@@ -308,3 +308,89 @@ class ContentModel(TimeStampedModel):
 
     def url_update(self):
         raise BlockError("class must implement 'url_update' method")
+
+
+class BlockContentManager(models.Manager):
+
+    def pending(self, page, section, kwargs=None):
+        """Return a list of pending content for a section.
+
+        Note: we return a list of content instances not a queryset.
+
+        """
+        pending = ModerateState.pending()
+        published = ModerateState.published()
+        qs = self.model.objects.filter(
+            block__page=page,
+            block__section=section,
+            moderate_state__in=[published, pending],
+        )
+        order_by = None
+        if kwargs:
+            order_by = kwargs.pop('order_by', None)
+            qs = qs.filter(**kwargs)
+        if order_by:
+            qs = qs.order_by(order_by)
+        else:
+            qs = qs.order_by('order')
+        result = collections.OrderedDict()
+        for c in qs:
+            if c.pk in result:
+                if c.moderate_state == pending:
+                    result[c.pk] = c
+            else:
+                result[c.pk] = c
+        return list(result.values())
+
+    def published(self, page, section):
+        """Return a published content for a page."""
+        published = ModerateState.published()
+        return self.model.objects.filter(
+            block__page=page,
+            block__section=section,
+            moderate_state=published,
+        ).order_by(
+            'order',
+        )
+
+
+class BlockModel(TimeStampedModel):
+    """Abstract base class for blocks of one type."""
+
+    page = models.ForeignKey(Page)
+    # TODO rename 'Layout' to 'Section;
+    section = models.ForeignKey(Layout)
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Block'
+        verbose_name_plural = 'Blocks'
+
+    def __str__(self):
+        return '{}: page {}, section {}'.format(
+            self.pk, self.page.name, self.section.name
+        )
+
+
+class BlockContentModel(TimeStampedModel):
+    """Abstract base class for the content within blocks.
+
+    TODO rename to 'ContentModel'?
+    """
+    moderate_state = models.ForeignKey(
+        ModerateState,
+        default=default_moderate_state
+    )
+    date_moderated = models.DateTimeField(blank=True, null=True)
+    user_moderated = models.ForeignKey(
+        settings.AUTH_USER_MODEL, blank=True, null=True, related_name='+'
+    )
+    objects = BlockContentManager()
+
+    class Meta:
+        abstract = True
+        verbose_name = 'Block content'
+        verbose_name_plural = 'Block contents'
+
+    def __str__(self):
+        return '{}'.format(self.pk)
