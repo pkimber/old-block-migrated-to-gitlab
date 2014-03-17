@@ -21,19 +21,19 @@ reversion.register(TestBlock)
 
 class TestContent(ContentModel):
 
-    block = models.ForeignKey(TestBlock)
+    block = models.ForeignKey(TestBlock, related_name='content')
     order = models.IntegerField()
     title = models.TextField()
 
     class Meta:
         # cannot put 'unique_together' on abstract base class
         # https://code.djangoproject.com/ticket/16732
-        # unique_together = ('container', 'moderate_state')
+        unique_together = ('block', 'moderate_state')
         verbose_name = 'Test block content'
         verbose_name_plural = 'Test block contents'
 
-    def _get_content_set(self):
-        return self.container.testcontent_set
+    #def _get_content_set(self):
+    #    return self.container.testcontent_set
 
     def __str__(self):
         return '{} {}'.format(self.title, self.moderate_state)

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from block.models import (
     ModerateState,
     Page,
+    Section,
 )
 from block.tests.model_maker import (
     make_page,
@@ -12,12 +13,20 @@ from block.tests.model_maker import (
 )
 
 
+def get_page_home():
+    return Page.objects.get(slug='home')
+
+
 def get_page_information():
     return Page.objects.get(slug='information')
 
 
-def get_page_home():
-    return Page.objects.get(slug='home')
+def get_section_body():
+    return Section.objects.get(slug='body')
+
+
+def get_section_footer():
+    return Section.objects.get(slug='footer')
 
 
 def default_moderate_state():

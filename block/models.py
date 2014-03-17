@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import collections
 
+from datetime import datetime
+
 from django.conf import settings
 from django.db import models
 
@@ -124,11 +126,11 @@ class ContentManager(models.Manager):
             qs = qs.order_by('order')
         result = collections.OrderedDict()
         for c in qs:
-            if c.pk in result:
+            if c.block.pk in result:
                 if c.moderate_state == pending:
-                    result[c.pk] = c
+                    result[c.block.pk] = c
             else:
-                result[c.pk] = c
+                result[c.block.pk] = c
         return list(result.values())
 
     def published(self, page, section):
@@ -182,3 +184,80 @@ class ContentModel(TimeStampedModel):
 
     def __str__(self):
         return '{}'.format(self.pk)
+
+    def _delete_removed_content(self):
+        """delete content which was previously removed."""
+        try:
+            c = self.block.content.get(
+                moderate_state=ModerateState.removed()
+            )
+            c.delete()
+        except self.DoesNotExist:
+            pass
+
+    def _is_pending(self):
+        return self.moderate_state == ModerateState.pending()
+    is_pending = property(_is_pending)
+
+    def _is_published(self):
+        return self.moderate_state == ModerateState.published()
+    is_published = property(_is_published)
+
+    def _is_removed(self):
+        return self.moderate_state == ModerateState.removed()
+    is_removed = property(_is_removed)
+
+    def _set_moderated(self, user, moderate_state):
+        self.date_moderated = datetime.now()
+        self.user_moderated = user
+        self.moderate_state = moderate_state
+
+    def _set_published_to_remove(self, user):
+        """publishing new content, so remove currently published content."""
+        try:
+            c = self.block.content.get(
+                moderate_state=ModerateState.published()
+            )
+            c.set_removed(user)
+            c.save()
+        except self.DoesNotExist:
+            pass
+
+    def set_pending(self, user):
+        if self.moderate_state == ModerateState.published():
+            try:
+                self.block.content.get(
+                    moderate_state=ModerateState.pending()
+                )
+                raise BlockError(
+                    "Section already has pending content so "
+                    "published content should not be edited."
+                )
+            except self.DoesNotExist:
+                self._set_moderated(user, ModerateState.pending())
+                self.pk = None
+        elif self.moderate_state == ModerateState.pending():
+            return
+        else:
+            raise BlockError(
+                "Cannot edit content which has been removed"
+            )
+
+    def set_published(self, user):
+        """Publish content."""
+        if not self.moderate_state == ModerateState.pending():
+            raise BlockError(
+                "Cannot publish content unless it is 'pending'"
+            )
+        self._delete_removed_content()
+        self._set_published_to_remove(user)
+        self._set_moderated(user, ModerateState.published())
+
+    def set_removed(self, user):
+        """Remove content."""
+        if self.moderate_state == ModerateState.removed():
+            raise BlockError(
+                "Cannot remove content which has already been removed"
+            )
+        self._delete_removed_content()
+        self._set_moderated(user, ModerateState.removed())
