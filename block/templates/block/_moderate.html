@@ -1,0 +1,17 @@
+{% if c.is_pending %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_publish }}">
+    <i class="fa fa-check"></i>
+    publish
+  </a>
+{% endif %}
+<a class="pure-button pure-button-xsmall" href="{{ c.url_update }}">
+  <i class="fa fa-edit"></i>
+  edit
+</a>
+{% if can_remove %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
+    <i class="fa fa-times"></i>
+    remove
+  </a>
+{% endif %}
+</p>

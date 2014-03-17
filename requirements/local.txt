@@ -1,0 +1,15 @@
+-r base.txt
+-e ../base
+-e ../login
+beautifulsoup4
+fabric
+gitpython
+hgapi
+ipdb
+IPy
+psycopg2
+pytest-django
+pytest-flakes
+pytest-pep8
+pyyaml
+walkdir
