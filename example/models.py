@@ -31,11 +31,10 @@ class TestContent(ContentModel):
         verbose_name = 'Test content'
         verbose_name_plural = 'Test contents'
 
-    #def _get_content_set(self):
-    #    return self.container.testcontent_set
-
     def __str__(self):
-        return '{} {}'.format(self.title, self.moderate_state)
+        return '{} ({}, {})'.format(
+            self.title, self.order, self.moderate_state.name
+        )
 
     def url_publish(self):
         return reverse('example.test.publish', kwargs={'pk': self.pk})
