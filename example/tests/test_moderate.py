@@ -2,13 +2,11 @@
 from __future__ import unicode_literals
 
 from django.db import IntegrityError
-from django.db import models
 from django.test import TestCase
 
 from base.tests.model_maker import clean_and_save
 from block.tests.scenario import (
     default_moderate_state,
-    default_scenario_block,
     get_page_home,
     get_section_body,
 )
@@ -28,7 +26,6 @@ from example.tests.scenario import (
     get_hatherleigh_three,
     get_hatherleigh_two,
     get_jacobstowe_one,
-    get_monkokehampton,
 )
 
 
@@ -131,9 +128,9 @@ class TestModerate(TestCase):
 
     def test_remove_pending(self):
         """remove pending content."""
-        c = get_hatherleigh_three()
-        c.set_removed(get_user_staff())
-        c.save()
+        content = get_hatherleigh_three()
+        content.set_removed(get_user_staff())
+        content.save()
         home = get_page_home()
         body = get_section_body()
         result = [
@@ -149,9 +146,9 @@ class TestModerate(TestCase):
 
     def test_remove_published(self):
         """remove pending content."""
-        c = get_hatherleigh_two()
-        c.set_removed(get_user_staff())
-        c.save()
+        content = get_hatherleigh_two()
+        content.set_removed(get_user_staff())
+        content.save()
         home = get_page_home()
         body = get_section_body()
         result = [
@@ -164,10 +161,10 @@ class TestModerate(TestCase):
 
     def test_pending_set(self):
         """edit published content."""
-        c = get_jacobstowe_one()
-        c.title = 'Jacobstowe Edit'
-        c.set_pending(get_user_staff())
-        c.save()
+        content = get_jacobstowe_one()
+        content.title = 'Jacobstowe Edit'
+        content.set_pending(get_user_staff())
+        content.save()
         page = get_page_home()
         section = get_section_body()
         result = [

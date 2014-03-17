@@ -13,7 +13,6 @@ from block.models import (
 
 
 class TestBlock(BlockModel):
-
     pass
 
 reversion.register(TestBlock)
@@ -29,8 +28,8 @@ class TestContent(ContentModel):
         # cannot put 'unique_together' on abstract base class
         # https://code.djangoproject.com/ticket/16732
         unique_together = ('block', 'moderate_state')
-        verbose_name = 'Test block content'
-        verbose_name_plural = 'Test block contents'
+        verbose_name = 'Test content'
+        verbose_name_plural = 'Test contents'
 
     #def _get_content_set(self):
     #    return self.container.testcontent_set
