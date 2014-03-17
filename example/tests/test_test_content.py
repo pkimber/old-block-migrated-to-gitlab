@@ -9,10 +9,7 @@ from block.tests.model_maker import (
     make_section,
 )
 from block.tests.scenario import default_moderate_state
-from example.models import (
-    TestBlock,
-    TestContent,
-)
+from example.models import TestContent
 from example.tests.model_maker import (
     make_test_block,
     make_test_content,
