@@ -16,8 +16,10 @@ class TestService(TestCase):
     def test_init_not(self):
         try:
             Page.objects.get(slug=self.SLUG)
-            self.fail("'{}' page exists, but hasn't been "
-                "created yet".format(self.SLUG))
+            self.fail(
+                "'{}' page exists, but hasn't been "
+                "created yet".format(self.SLUG)
+            )
         except Page.DoesNotExist:
             pass
 

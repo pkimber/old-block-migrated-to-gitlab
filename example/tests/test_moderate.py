@@ -155,7 +155,7 @@ class TestModerate(TestCase):
             c.title for c in TestContent.objects.published(home, body)
         ]
         self.assertListEqual(
-            ['Jacobstowe One',],
+            ['Jacobstowe One', ],
             result
         )
 
