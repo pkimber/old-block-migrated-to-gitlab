@@ -17,7 +17,7 @@ def default_moderate_state():
     return ModerateState.pending()
 
 
-class blockError(Exception):
+class BlockError(Exception):
 
     def __init__(self, value):
         Exception.__init__(self)
@@ -229,7 +229,7 @@ class ContentModel(TimeStampedModel):
             pass
 
     def _get_content_set(self):
-        raise blockError(
+        raise BlockError(
             "Concrete class must implement the '_get_content_set' method"
         )
 
@@ -267,7 +267,7 @@ class ContentModel(TimeStampedModel):
                 self._get_content_set().get(
                     moderate_state=ModerateState.pending()
                 )
-                raise blockError(
+                raise BlockError(
                     "Section already has pending content so "
                     "published content should not be edited."
                 )
@@ -277,14 +277,14 @@ class ContentModel(TimeStampedModel):
         elif self.moderate_state == ModerateState.pending():
             return
         else:
-            raise blockError(
+            raise BlockError(
                 "Cannot edit content which has been removed"
             )
 
     def set_published(self, user):
         """Publish content."""
         if not self.moderate_state == ModerateState.pending():
-            raise blockError(
+            raise BlockError(
                 "Cannot publish content unless it is 'pending'"
             )
         self._delete_removed_content()
@@ -294,17 +294,17 @@ class ContentModel(TimeStampedModel):
     def set_removed(self, user):
         """Remove content."""
         if self.moderate_state == ModerateState.removed():
-            raise blockError(
+            raise BlockError(
                 "Cannot remove content which has already been removed"
             )
         self._delete_removed_content()
         self._set_moderated(user, ModerateState.removed())
 
     def url_publish(self):
-        raise blockError("class must implement 'url_publish' method")
+        raise BlockError("class must implement 'url_publish' method")
 
     def url_remove(self):
-        raise blockError("class must implement 'url_remove' method")
+        raise BlockError("class must implement 'url_remove' method")
 
     def url_update(self):
-        raise blockError("class must implement 'url_update' method")
+        raise BlockError("class must implement 'url_update' method")
