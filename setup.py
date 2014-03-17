@@ -19,20 +19,20 @@ def get_readme():
 
 
 setup(
-    name='pkimber-cms',
-    packages=['cms', 'cms.templatetags', 'cms.migrations', 'cms.tests', 'cms.management', 'cms.management.commands'],
+    name='pkimber-block',
+    packages=['block', 'block.templatetags', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
     package_data={
-        'cms': [
+        'block': [
             'static/*.*',
             'templates/*.*',
-            'templates/cms/*.*',
+            'templates/block/*.*',
         ],
     },
-    version='0.0.26',
-    description='cms',
+    version='0.0.02',
+    description='block',
     author='Patrick Kimber',
     author_email='code@pkimber.net',
-    url='git@github.com:pkimber/cms.git',
+    url='git@github.com:pkimber/block.git',
     classifiers=[
         'Development Status :: 1 - Planning',
         'Environment :: Console',
