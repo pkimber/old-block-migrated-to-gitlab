@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from block.models import ModerateState
+from block.tests.helper import check_content_methods
 from block.tests.model_maker import (
     make_page,
     make_section,
@@ -16,7 +17,7 @@ from example.tests.model_maker import (
 )
 
 
-class TestTestBlockContent(TestCase):
+class TestTestContent(TestCase):
 
     def setUp(self):
         default_moderate_state()
@@ -26,6 +27,15 @@ class TestTestBlockContent(TestCase):
     def test_next_order(self):
         #self.assertGreater(Content.objects.next_order(self.section), 3)
         pass
+
+    def test_content_methods(self):
+        c = make_test_content(
+            make_test_block(self.page, self.body),
+            ModerateState.pending(),
+            5,
+            'ABC'
+        )
+        check_content_methods(c)
 
     def test_pending_order(self):
         """Pending items should be in 'order' order."""

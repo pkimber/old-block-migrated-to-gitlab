@@ -42,7 +42,7 @@ def get_monkokehampton():
     return TestContent.objects.get(title='Monkokehampton')
 
 
-def default_scenario_project():
+def default_scenario_example():
     default_moderate_state()
     default_scenario_block()
     # Home, Hatherleigh

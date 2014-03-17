@@ -20,7 +20,7 @@ from block.models import (
 )
 from example.models import TestContent
 from example.tests.scenario import (
-    default_scenario_project,
+    default_scenario_example,
     get_block_hatherleigh_two,
     get_hatherleigh_old,
     get_hatherleigh_three,
@@ -34,7 +34,7 @@ class TestModerate(TestCase):
     def setUp(self):
         default_moderate_state()
         default_scenario_login()
-        default_scenario_project()
+        default_scenario_example()
 
     def test_is_pending(self):
         self.assertTrue(get_hatherleigh_three().is_pending)

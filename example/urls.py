@@ -28,6 +28,21 @@ urlpatterns = patterns(
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
         name='project.home.user'
         ),
+    # test view - so 'check_content_methods' will pass
+    url(regex=r'^example/(?P<pk>\d+)/publish/$',
+        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        name='example.test.publish'
+        ),
+    # test view - so 'check_content_methods' will pass
+    url(regex=r'^example/(?P<pk>\d+)/remove/$',
+        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        name='example.test.remove'
+        ),
+    # test view - so 'check_content_methods' will pass
+    url(regex=r'^example/(?P<pk>\d+)/update/$',
+        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        name='example.test.update'
+        ),
 )
 
 urlpatterns += staticfiles_urlpatterns()
