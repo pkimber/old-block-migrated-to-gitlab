@@ -2,13 +2,11 @@
 from __future__ import unicode_literals
 
 from block.models import (
-    Layout,
     ModerateState,
     Page,
     Section,
 )
 from block.tests.model_maker import (
-    make_layout,
     make_page,
     make_moderate_state,
     make_section,
