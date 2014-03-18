@@ -106,12 +106,16 @@ class ContentManager(models.Manager):
 
     def next_order(self):
         result = self.model.objects.aggregate(max_order=Max('order'))
-        max_order = result.get('max_order', None)
-        if not max_order:
+        max_order = result.get('max_order', 0)
+        if max_order == 0:
             raise BlockError(
-                "Cannot get the maximum value of the 'order' field."
+                "Cannot get the maximum value of the 'order' field "
+                "in the '{}' class.".format(self.model.__name__)
             )
-        return max_order + 1
+        elif max_order:
+            return max_order + 1
+        else:
+            return 1
 
     def pending(self, page, section, kwargs=None):
         """Return a list of pending content for a section.
