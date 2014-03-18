@@ -11,9 +11,7 @@ from django.views.generic import (
 
 from base.view_utils import BaseMixin
 from block.models import (
-    blockError,
-    Container,
-    Layout,
+    BlockError,
     Page,
     Section,
 )
@@ -30,41 +28,35 @@ class ContentPageMixin(BaseMixin):
         ))
         return context
 
-    def get_layout(self):
-        layout = self.kwargs.get('layout', None)
-        if not layout:
-            raise blockError("no 'layout' parameter in url")
-        try:
-            return Layout.objects.get(slug=layout)
-        except Layout.DoesNotExist:
-            raise blockError("Layout '{}' does not exist".format(layout))
-
     def get_page(self):
         page = self.kwargs.get('page', None)
         if not page:
-            raise blockError("no 'page' parameter in url")
+            raise BlockError("no 'page' parameter in url")
         try:
             return Page.objects.get(slug=page)
         except Page.DoesNotExist:
-            raise blockError("Page '{}' does not exist".format(page))
+            raise BlockError("Page '{}' does not exist".format(page))
 
     def get_section(self):
-        return get_object_or_404(
-            Section,
-            page=self.get_page(),
-            layout=self.get_layout()
-        )
+        section = self.kwargs.get('section', None)
+        if not section:
+            raise BlockError("no 'section' parameter in url")
+        try:
+            return Section.objects.get(slug=section)
+        except Section.DoesNotExist:
+            raise BlockError("Section '{}' does not exist".format(section))
 
 
 class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        # create a new container for the content
+        page = self.get_page()
         section = self.get_section()
-        container = Container(section=section, order=section.next_order())
-        container.save()
-        self.object.container = container
+        block = self.block_class(page=page, section=section)
+        block.save()
+        self.object.block = block
+        self.object.order = self.model.objects.next_order()
         return super(ContentCreateView, self).form_valid(form)
 
     def get_success_url(self):
@@ -113,7 +105,7 @@ class ContentRemoveView(BaseMixin, UpdateView):
     def get_success_url(self):
         return reverse(
             'project.page.design',
-            kwargs=dict(page=self.object.container.section.page.slug)
+            kwargs=dict(page=self.object.block.page.slug)
         )
 
 
@@ -127,5 +119,5 @@ class ContentUpdateView(BaseMixin, UpdateView):
     def get_success_url(self):
         return reverse(
             'project.page.design',
-            kwargs=dict(page=self.object.container.section.page.slug)
+            kwargs=dict(page=self.object.block.page.slug)
         )

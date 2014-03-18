@@ -36,3 +36,11 @@ def check_content_methods(model_instance):
         )
     except IntegrityError:
         pass
+    # check the order field
+    try:
+        model_instance.order
+    except AttributeError:
+        raise BlockError(
+            "The {} model does not have an 'order' field"
+            "".format(model_instance.__class__)
+        )

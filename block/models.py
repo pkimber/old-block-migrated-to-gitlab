@@ -7,6 +7,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Max
 
 import reversion
 
@@ -102,6 +103,15 @@ reversion.register(Section)
 
 
 class ContentManager(models.Manager):
+
+    def next_order(self):
+        result = self.model.objects.aggregate(max_order=Max('order'))
+        max_order = result.get('max_order', None)
+        if not max_order:
+            raise BlockError(
+                "Cannot get the maximum value of the 'order' field."
+            )
+        return max_order + 1
 
     def pending(self, page, section, kwargs=None):
         """Return a list of pending content for a section.
