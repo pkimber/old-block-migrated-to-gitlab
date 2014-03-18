@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -53,7 +52,13 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
         self.object = form.save(commit=False)
         page = self.get_page()
         section = self.get_section()
-        block = self.block_class(page=page, section=section)
+        try:
+            block = self.block_class(page=page, section=section)
+        except AttributeError:
+            raise BlockError(
+                "You need to add the 'block_class' attribute "
+                "to your '{}' class.".format(self.__class__.__name__)
+            )
         block.save()
         self.object.block = block
         self.object.order = self.model.objects.next_order()
