@@ -84,7 +84,7 @@ class ContentPublishView(BaseMixin, UpdateView):
     def get_success_url(self):
         return reverse(
             'project.page.design',
-            kwargs=dict(page=self.object.container.section.page.slug)
+            kwargs=dict(page=self.object.block.page.slug)
         )
 
 
