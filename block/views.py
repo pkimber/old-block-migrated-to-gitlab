@@ -121,6 +121,13 @@ class ContentUpdateView(BaseMixin, UpdateView):
         self.object.set_pending(self.request.user)
         return super(ContentUpdateView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(ContentUpdateView, self).get_context_data(**kwargs)
+        context.update(dict(
+            is_update=True,
+        ))
+        return context
+
     def get_success_url(self):
         return reverse(
             'project.page.design',
