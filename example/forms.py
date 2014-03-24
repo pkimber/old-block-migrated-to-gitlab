@@ -8,13 +8,6 @@ from base.form_utils import RequiredFieldForm
 from .models import Title
 
 
-class TitleEmptyForm(forms.ModelForm):
-
-    class Meta:
-        model = Title
-        fields = ()
-
-
 class TitleForm(RequiredFieldForm):
 
     def __init__(self, *args, **kwargs):

@@ -8,6 +8,7 @@ from braces.views import (
     StaffuserRequiredMixin,
 )
 
+from block.forms import ContentEmptyForm
 from block.tests.scenario import get_section_body
 from block.views import (
     ContentCreateView,
@@ -17,10 +18,7 @@ from block.views import (
     ContentUpdateView,
 )
 
-from .forms import (
-    TitleEmptyForm,
-    TitleForm,
-)
+from .forms import TitleForm
 from .models import (
     Title,
     TitleBlock,
@@ -85,7 +83,7 @@ class TitleUpdateView(
 class TitlePublishView(
         LoginRequiredMixin, StaffuserRequiredMixin, ContentPublishView):
 
-    form_class = TitleEmptyForm
+    form_class = ContentEmptyForm
     model = Title
     template_name = 'example/title_publish.html'
 
@@ -93,6 +91,6 @@ class TitlePublishView(
 class TitleRemoveView(
         LoginRequiredMixin, StaffuserRequiredMixin, ContentRemoveView):
 
-    form_class = TitleEmptyForm
+    form_class = ContentEmptyForm
     model = Title
     template_name = 'example/title_remove.html'
