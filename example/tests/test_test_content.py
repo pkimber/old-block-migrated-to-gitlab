@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from block.models import ModerateState
 from block.tests.helper import check_content_methods
 from block.tests.model_maker import (
     make_page,

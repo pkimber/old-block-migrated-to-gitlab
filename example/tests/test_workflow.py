@@ -4,12 +4,10 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from block.models import (
-    ModerateState,
     PENDING,
     PUBLISHED,
     REMOVED,
 )
-from block.tests.helper import check_content_methods
 from block.tests.model_maker import (
     make_page,
     make_section,
@@ -20,7 +18,6 @@ from login.tests.scenario import (
     get_user_staff,
 )
 
-from example.models import TestContent
 from example.tests.model_maker import (
     make_test_block,
     make_test_content,

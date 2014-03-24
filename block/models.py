@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-import collections
-
 from datetime import datetime
 
 from django.conf import settings

@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from block.models import (
-    ModerateState,
     PENDING,
     PUBLISHED,
 )
