@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-from block.models import ModerateState
+from block.models import (
+    ModerateState,
+    PENDING,
+    PUBLISHED,
+)
 from block.tests.scenario import (
     default_moderate_state,
     default_scenario_block,
@@ -10,6 +14,8 @@ from block.tests.scenario import (
     get_section_body,
     get_section_footer,
 )
+from login.tests.scenario import get_user_staff
+
 from example.models import TestContent
 from example.tests.model_maker import (
     make_test_block,
@@ -34,8 +40,18 @@ def get_hatherleigh_three():
     return TestContent.objects.get(title='Hatherleigh Three')
 
 
-def get_jacobstowe_one():
-    return TestContent.objects.get(title='Jacobstowe One')
+def get_jacobstowe_one_pending():
+    return TestContent.objects.get(
+        moderate_state__slug=PENDING,
+        title='Jacobstowe One',
+    )
+
+
+def get_jacobstowe_one_published():
+    return TestContent.objects.get(
+        moderate_state__slug=PUBLISHED,
+        title='Jacobstowe One',
+    )
 
 
 def get_monkokehampton():
@@ -45,24 +61,29 @@ def get_monkokehampton():
 def default_scenario_example():
     default_moderate_state()
     default_scenario_block()
-    # Home, Hatherleigh
+    # pages
     home = get_page_home()
     information = get_page_information()
+    # sections
     body = get_section_body()
     footer = get_section_footer()
+    # Home, Hatherleigh
     block_hatherleigh = make_test_block(home, body)
-    make_test_content(
-        block_hatherleigh,
-        ModerateState.published(),
-        1,
-        'Hatherleigh Two'
-    )
-    make_test_content(
+    c = make_test_content(
         block_hatherleigh,
         ModerateState.pending(),
         1,
-        'Hatherleigh Three'
+        'Hatherleigh Two'
     )
+    c.publish(get_user_staff())
+    c.title = 'Hatherleigh Three'
+    c.save()
+    #make_test_content(
+    #    block_hatherleigh,
+    #    ModerateState.pending(),
+    #    1,
+    #    'Hatherleigh Three'
+    #)
     make_test_content(
         block_hatherleigh,
         ModerateState.removed(),
@@ -71,25 +92,28 @@ def default_scenario_example():
     )
     # Home, Jacobstowe
     block_jacobstowe = make_test_block(home, body)
-    make_test_content(
+    c = make_test_content(
         block_jacobstowe,
-        ModerateState.published(),
+        ModerateState.pending(),
         2,
         'Jacobstowe One'
     )
+    c.publish(get_user_staff())
     # Home, Footer
     block_jacobstowe = make_test_block(home, footer)
-    make_test_content(
+    c = make_test_content(
         block_jacobstowe,
-        ModerateState.published(),
+        ModerateState.pending(),
         1,
         'Villages for You'
     )
+    c.publish(get_user_staff())
     # Information, Monkokehampton
     block_monkokehampton = make_test_block(information, body)
-    make_test_content(
+    c = make_test_content(
         block_monkokehampton,
-        ModerateState.published(),
+        ModerateState.pending(),
         1,
         'Monkokehampton'
     )
+    c.publish(get_user_staff())

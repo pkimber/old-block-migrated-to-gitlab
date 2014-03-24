@@ -10,6 +10,11 @@ from block.tests.model_maker import (
     make_section,
 )
 from block.tests.scenario import default_moderate_state
+from login.tests.scenario import (
+    default_scenario_login,
+    get_user_staff,
+)
+
 from example.models import TestContent
 from example.tests.model_maker import (
     make_test_block,
@@ -21,6 +26,7 @@ class TestTestContent(TestCase):
 
     def setUp(self):
         default_moderate_state()
+        default_scenario_login()
         self.page = make_page('home', 0)
         self.body = make_section('body')
 
@@ -45,12 +51,13 @@ class TestTestContent(TestCase):
             5,
             'ABC'
         )
-        make_test_content(
+        c = make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.published(),
+            ModerateState.pending(),
             3,
             'LMN'
         )
+        c.publish(get_user_staff())
         make_test_content(
             make_test_block(self.page, self.body),
             ModerateState.pending(),
@@ -69,18 +76,20 @@ class TestTestContent(TestCase):
 
     def test_published_order(self):
         """Published items should by in 'order' order."""
-        make_test_content(
+        c = make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.published(),
+            ModerateState.pending(),
             9,
             'ABC'
         )
-        make_test_content(
+        c.publish(get_user_staff())
+        c = make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.published(),
+            ModerateState.pending(),
             8,
             'XYZ'
         )
+        c.publish(get_user_staff())
         published = TestContent.objects.published(self.page, self.body)
         self.assertListEqual(
             ['XYZ', 'ABC'],

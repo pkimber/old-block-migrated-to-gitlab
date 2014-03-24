@@ -11,7 +11,15 @@ from django.db.models import Max
 
 import reversion
 
-from base.model_utils import TimeStampedModel
+from base.model_utils import (
+    copy_model_instance,
+    TimeStampedModel,
+)
+
+
+PENDING = 'pending'
+PUBLISHED = 'published'
+REMOVED = 'removed'
 
 
 def default_moderate_state():
@@ -42,12 +50,13 @@ class ModerateState(models.Model):
         return '{}'.format(self.name)
 
     @staticmethod
-    def pending():
-        return ModerateState.objects.get(slug='pending')
+    def _get_published():
+        """Internal use only."""
+        return ModerateState.objects.get(slug='published')
 
     @staticmethod
-    def published():
-        return ModerateState.objects.get(slug='published')
+    def pending():
+        return ModerateState.objects.get(slug=PENDING)
 
     @staticmethod
     def removed():
@@ -124,11 +133,11 @@ class ContentManager(models.Manager):
 
         """
         pending = ModerateState.pending()
-        published = ModerateState.published()
+        published = ModerateState._get_published()
         qs = self.model.objects.filter(
             block__page=page,
             block__section=section,
-            moderate_state__in=[published, pending],
+            moderate_state=pending,
         )
         order_by = None
         if kwargs:
@@ -149,7 +158,7 @@ class ContentManager(models.Manager):
 
     def published(self, page, section):
         """Return a published content for a page."""
-        published = ModerateState.published()
+        published = ModerateState._get_published()
         return self.model.objects.filter(
             block__page=page,
             block__section=section,
@@ -177,10 +186,8 @@ class BlockModel(TimeStampedModel):
 
 
 class ContentModel(TimeStampedModel):
-    """Abstract base class for the content within blocks.
+    """Abstract base class for the content within blocks."""
 
-    TODO rename to 'ContentModel'?
-    """
     moderate_state = models.ForeignKey(
         ModerateState,
         default=default_moderate_state
@@ -199,22 +206,58 @@ class ContentModel(TimeStampedModel):
     def __str__(self):
         return '{}'.format(self.pk)
 
-    def _delete_removed_content(self):
-        """delete content which was previously removed."""
+    def _copy_pending_to_published(self, pending, user):
+        """Copy the pending record to a new published record."""
+        c = copy_model_instance(pending)
+        c._set_moderated(user, ModerateState._get_published())
+        c.save()
+        return c
+
+    #def _delete_pending_content(self):
+    #    """delete pending content."""
+    #    try:
+    #        c = self._get_pending()
+    #        c.delete()
+    #    except self.DoesNotExist:
+    #        pass
+
+    def _delete_published_content(self):
+        """delete published content."""
         try:
-            c = self.block.content.get(
-                moderate_state=ModerateState.removed()
-            )
+            c = self._get_published()
             c.delete()
         except self.DoesNotExist:
             pass
+
+    def _delete_removed_content(self):
+        """delete content which was previously removed."""
+        try:
+            c = self._get_removed()
+            c.delete()
+        except self.DoesNotExist:
+            pass
+
+    def _get_pending(self):
+        return self.block.content.get(
+            moderate_state=ModerateState.pending()
+        )
+
+    def _get_published(self):
+        return self.block.content.get(
+            moderate_state=ModerateState._get_published()
+        )
+
+    def _get_removed(self):
+        return self.block.content.get(
+            moderate_state=ModerateState.removed()
+        )
 
     def _is_pending(self):
         return self.moderate_state == ModerateState.pending()
     is_pending = property(_is_pending)
 
     def _is_published(self):
-        return self.moderate_state == ModerateState.published()
+        return self.moderate_state == ModerateState._get_published()
     is_published = property(_is_published)
 
     def _is_removed(self):
@@ -229,49 +272,70 @@ class ContentModel(TimeStampedModel):
     def _set_published_to_remove(self, user):
         """publishing new content, so remove currently published content."""
         try:
-            c = self.block.content.get(
-                moderate_state=ModerateState.published()
-            )
-            c.set_removed(user)
+            c = self._get_published()
+            c._set_moderated(user, ModerateState.removed())
             c.save()
         except self.DoesNotExist:
             pass
 
-    def set_pending(self, user):
-        if self.moderate_state == ModerateState.published():
-            try:
-                self.block.content.get(
-                    moderate_state=ModerateState.pending()
-                )
-                raise BlockError(
-                    "Section already has pending content so "
-                    "published content should not be edited."
-                )
-            except self.DoesNotExist:
-                self._set_moderated(user, ModerateState.pending())
-                self.pk = None
-        elif self.moderate_state == ModerateState.pending():
-            return
-        else:
-            raise BlockError(
-                "Cannot edit content which has been removed"
-            )
+    #def set_pending(self, user):
+    #    if self.moderate_state == ModerateState._get_published():
+    #        try:
+    #            self.block.content.get(
+    #                moderate_state=ModerateState.pending()
+    #            )
+    #            raise BlockError(
+    #                "Section already has pending content so "
+    #                "published content should not be edited."
+    #            )
+    #        except self.DoesNotExist:
+    #            self._set_moderated(user, ModerateState.pending())
+    #            self.pk = None
+    #    elif self.moderate_state == ModerateState.pending():
+    #        return
+    #    else:
+    #        raise BlockError(
+    #            "Cannot edit content which has been removed"
+    #        )
 
-    def set_published(self, user):
-        """Publish content."""
-        if not self.moderate_state == ModerateState.pending():
+    def publish(self, user):
+        """Publish content.
+
+        Return the published content.
+
+        """
+        try:
+            pending = self._get_pending()
+        except self.DoesNotExist:
             raise BlockError(
                 "Cannot publish content unless it is 'pending'"
             )
         self._delete_removed_content()
         self._set_published_to_remove(user)
-        self._set_moderated(user, ModerateState.published())
+        return self._copy_pending_to_published(pending, user)
 
-    def set_removed(self, user):
+    def remove(self, user):
         """Remove content."""
-        if self.moderate_state == ModerateState.removed():
+        pending = None
+        published = None
+        try:
+            pending = self._get_pending()
+        except self.DoesNotExist:
+            pass
+        try:
+            published = self._get_published()
+        except self.DoesNotExist:
+            pass
+        if not pending and not published:
             raise BlockError(
-                "Cannot remove content which has already been removed"
+                "Cannot find pending or published content to remove."
             )
         self._delete_removed_content()
-        self._set_moderated(user, ModerateState.removed())
+        if published:
+            published._set_moderated(user, ModerateState.removed())
+            published.save()
+            if pending:
+                pending.delete()
+        else:
+            pending._set_moderated(user, ModerateState.removed())
+            pending.save()

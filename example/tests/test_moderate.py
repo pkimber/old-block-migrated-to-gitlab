@@ -25,7 +25,7 @@ from example.tests.scenario import (
     get_hatherleigh_old,
     get_hatherleigh_three,
     get_hatherleigh_two,
-    get_jacobstowe_one,
+    get_jacobstowe_one_pending,
 )
 
 
@@ -86,19 +86,19 @@ class TestModerate(TestCase):
             result
         )
 
-    def test_publish_not_pending(self):
-        """This content is not 'pending' so cannot be published."""
-        c = get_hatherleigh_two()
-        self.assertRaises(
-            BlockError,
-            c.set_published,
-            get_user_staff(),
-        )
+    # there is always pending content now
+    #def test_publish_not_pending(self):
+    #    """This content is not 'pending' so cannot be published."""
+    #    c = get_hatherleigh_two()
+    #    self.assertRaises(
+    #        BlockError,
+    #        c.publish,
+    #        get_user_staff(),
+    #    )
 
     def test_publish(self):
         c = get_hatherleigh_three()
-        c.set_published(get_user_staff())
-        c.save()
+        c.publish(get_user_staff())
         page = get_page_home()
         section = get_section_body()
         result = list(
@@ -120,17 +120,17 @@ class TestModerate(TestCase):
     def test_remove_already(self):
         """content has already been removed and cannot be removed again."""
         c = get_hatherleigh_old()
+        c.remove(get_user_staff())
         self.assertRaises(
             BlockError,
-            c.set_removed,
+            c.remove,
             get_user_staff(),
         )
 
     def test_remove_pending(self):
         """remove pending content."""
         content = get_hatherleigh_three()
-        content.set_removed(get_user_staff())
-        content.save()
+        content.remove(get_user_staff())
         home = get_page_home()
         body = get_section_body()
         result = [
@@ -138,7 +138,6 @@ class TestModerate(TestCase):
         ]
         self.assertListEqual(
             [
-                'Hatherleigh Two',
                 'Jacobstowe One',
             ],
             result
@@ -147,8 +146,7 @@ class TestModerate(TestCase):
     def test_remove_published(self):
         """remove pending content."""
         content = get_hatherleigh_two()
-        content.set_removed(get_user_staff())
-        content.save()
+        content.remove(get_user_staff())
         home = get_page_home()
         body = get_section_body()
         result = [
@@ -161,9 +159,8 @@ class TestModerate(TestCase):
 
     def test_pending_set(self):
         """edit published content."""
-        content = get_jacobstowe_one()
+        content = get_jacobstowe_one_pending()
         content.title = 'Jacobstowe Edit'
-        content.set_pending(get_user_staff())
         content.save()
         page = get_page_home()
         section = get_section_body()
@@ -178,25 +175,23 @@ class TestModerate(TestCase):
             result
         )
 
-    def test_pending_when_pending_exists(self):
-        """edit published content when content already pending.
+    #def test_pending_when_pending_exists(self):
+    #    """edit published content when content already pending.
+    #    user should not be allowed to edit published content when pending
+    #    content already exists in the section.
+    #    """
+    #    c = get_hatherleigh_two()
+    #    self.assertRaises(
+    #        BlockError,
+    #        c.set_pending,
+    #        get_user_staff()
+    #    )
 
-        user should not be allowed to edit published content when pending
-        content already exists in the section.
-
-        """
-        c = get_hatherleigh_two()
-        self.assertRaises(
-            BlockError,
-            c.set_pending,
-            get_user_staff()
-        )
-
-    def test_pending_when_removed(self):
-        """content has been removed, so cannot set to pending."""
-        c = get_hatherleigh_old()
-        self.assertRaises(
-            BlockError,
-            c.set_pending,
-            get_user_staff()
-        )
+    #def test_pending_when_removed(self):
+    #    """content has been removed, so cannot set to pending."""
+    #    c = get_hatherleigh_old()
+    #    self.assertRaises(
+    #        BlockError,
+    #        c.set_pending,
+    #        get_user_staff()
+    #    )

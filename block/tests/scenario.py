@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 
 from block.models import (
+    PENDING,
+    PUBLISHED,
+    REMOVED,
     ModerateState,
     Page,
     Section,
@@ -33,15 +36,15 @@ def default_moderate_state():
     try:
         ModerateState.pending()
     except ModerateState.DoesNotExist:
-        make_moderate_state('pending')
+        make_moderate_state(PENDING)
     try:
-        ModerateState.published()
+        ModerateState.objects.get(slug=PUBLISHED)
     except ModerateState.DoesNotExist:
-        make_moderate_state('published')
+        make_moderate_state(PUBLISHED)
     try:
         ModerateState.removed()
     except ModerateState.DoesNotExist:
-        make_moderate_state('removed')
+        make_moderate_state(REMOVED)
 
 
 def default_scenario_block():
