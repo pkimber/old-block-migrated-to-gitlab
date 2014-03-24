@@ -296,6 +296,14 @@ class ContentModel(TimeStampedModel):
         return self.moderate_state == ModerateState._pending()
     is_pending = property(_is_pending)
 
+    def _is_pending_not_pushed(self):
+        return self.is_pending and not self.pushed
+    is_pending_not_pushed = property(_is_pending_not_pushed)
+
+    def _is_pending_pushed(self):
+        return self.is_pending and self.pushed
+    is_pending_pushed = property(_is_pending_pushed)
+
     def _is_published(self):
         return self.moderate_state == ModerateState._published()
     is_published = property(_is_published)

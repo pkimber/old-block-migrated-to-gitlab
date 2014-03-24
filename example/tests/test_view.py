@@ -45,6 +45,27 @@ class TestView(TestCase):
             },
         )
 
+    def _update(self):
+        title = self._get_hatherleigh_pending()
+        return self.client.post(
+            reverse(
+                'example.title.update',
+                kwargs=dict(pk=title.pk),
+            ),
+            {
+                'title': 'Hatherleigh Market',
+            }
+        )
+
+    def _publish(self):
+        title = self._get_hatherleigh()
+        return self.client.post(
+            reverse(
+                'example.title.publish',
+                kwargs=dict(pk=title.pk),
+            )
+        )
+
     def _get_hatherleigh(self):
         return Title.objects.get(title='Hatherleigh')
 
@@ -70,20 +91,14 @@ class TestView(TestCase):
         self.assertEqual(PENDING, title.moderate_state.slug)
 
     def test_update(self):
-        self._create()
-        title = self._get_hatherleigh()
-        response = self.client.post(
-            reverse(
-                'example.title.update',
-                kwargs=dict(pk=title.pk),
-            ),
-            {
-                'title': 'Hatherleigh Market',
-            }
-        )
+        response = self._create()
+        self.assertEqual(response.status_code, 302)
+        response = self._update()
         self.assertEqual(response.status_code, 302)
         # Get 'Hatherleigh Market'
-        self._get_hatherleigh_market()
+        title = self._get_hatherleigh_market()
+        # Is not published, so should be 'pending' not 'pushed'
+        self.assertTrue(title.is_pending_not_pushed)
         # 'Hatherleigh' should no longer exist
         self.assertRaises(
             Title.DoesNotExist,
@@ -92,14 +107,26 @@ class TestView(TestCase):
 
     def test_publish(self):
         self._create()
-        title = self._get_hatherleigh()
-        response = self.client.post(
-            reverse(
-                'example.title.publish',
-                kwargs=dict(pk=title.pk),
-            )
-        )
+        response = self._publish()
         self.assertEqual(response.status_code, 302)
         title = self._get_hatherleigh_pending()
-        self.assertTrue(title.pushed)
+        # Is published, so should be 'pending' and 'pushed'
+        self.assertTrue(title.is_pending_pushed)
         self._get_hatherleigh_published()
+
+    def test_publish_update(self):
+        # create
+        response = self._create()
+        self.assertEqual(response.status_code, 302)
+        # publish
+        response = self._publish()
+        self.assertEqual(response.status_code, 302)
+        # Is published, so should be 'pending' and 'pushed'
+        title = self._get_hatherleigh_pending()
+        self.assertTrue(title.is_pending_pushed)
+        # update
+        response = self._update()
+        self.assertEqual(response.status_code, 302)
+        # Has been edited, so should be 'pending' not 'pushed'
+        title = self._get_hatherleigh_market()
+        self.assertTrue(title.is_pending_not_pushed)
