@@ -18,7 +18,8 @@ from block.models import (
     BlockError,
     ModerateState,
 )
-from example.models import TestContent
+from block.tests.scenario import default_scenario_block
+from example.models import Title
 from example.tests.scenario import (
     default_scenario_example,
     get_block_hatherleigh_old,
@@ -34,8 +35,8 @@ from example.tests.scenario import (
 class TestModerate(TestCase):
 
     def setUp(self):
-        default_moderate_state()
         default_scenario_login()
+        default_scenario_block()
         default_scenario_example()
 
     def test_is_pending(self):
@@ -52,7 +53,7 @@ class TestModerate(TestCase):
         self.assertRaises(
             IntegrityError,
             clean_and_save,
-            TestContent(
+            Title(
                 block=block,
                 moderate_state=ModerateState._pending(),
                 order=1,
@@ -64,7 +65,7 @@ class TestModerate(TestCase):
         home = get_page_home()
         body = get_section_body()
         result = [
-            c.title for c in TestContent.objects.published(home, body)
+            c.title for c in Title.objects.published(home, body)
         ]
         self.assertListEqual(
             [
@@ -78,7 +79,7 @@ class TestModerate(TestCase):
         home = get_page_home()
         body = get_section_body()
         result = [
-            c.title for c in TestContent.objects.pending(home, body)
+            c.title for c in Title.objects.pending(home, body)
         ]
         self.assertListEqual(
             [
@@ -104,7 +105,7 @@ class TestModerate(TestCase):
         page = get_page_home()
         section = get_section_body()
         result = list(
-            TestContent.objects.published(
+            Title.objects.published(
                 page,
                 section,
             ).values_list(
@@ -135,7 +136,7 @@ class TestModerate(TestCase):
         home = get_page_home()
         body = get_section_body()
         result = [
-            c.title for c in TestContent.objects.pending(home, body)
+            c.title for c in Title.objects.pending(home, body)
         ]
         self.assertListEqual(
             [
@@ -151,7 +152,7 @@ class TestModerate(TestCase):
         home = get_page_home()
         body = get_section_body()
         result = [
-            c.title for c in TestContent.objects.published(home, body)
+            c.title for c in Title.objects.published(home, body)
         ]
         self.assertListEqual(
             ['Jacobstowe One', ],
@@ -166,7 +167,7 @@ class TestModerate(TestCase):
         page = get_page_home()
         section = get_section_body()
         result = [
-            c.title for c in TestContent.objects.pending(page, section)
+            c.title for c in Title.objects.pending(page, section)
         ]
         self.assertListEqual(
             [

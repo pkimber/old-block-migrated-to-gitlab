@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -77,14 +78,14 @@ class ContentPublishView(BaseMixin, UpdateView):
     def form_valid(self, form):
         """Publish 'pending' content."""
         self.object = form.save(commit=False)
-        self.object.set_published(self.request.user)
+        self.object.block.publish(self.request.user)
         messages.info(
             self.request,
-            "Published content, id {}".format(
-                self.object.pk,
+            "Published block, id {}".format(
+                self.object.block.pk,
             )
         )
-        return super(ContentPublishView, self).form_valid(form)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse(
@@ -118,7 +119,10 @@ class ContentUpdateView(BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        self.object.set_pending(self.request.user)
+        if not self.object.is_pending:
+            raise BlockError(
+                "Sorry, only pending content can be edited."
+            )
         return super(ContentUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):

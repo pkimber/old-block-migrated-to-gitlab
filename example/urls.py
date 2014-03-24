@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-
 from __future__ import unicode_literals
+
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -29,19 +29,19 @@ urlpatterns = patterns(
         name='project.home.user'
         ),
     # test view - so 'check_content_methods' will pass
-    url(regex=r'^example/(?P<pk>\d+)/publish/$',
+    url(regex=r'^title/(?P<pk>\d+)/publish/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
-        name='example.test.publish'
+        name='example.title.publish'
         ),
     # test view - so 'check_content_methods' will pass
-    url(regex=r'^example/(?P<pk>\d+)/remove/$',
+    url(regex=r'^title/(?P<pk>\d+)/remove/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
-        name='example.test.remove'
+        name='example.title.remove'
         ),
     # test view - so 'check_content_methods' will pass
-    url(regex=r'^example/(?P<pk>\d+)/update/$',
+    url(regex=r'^title/(?P<pk>\d+)/update/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
-        name='example.test.update'
+        name='example.title.update'
         ),
 )
 

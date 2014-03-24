@@ -12,15 +12,15 @@ from block.models import (
 )
 
 
-class TestBlock(BlockModel):
+class TitleBlock(BlockModel):
     pass
 
-reversion.register(TestBlock)
+reversion.register(TitleBlock)
 
 
-class TestContent(ContentModel):
+class Title(ContentModel):
 
-    block = models.ForeignKey(TestBlock, related_name='content')
+    block = models.ForeignKey(TitleBlock, related_name='content')
     order = models.IntegerField()
     title = models.TextField()
 
@@ -37,12 +37,12 @@ class TestContent(ContentModel):
         )
 
     def url_publish(self):
-        return reverse('example.test.publish', kwargs={'pk': self.pk})
+        return reverse('example.title.publish', kwargs={'pk': self.pk})
 
     def url_remove(self):
-        return reverse('example.test.remove', kwargs={'pk': self.pk})
+        return reverse('example.title.remove', kwargs={'pk': self.pk})
 
     def url_update(self):
-        return reverse('example.test.update', kwargs={'pk': self.pk})
+        return reverse('example.title.update', kwargs={'pk': self.pk})
 
-reversion.register(TestContent)
+reversion.register(Title)

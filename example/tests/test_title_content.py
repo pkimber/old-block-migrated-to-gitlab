@@ -14,14 +14,14 @@ from login.tests.scenario import (
     get_user_staff,
 )
 
-from example.models import TestContent
+from example.models import Title
 from example.tests.model_maker import (
-    make_test_block,
-    make_test_content,
+    make_title,
+    make_title_block,
 )
 
 
-class TestTestContent(TestCase):
+class TestTitle(TestCase):
 
     def setUp(self):
         default_moderate_state()
@@ -34,8 +34,8 @@ class TestTestContent(TestCase):
         pass
 
     def test_content_methods(self):
-        c = make_test_content(
-            make_test_block(self.page, self.body),
+        c = make_title(
+            make_title_block(self.page, self.body),
             5,
             'ABC'
         )
@@ -43,24 +43,24 @@ class TestTestContent(TestCase):
 
     def test_pending_order(self):
         """Pending items should be in 'order' order."""
-        make_test_content(
-            make_test_block(self.page, self.body),
+        make_title(
+            make_title_block(self.page, self.body),
             5,
             'ABC'
         )
-        block_2 = make_test_block(self.page, self.body)
-        make_test_content(
+        block_2 = make_title_block(self.page, self.body)
+        make_title(
             block_2,
             3,
             'LMN'
         )
         block_2.publish(get_user_staff())
-        make_test_content(
-            make_test_block(self.page, self.body),
+        make_title(
+            make_title_block(self.page, self.body),
             1,
             'XYZ'
         )
-        pending = TestContent.objects.pending(self.page, self.body)
+        pending = Title.objects.pending(self.page, self.body)
         self.assertListEqual(
             [
                 'XYZ',
@@ -72,21 +72,21 @@ class TestTestContent(TestCase):
 
     def test_published_order(self):
         """Published items should by in 'order' order."""
-        block_1 = make_test_block(self.page, self.body)
-        make_test_content(
+        block_1 = make_title_block(self.page, self.body)
+        make_title(
             block_1,
             9,
             'ABC'
         )
         block_1.publish(get_user_staff())
-        block_2 = make_test_block(self.page, self.body)
-        make_test_content(
+        block_2 = make_title_block(self.page, self.body)
+        make_title(
             block_2,
             8,
             'XYZ'
         )
         block_2.publish(get_user_staff())
-        published = TestContent.objects.published(self.page, self.body)
+        published = Title.objects.published(self.page, self.body)
         self.assertListEqual(
             ['XYZ', 'ABC'],
             [t.title for t in published]

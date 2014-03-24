@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from block.models import (
     PENDING,
+    PENDING_PUSHED,
     PUBLISHED,
     REMOVED,
     ModerateState,
@@ -37,6 +38,10 @@ def default_moderate_state():
         ModerateState._pending()
     except ModerateState.DoesNotExist:
         make_moderate_state(PENDING)
+    try:
+        ModerateState._pending_pushed()
+    except ModerateState.DoesNotExist:
+        make_moderate_state(PENDING_PUSHED)
     try:
         ModerateState._published()
     except ModerateState.DoesNotExist:

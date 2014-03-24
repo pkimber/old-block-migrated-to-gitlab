@@ -19,8 +19,8 @@ from login.tests.scenario import (
 )
 
 from example.tests.model_maker import (
-    make_test_block,
-    make_test_content,
+    make_title,
+    make_title_block,
 )
 
 
@@ -29,11 +29,11 @@ class TestWorkflow(TestCase):
     def setUp(self):
         default_moderate_state()
         default_scenario_login()
-        self.block = make_test_block(
+        self.block = make_title_block(
             make_page('home', 0),
             make_section('body'),
         )
-        self.content = make_test_content(
+        self.content = make_title(
             self.block,
             1,
             'Saints'

@@ -20,6 +20,7 @@ from base.model_utils import (
 
 
 PENDING = 'pending'
+PENDING_PUSHED = 'pending_pushed'
 PUBLISHED = 'published'
 REMOVED = 'removed'
 
@@ -60,6 +61,10 @@ class ModerateState(models.Model):
     @staticmethod
     def _pending():
         return ModerateState.objects.get(slug=PENDING)
+
+    @staticmethod
+    def _pending_pushed():
+        return ModerateState.objects.get(slug=PENDING_PUSHED)
 
     @staticmethod
     def _removed():
