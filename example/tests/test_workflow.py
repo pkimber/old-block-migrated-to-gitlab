@@ -38,7 +38,6 @@ class TestWorkflow(TestCase):
         )
         self.content = make_test_content(
             self.block,
-            ModerateState.pending(),
             1,
             'Saints'
         )
@@ -74,28 +73,20 @@ class TestWorkflow(TestCase):
         self.assertEqual(0, self._remove_count())
 
     def test_published(self):
-        self.content.publish(get_user_staff())
+        self.block.publish(get_user_staff())
         self.assertEqual(1, self._pending_count())
         self.assertEqual(1, self._publish_count())
         self.assertEqual(0, self._remove_count())
 
     def test_remove_pending(self):
-        self.content.remove(get_user_staff())
+        self.block.remove(get_user_staff())
         self.assertEqual(0, self._pending_count())
         self.assertEqual(0, self._publish_count())
         self.assertEqual(1, self._remove_count())
 
     def test_remove_published(self):
-        self.content.publish(get_user_staff())
-        published = self._get_published()
-        published.remove(get_user_staff())
-        self.assertEqual(0, self._pending_count())
-        self.assertEqual(0, self._publish_count())
-        self.assertEqual(1, self._remove_count())
-
-    def test_remove_temp(self):
-        self.content.publish(get_user_staff())
-        self.content.remove(get_user_staff())
+        self.block.publish(get_user_staff())
+        self.block.remove(get_user_staff())
         self.assertEqual(0, self._pending_count())
         self.assertEqual(0, self._publish_count())
         self.assertEqual(1, self._remove_count())

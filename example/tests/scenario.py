@@ -23,9 +23,16 @@ from example.tests.model_maker import (
 )
 
 
+def get_block_hatherleigh_old():
+    return get_hatherleigh_old().block
+
+
+def get_block_hatherleigh_three():
+    return get_hatherleigh_three().block
+
+
 def get_block_hatherleigh_two():
-    result = TestContent.objects.get(title='Hatherleigh Two')
-    return result.block
+    return get_hatherleigh_two().block
 
 
 def get_hatherleigh_old():
@@ -68,14 +75,14 @@ def default_scenario_example():
     body = get_section_body()
     footer = get_section_footer()
     # Home, Hatherleigh
-    block_hatherleigh = make_test_block(home, body)
-    c = make_test_content(
-        block_hatherleigh,
-        ModerateState.pending(),
+    hatherleigh_body_1 = make_test_block(home, body)
+    make_test_content(
+        hatherleigh_body_1,
         1,
         'Hatherleigh Two'
     )
-    c.publish(get_user_staff())
+    hatherleigh_body_1.publish(get_user_staff())
+    c = hatherleigh_body_1.get_pending()
     c.title = 'Hatherleigh Three'
     c.save()
     #make_test_content(
@@ -84,36 +91,34 @@ def default_scenario_example():
     #    1,
     #    'Hatherleigh Three'
     #)
+    hatherleigh_body_2 = make_test_block(home, body)
     make_test_content(
-        block_hatherleigh,
-        ModerateState.removed(),
-        1,
+        hatherleigh_body_2,
+        2,
         'Hatherleigh Old'
     )
+    hatherleigh_body_2.remove(get_user_staff())
     # Home, Jacobstowe
-    block_jacobstowe = make_test_block(home, body)
-    c = make_test_content(
-        block_jacobstowe,
-        ModerateState.pending(),
+    jacobstowe_body = make_test_block(home, body)
+    make_test_content(
+        jacobstowe_body,
         2,
         'Jacobstowe One'
     )
-    c.publish(get_user_staff())
+    jacobstowe_body.publish(get_user_staff())
     # Home, Footer
-    block_jacobstowe = make_test_block(home, footer)
-    c = make_test_content(
-        block_jacobstowe,
-        ModerateState.pending(),
+    jacobstowe_footer = make_test_block(home, footer)
+    make_test_content(
+        jacobstowe_footer,
         1,
         'Villages for You'
     )
-    c.publish(get_user_staff())
+    jacobstowe_footer.publish(get_user_staff())
     # Information, Monkokehampton
-    block_monkokehampton = make_test_block(information, body)
-    c = make_test_content(
-        block_monkokehampton,
-        ModerateState.pending(),
+    monkokehampton_body = make_test_block(information, body)
+    make_test_content(
+        monkokehampton_body,
         1,
         'Monkokehampton'
     )
-    c.publish(get_user_staff())
+    monkokehampton_body.publish(get_user_staff())

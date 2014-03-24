@@ -21,6 +21,8 @@ from block.models import (
 from example.models import TestContent
 from example.tests.scenario import (
     default_scenario_example,
+    get_block_hatherleigh_old,
+    get_block_hatherleigh_three,
     get_block_hatherleigh_two,
     get_hatherleigh_old,
     get_hatherleigh_three,
@@ -97,8 +99,8 @@ class TestModerate(TestCase):
     #    )
 
     def test_publish(self):
-        c = get_hatherleigh_three()
-        c.publish(get_user_staff())
+        b = get_block_hatherleigh_three()
+        b.publish(get_user_staff())
         page = get_page_home()
         section = get_section_body()
         result = list(
@@ -119,18 +121,17 @@ class TestModerate(TestCase):
 
     def test_remove_already(self):
         """content has already been removed and cannot be removed again."""
-        c = get_hatherleigh_old()
-        c.remove(get_user_staff())
+        b = get_block_hatherleigh_old()
         self.assertRaises(
             BlockError,
-            c.remove,
+            b.remove,
             get_user_staff(),
         )
 
     def test_remove_pending(self):
         """remove pending content."""
-        content = get_hatherleigh_three()
-        content.remove(get_user_staff())
+        b = get_block_hatherleigh_three()
+        b.remove(get_user_staff())
         home = get_page_home()
         body = get_section_body()
         result = [
@@ -145,8 +146,8 @@ class TestModerate(TestCase):
 
     def test_remove_published(self):
         """remove pending content."""
-        content = get_hatherleigh_two()
-        content.remove(get_user_staff())
+        b = get_block_hatherleigh_two()
+        b.remove(get_user_staff())
         home = get_page_home()
         body = get_section_body()
         result = [

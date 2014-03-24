@@ -37,7 +37,6 @@ class TestTestContent(TestCase):
     def test_content_methods(self):
         c = make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.pending(),
             5,
             'ABC'
         )
@@ -47,20 +46,18 @@ class TestTestContent(TestCase):
         """Pending items should be in 'order' order."""
         make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.pending(),
             5,
             'ABC'
         )
-        c = make_test_content(
-            make_test_block(self.page, self.body),
-            ModerateState.pending(),
+        block_2 = make_test_block(self.page, self.body)
+        make_test_content(
+            block_2,
             3,
             'LMN'
         )
-        c.publish(get_user_staff())
+        block_2.publish(get_user_staff())
         make_test_content(
             make_test_block(self.page, self.body),
-            ModerateState.pending(),
             1,
             'XYZ'
         )
@@ -76,20 +73,20 @@ class TestTestContent(TestCase):
 
     def test_published_order(self):
         """Published items should by in 'order' order."""
-        c = make_test_content(
-            make_test_block(self.page, self.body),
-            ModerateState.pending(),
+        block_1 = make_test_block(self.page, self.body)
+        make_test_content(
+            block_1,
             9,
             'ABC'
         )
-        c.publish(get_user_staff())
-        c = make_test_content(
-            make_test_block(self.page, self.body),
-            ModerateState.pending(),
+        block_1.publish(get_user_staff())
+        block_2 = make_test_block(self.page, self.body)
+        make_test_content(
+            block_2,
             8,
             'XYZ'
         )
-        c.publish(get_user_staff())
+        block_2.publish(get_user_staff())
         published = TestContent.objects.published(self.page, self.body)
         self.assertListEqual(
             ['XYZ', 'ABC'],

@@ -18,10 +18,9 @@ def make_test_block(page, section, **kwargs):
     return clean_and_save(TestBlock(**defaults))
 
 
-def make_test_content(block, moderate_state, order, title, **kwargs):
+def make_test_content(block, order, title, **kwargs):
     defaults = dict(
         block=block,
-        moderate_state=moderate_state,
         order=order,
         title=title,
     )
