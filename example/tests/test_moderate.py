@@ -54,7 +54,7 @@ class TestModerate(TestCase):
             clean_and_save,
             TestContent(
                 block=block,
-                moderate_state=ModerateState.pending(),
+                moderate_state=ModerateState._pending(),
                 order=1,
                 title='Title',
             )

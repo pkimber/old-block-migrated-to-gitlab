@@ -26,8 +26,8 @@ PUBLISHED = 'published'
 REMOVED = 'removed'
 
 
-def default_moderate_state():
-    return ModerateState.pending()
+def _default_moderate_state():
+    return ModerateState._pending()
 
 
 class BlockError(Exception):
@@ -42,6 +42,7 @@ class BlockError(Exception):
 
 class ModerateState(models.Model):
     """Accept, remove or pending."""
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
 
@@ -54,17 +55,17 @@ class ModerateState(models.Model):
         return '{}'.format(self.name)
 
     @staticmethod
-    def _get_published():
+    def _published():
         """Internal use only."""
-        return ModerateState.objects.get(slug='published')
+        return ModerateState.objects.get(slug=PUBLISHED)
 
     @staticmethod
-    def pending():
+    def _pending():
         return ModerateState.objects.get(slug=PENDING)
 
     @staticmethod
-    def removed():
-        return ModerateState.objects.get(slug='removed')
+    def _removed():
+        return ModerateState.objects.get(slug=REMOVED)
 
 reversion.register(ModerateState)
 
@@ -141,26 +142,26 @@ class BlockModel(TimeStampedModel):
 
     def _get_published(self):
         return self.content.get(
-            moderate_state=ModerateState._get_published()
+            moderate_state=ModerateState._published()
         )
 
     def _get_removed(self):
         return self.content.get(
-            moderate_state=ModerateState.removed()
+            moderate_state=ModerateState._removed()
         )
 
     def _remove_published_content(self, user):
         """publishing new content, so remove currently published content."""
         try:
             c = self._get_published()
-            c._set_moderated(user, ModerateState.removed())
+            c._set_moderated(user, ModerateState._removed())
             c.save()
         except ObjectDoesNotExist:
             pass
 
     def get_pending(self):
         return self.content.get(
-            moderate_state=ModerateState.pending()
+            moderate_state=ModerateState._pending()
         )
 
     def publish(self, user):
@@ -176,7 +177,7 @@ class BlockModel(TimeStampedModel):
             self._remove_published_content(user)
             # copy the pending record to a new published record.
             c = copy_model_instance(pending)
-            c._set_moderated(user, ModerateState._get_published())
+            c._set_moderated(user, ModerateState._published())
             c.save()
 
     def remove(self, user):
@@ -204,12 +205,12 @@ class BlockModel(TimeStampedModel):
         with transaction.atomic():
             self._delete_removed_content()
             if published:
-                published._set_moderated(user, ModerateState.removed())
+                published._set_moderated(user, ModerateState._removed())
                 published.save()
                 if pending:
                     pending.delete()
             else:
-                pending._set_moderated(user, ModerateState.removed())
+                pending._set_moderated(user, ModerateState._removed())
                 pending.save()
 
 
@@ -234,8 +235,7 @@ class ContentManager(models.Manager):
         Note: we return a list of content instances not a queryset.
 
         """
-        pending = ModerateState.pending()
-        published = ModerateState._get_published()
+        pending = ModerateState._pending()
         qs = self.model.objects.filter(
             block__page=page,
             block__section=section,
@@ -249,18 +249,11 @@ class ContentManager(models.Manager):
             qs = qs.order_by(order_by)
         else:
             qs = qs.order_by('order')
-        result = collections.OrderedDict()
-        for c in qs:
-            if c.block.pk in result:
-                if c.moderate_state == pending:
-                    result[c.block.pk] = c
-            else:
-                result[c.block.pk] = c
-        return list(result.values())
+        return qs
 
     def published(self, page, section):
         """Return a published content for a page."""
-        published = ModerateState._get_published()
+        published = ModerateState._published()
         return self.model.objects.filter(
             block__page=page,
             block__section=section,
@@ -275,7 +268,7 @@ class ContentModel(TimeStampedModel):
 
     moderate_state = models.ForeignKey(
         ModerateState,
-        default=default_moderate_state
+        default=_default_moderate_state
     )
     date_moderated = models.DateTimeField(blank=True, null=True)
     user_moderated = models.ForeignKey(
@@ -292,15 +285,15 @@ class ContentModel(TimeStampedModel):
         return '{}'.format(self.pk)
 
     def _is_pending(self):
-        return self.moderate_state == ModerateState.pending()
+        return self.moderate_state == ModerateState._pending()
     is_pending = property(_is_pending)
 
     def _is_published(self):
-        return self.moderate_state == ModerateState._get_published()
+        return self.moderate_state == ModerateState._published()
     is_published = property(_is_published)
 
     def _is_removed(self):
-        return self.moderate_state == ModerateState.removed()
+        return self.moderate_state == ModerateState._removed()
     is_removed = property(_is_removed)
 
     def _set_moderated(self, user, moderate_state):

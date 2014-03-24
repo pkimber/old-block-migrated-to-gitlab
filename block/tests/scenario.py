@@ -34,15 +34,15 @@ def get_section_footer():
 
 def default_moderate_state():
     try:
-        ModerateState.pending()
+        ModerateState._pending()
     except ModerateState.DoesNotExist:
         make_moderate_state(PENDING)
     try:
-        ModerateState.objects.get(slug=PUBLISHED)
+        ModerateState._published()
     except ModerateState.DoesNotExist:
         make_moderate_state(PUBLISHED)
     try:
-        ModerateState.removed()
+        ModerateState._removed()
     except ModerateState.DoesNotExist:
         make_moderate_state(REMOVED)
 
