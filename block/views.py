@@ -118,10 +118,7 @@ class ContentUpdateView(BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        if not self.object.is_pending:
-            raise BlockError(
-                "Sorry, only pending content can be edited."
-            )
+        self.object.set_pending_edit()
         return super(ContentUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):

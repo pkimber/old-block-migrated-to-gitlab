@@ -100,5 +100,6 @@ class TestView(TestCase):
             )
         )
         self.assertEqual(response.status_code, 302)
-        self._get_hatherleigh_pending()
+        title = self._get_hatherleigh_pending()
+        self.assertTrue(title.pushed)
         self._get_hatherleigh_published()

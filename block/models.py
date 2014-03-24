@@ -20,7 +20,6 @@ from base.model_utils import (
 
 
 PENDING = 'pending'
-PENDING_PUSHED = 'pending_pushed'
 PUBLISHED = 'published'
 REMOVED = 'removed'
 
@@ -61,10 +60,6 @@ class ModerateState(models.Model):
     @staticmethod
     def _pending():
         return ModerateState.objects.get(slug=PENDING)
-
-    @staticmethod
-    def _pending_pushed():
-        return ModerateState.objects.get(slug=PENDING_PUSHED)
 
     @staticmethod
     def _removed():
@@ -182,6 +177,9 @@ class BlockModel(TimeStampedModel):
             c = copy_model_instance(pending)
             c._set_moderated(user, ModerateState._published())
             c.save()
+            # mark the pending record as 'pushed' (published)
+            pending.set_pending_pushed()
+            pending.save()
 
     def remove(self, user):
         """Remove content.
@@ -267,7 +265,13 @@ class ContentManager(models.Manager):
 
 
 class ContentModel(TimeStampedModel):
-    """Abstract base class for the content within blocks."""
+    """Abstract base class for the content within blocks.
+
+    'pushed' is set to 'True' on a 'pending' model when it has just been
+    'published'.  When the user edits the 'pending' record, the 'pushed'
+    field is set to 'False'.
+
+    """
 
     moderate_state = models.ForeignKey(
         ModerateState,
@@ -277,6 +281,7 @@ class ContentModel(TimeStampedModel):
     user_moderated = models.ForeignKey(
         settings.AUTH_USER_MODEL, blank=True, null=True, related_name='+'
     )
+    pushed = models.BooleanField(default=False)
     objects = ContentManager()
 
     class Meta:
@@ -303,3 +308,21 @@ class ContentModel(TimeStampedModel):
         self.date_moderated = datetime.now()
         self.user_moderated = user
         self.moderate_state = moderate_state
+
+    def set_pending_edit(self):
+        """Pending content has been edited, so set 'pushed' to 'False'."""
+        if self.is_pending:
+            self.pushed = False
+        else:
+            raise BlockError(
+                "Sorry, only pending content can be edited."
+            )
+
+    def set_pending_pushed(self):
+        """Pending content is being 'pushed' ('published')."""
+        if self.is_pending:
+            self.pushed = True
+        else:
+            raise BlockError(
+                "Sorry, only pending content can be edited."
+            )
