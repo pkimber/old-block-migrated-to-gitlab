@@ -1,4 +1,4 @@
-{% if c.is_pending_not_pushed %}
+{% if c.is_pending_added or c.is_pending_edited %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_publish }}">
     <i class="fa fa-check"></i>
     publish
