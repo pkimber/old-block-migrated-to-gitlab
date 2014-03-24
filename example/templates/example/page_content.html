@@ -1,6 +1,5 @@
 {% extends "project/base.html" %}
 {% load block_tags %}
-{% load staticfiles %}
 
 {% block menu %}
   <li {% if design %}class="pure-menu-selected"{% endif %}>
@@ -12,16 +11,6 @@
   <div class="pure-g-r">
     <div class="pure-u-1">
       <div class="l-box">
-        <div class="pure-menu pure-menu-open pure-menu-horizontal">
-          <ul>
-            <li>
-              <a href="{% url 'example.title.create' page.slug 'body' %}">
-                <i class="fa fa-edit"></i>
-                Create title
-              </a>
-            </li>
-          </ul>
-        </div>
         <table class="pure-table pure-table-bordered">
           <thead>
             <tr>
@@ -41,21 +30,15 @@
                 </td>
                 <td>
                   {{ c.title }}
-                  {% if c.user_moderated %}
-                    <br />
-                    <small>{{ c.user_moderated }}</small>
-                  {% endif %}
-                  {% if c.date_moderated %}
-                    <br />
-                    <small>{{ c.date_moderated }}</small>
-                  {% endif %}
                 </td>
                 <td>
                   {% if c.is_published %}
                     <i class="fa fa-thumbs-o-up"></i>
                     <small>{{ c.date_moderated|date:"d/m/y" }}</small>
-                  {% elif c.is_pending %}
+                  {% elif c.is_pending_not_pushed %}
                     <small>Pending</small>
+                  {% elif c.is_pending_pushed %}
+                    <small>Published</small>
                   {% elif c.is_removed %}
                     <i class="fa fa-thumbs-o-down"></i>
                     <small>{{ c.date_moderated|date:"d/m/y" }}</small>
@@ -70,6 +53,18 @@
             {% endfor %}
           </tbody>
         </table>
+        {% if design %}
+          <div class="pure-menu pure-menu-open pure-menu-horizontal">
+            <ul>
+              <li>
+                <a href="{% url 'example.title.create' page.slug 'body' %}">
+                  <i class="fa fa-edit"></i>
+                  Create title
+                </a>
+              </li>
+            </ul>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
