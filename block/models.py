@@ -195,8 +195,15 @@ class BlockModel(TimeStampedModel):
             pass
 
     def get_pending(self):
+        """If the block has pending content, then get it."""
         return self.content.get(
             moderate_state=ModerateState._pending()
+        )
+
+    def get_published(self):
+        """If the block has published content, then get it."""
+        return self.content.get(
+            moderate_state=ModerateState._published()
         )
 
     def publish(self, user):
@@ -214,6 +221,8 @@ class BlockModel(TimeStampedModel):
             c = copy_model_instance(pending)
             c._set_moderated(user, ModerateState._published())
             c.save()
+            # give pending class the opportunity to copy data
+            pending.copy_elements(c)
             # mark the pending record as 'pushed' (published)
             pending.set_pending_pushed()
             pending.save()
@@ -360,6 +369,9 @@ class ContentModel(TimeStampedModel):
         self.date_moderated = datetime.now()
         self.user_moderated = user
         self.moderate_state = moderate_state
+
+    def copy_elements(self, instance):
+        pass
 
     def set_pending_edit(self):
         """Content has been edited... so update the state.
