@@ -98,15 +98,14 @@ class ContentRemoveView(BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        self.object.set_removed(self.request.user)
+        self.object.block.remove(self.request.user)
         messages.info(
             self.request,
-            "Removed content {}, {}".format(
-                self.object.pk,
-                self.object.title,
+            "Removed block {}".format(
+                self.object.block.pk,
             )
         )
-        return super(ContentRemoveView, self).form_valid(form)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse(
