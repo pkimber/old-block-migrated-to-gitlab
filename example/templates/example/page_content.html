@@ -41,9 +41,13 @@
                 </td>
                 <td>
                   {{ c.title }}
-                  {% if user_moderated %}
+                  {% if c.user_moderated %}
                     <br />
-                    {{ c.user_moderated }}
+                    <small>{{ c.user_moderated }}</small>
+                  {% endif %}
+                  {% if c.date_moderated %}
+                    <br />
+                    <small>{{ c.date_moderated }}</small>
                   {% endif %}
                 </td>
                 <td>
