@@ -27,11 +27,6 @@ from .models import (
 )
 
 
-class HomeView(TemplateView):
-
-    template_name = 'example/home.html'
-
-
 class PageBaseView(ContentPageMixin, TemplateView):
 
     template_name = 'example/page_content.html'

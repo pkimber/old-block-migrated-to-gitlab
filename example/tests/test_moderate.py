@@ -6,7 +6,6 @@ from django.test import TestCase
 
 from base.tests.model_maker import clean_and_save
 from block.tests.scenario import (
-    default_moderate_state,
     get_page_home,
     get_section_body,
 )

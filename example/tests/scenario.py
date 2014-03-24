@@ -6,8 +6,6 @@ from block.models import (
     PUBLISHED,
 )
 from block.tests.scenario import (
-    default_moderate_state,
-    default_scenario_block,
     get_page_home,
     get_page_information,
     get_section_body,
