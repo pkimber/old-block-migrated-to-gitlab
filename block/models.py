@@ -18,10 +18,17 @@ from base.model_utils import (
     TimeStampedModel,
 )
 
+ADD = 'add'
+EDIT = 'edit'
+PUSH = 'push'
 
 PENDING = 'pending'
 PUBLISHED = 'published'
 REMOVED = 'removed'
+
+
+def _default_edit_state():
+    return EditState._add()
 
 
 def _default_moderate_state():
@@ -36,6 +43,36 @@ class BlockError(Exception):
 
     def __str__(self):
         return repr('%s, %s' % (self.__class__.__name__, self.value))
+
+
+class EditState(models.Model):
+    """Add, pushed or editing."""
+
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Edit state'
+        verbose_name_plural = 'Edit state'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    @staticmethod
+    def _add():
+        """Internal use only."""
+        return EditState.objects.get(slug=ADD)
+
+    @staticmethod
+    def _edit():
+        return EditState.objects.get(slug=EDIT)
+
+    @staticmethod
+    def _push():
+        return EditState.objects.get(slug=PUSH)
+
+reversion.register(EditState)
 
 
 class ModerateState(models.Model):
@@ -281,7 +318,10 @@ class ContentModel(TimeStampedModel):
     user_moderated = models.ForeignKey(
         settings.AUTH_USER_MODEL, blank=True, null=True, related_name='+'
     )
-    pushed = models.BooleanField(default=False)
+    edit_state = models.ForeignKey(
+        EditState,
+        default=_default_edit_state
+    )
     objects = ContentManager()
 
     class Meta:
@@ -296,12 +336,16 @@ class ContentModel(TimeStampedModel):
         return self.moderate_state == ModerateState._pending()
     is_pending = property(_is_pending)
 
-    def _is_pending_not_pushed(self):
-        return self.is_pending and not self.pushed
-    is_pending_not_pushed = property(_is_pending_not_pushed)
+    def _is_pending_added(self):
+        return self.is_pending and self.edit_state == EditState._add()
+    is_pending_added = property(_is_pending_added)
+
+    def _is_pending_edited(self):
+        return self.is_pending and self.edit_state == EditState._edit()
+    is_pending_edited = property(_is_pending_edited)
 
     def _is_pending_pushed(self):
-        return self.is_pending and self.pushed
+        return self.is_pending and self.edit_state == EditState._push()
     is_pending_pushed = property(_is_pending_pushed)
 
     def _is_published(self):
@@ -318,9 +362,17 @@ class ContentModel(TimeStampedModel):
         self.moderate_state = moderate_state
 
     def set_pending_edit(self):
-        """Pending content has been edited, so set 'pushed' to 'False'."""
+        """Content has been edited... so update the state.
+
+        If the content was published, then set the state to 'edit'.
+        If the content has never been published ('add'), then leave alone.
+
+        """
         if self.is_pending:
-            self.pushed = False
+            if self.edit_state == EditState._add():
+                pass
+            elif self.edit_state == EditState._push():
+                self.edit_state = EditState._edit()
         else:
             raise BlockError(
                 "Sorry, only pending content can be edited."
@@ -329,7 +381,7 @@ class ContentModel(TimeStampedModel):
     def set_pending_pushed(self):
         """Pending content is being 'pushed' ('published')."""
         if self.is_pending:
-            self.pushed = True
+            self.edit_state = EditState._push()
         else:
             raise BlockError(
                 "Sorry, only pending content can be edited."

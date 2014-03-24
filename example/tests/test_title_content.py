@@ -8,7 +8,7 @@ from block.tests.model_maker import (
     make_page,
     make_section,
 )
-from block.tests.scenario import default_moderate_state
+from block.tests.scenario import default_block_state
 from login.tests.scenario import (
     default_scenario_login,
     get_user_staff,
@@ -24,7 +24,7 @@ from example.tests.model_maker import (
 class TestTitle(TestCase):
 
     def setUp(self):
-        default_moderate_state()
+        default_block_state()
         default_scenario_login()
         self.page = make_page('home', 0)
         self.body = make_section('body')

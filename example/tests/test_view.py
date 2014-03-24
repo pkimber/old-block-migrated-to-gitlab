@@ -89,6 +89,7 @@ class TestView(TestCase):
         self.assertEqual(response.status_code, 302)
         title = self._get_hatherleigh()
         self.assertEqual(PENDING, title.moderate_state.slug)
+        self.assertTrue(title.is_pending_added)
 
     def test_update(self):
         response = self._create()
@@ -98,7 +99,7 @@ class TestView(TestCase):
         # Get 'Hatherleigh Market'
         title = self._get_hatherleigh_market()
         # Is not published, so should be 'pending' not 'pushed'
-        self.assertTrue(title.is_pending_not_pushed)
+        self.assertTrue(title.is_pending_added)
         # 'Hatherleigh' should no longer exist
         self.assertRaises(
             Title.DoesNotExist,
@@ -129,4 +130,10 @@ class TestView(TestCase):
         self.assertEqual(response.status_code, 302)
         # Has been edited, so should be 'pending' not 'pushed'
         title = self._get_hatherleigh_market()
-        self.assertTrue(title.is_pending_not_pushed)
+        self.assertTrue(
+            title.is_pending_edited,
+            'state is {} {}'.format(
+                title.moderate_state.slug,
+                title.edit_state.slug,
+            )
+        )

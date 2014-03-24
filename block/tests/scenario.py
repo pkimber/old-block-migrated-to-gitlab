@@ -2,16 +2,21 @@
 from __future__ import unicode_literals
 
 from block.models import (
-    PENDING,
-    PUBLISHED,
-    REMOVED,
+    ADD,
+    EDIT,
+    EditState,
     ModerateState,
     Page,
+    PENDING,
+    PUBLISHED,
+    PUSH,
+    REMOVED,
     Section,
 )
 from block.tests.model_maker import (
-    make_page,
+    make_edit_state,
     make_moderate_state,
+    make_page,
     make_section,
 )
 
@@ -32,7 +37,21 @@ def get_section_footer():
     return Section.objects.get(slug='footer')
 
 
-def default_moderate_state():
+def default_block_state():
+    """Edit and moderate state."""
+    try:
+        EditState._add()
+    except EditState.DoesNotExist:
+        make_edit_state(ADD)
+    try:
+        EditState._edit()
+    except EditState.DoesNotExist:
+        make_edit_state(EDIT)
+    try:
+        EditState._push()
+    except EditState.DoesNotExist:
+        make_edit_state(PUSH)
+    # moderate state
     try:
         ModerateState._pending()
     except ModerateState.DoesNotExist:
@@ -48,7 +67,7 @@ def default_moderate_state():
 
 
 def default_scenario_block():
-    default_moderate_state()
+    default_block_state()
     make_page('Home', 0)
     make_section('Body')
     make_section('Footer')

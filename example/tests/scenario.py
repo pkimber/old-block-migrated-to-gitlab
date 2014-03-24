@@ -63,8 +63,6 @@ def get_monkokehampton():
 
 
 def default_scenario_example():
-    #default_moderate_state()
-    #default_scenario_block()
     # pages
     home = get_page_home()
     information = get_page_information()
@@ -82,12 +80,6 @@ def default_scenario_example():
     c = hatherleigh_body_1.get_pending()
     c.title = 'Hatherleigh Three'
     c.save()
-    #make_title(
-    #    block_hatherleigh,
-    #    ModerateState.pending(),
-    #    1,
-    #    'Hatherleigh Three'
-    #)
     hatherleigh_body_2 = make_title_block(home, body)
     make_title(
         hatherleigh_body_2,
