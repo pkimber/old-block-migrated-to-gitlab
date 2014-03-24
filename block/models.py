@@ -115,63 +115,6 @@ class Section(TimeStampedModel):
 reversion.register(Section)
 
 
-class ContentManager(models.Manager):
-
-    def next_order(self):
-        result = self.model.objects.aggregate(max_order=Max('order'))
-        max_order = result.get('max_order', 0)
-        if max_order == 0:
-            raise BlockError(
-                "Cannot get the maximum value of the 'order' field "
-                "in the '{}' class.".format(self.model.__name__)
-            )
-        elif max_order:
-            return max_order + 1
-        else:
-            return 1
-
-    def pending(self, page, section, kwargs=None):
-        """Return a list of pending content for a section.
-
-        Note: we return a list of content instances not a queryset.
-
-        """
-        pending = ModerateState.pending()
-        published = ModerateState._get_published()
-        qs = self.model.objects.filter(
-            block__page=page,
-            block__section=section,
-            moderate_state=pending,
-        )
-        order_by = None
-        if kwargs:
-            order_by = kwargs.pop('order_by', None)
-            qs = qs.filter(**kwargs)
-        if order_by:
-            qs = qs.order_by(order_by)
-        else:
-            qs = qs.order_by('order')
-        result = collections.OrderedDict()
-        for c in qs:
-            if c.block.pk in result:
-                if c.moderate_state == pending:
-                    result[c.block.pk] = c
-            else:
-                result[c.block.pk] = c
-        return list(result.values())
-
-    def published(self, page, section):
-        """Return a published content for a page."""
-        published = ModerateState._get_published()
-        return self.model.objects.filter(
-            block__page=page,
-            block__section=section,
-            moderate_state=published,
-        ).order_by(
-            'order',
-        )
-
-
 class BlockModel(TimeStampedModel):
     """Abstract base class for blocks of one type."""
 
@@ -268,6 +211,63 @@ class BlockModel(TimeStampedModel):
             else:
                 pending._set_moderated(user, ModerateState.removed())
                 pending.save()
+
+
+class ContentManager(models.Manager):
+
+    def next_order(self):
+        result = self.model.objects.aggregate(max_order=Max('order'))
+        max_order = result.get('max_order', 0)
+        if max_order == 0:
+            raise BlockError(
+                "Cannot get the maximum value of the 'order' field "
+                "in the '{}' class.".format(self.model.__name__)
+            )
+        elif max_order:
+            return max_order + 1
+        else:
+            return 1
+
+    def pending(self, page, section, kwargs=None):
+        """Return a list of pending content for a section.
+
+        Note: we return a list of content instances not a queryset.
+
+        """
+        pending = ModerateState.pending()
+        published = ModerateState._get_published()
+        qs = self.model.objects.filter(
+            block__page=page,
+            block__section=section,
+            moderate_state=pending,
+        )
+        order_by = None
+        if kwargs:
+            order_by = kwargs.pop('order_by', None)
+            qs = qs.filter(**kwargs)
+        if order_by:
+            qs = qs.order_by(order_by)
+        else:
+            qs = qs.order_by('order')
+        result = collections.OrderedDict()
+        for c in qs:
+            if c.block.pk in result:
+                if c.moderate_state == pending:
+                    result[c.block.pk] = c
+            else:
+                result[c.block.pk] = c
+        return list(result.values())
+
+    def published(self, page, section):
+        """Return a published content for a page."""
+        published = ModerateState._get_published()
+        return self.model.objects.filter(
+            block__page=page,
+            block__section=section,
+            moderate_state=published,
+        ).order_by(
+            'order',
+        )
 
 
 class ContentModel(TimeStampedModel):
