@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from block.models import (
     PENDING,
+    PUBLISHED,
 )
 from block.tests.scenario import (
     default_scenario_block,
@@ -39,27 +40,65 @@ class TestView(TestCase):
                 'example.title.create',
                 kwargs=dict(page=home.slug, section=body.slug),
             ),
-            {'title': 'Hatherleigh'},
+            {
+                'title': 'Hatherleigh',
+            },
         )
+
+    def _get_hatherleigh(self):
+        return Title.objects.get(title='Hatherleigh')
+
+    def _get_hatherleigh_pending(self):
+        return Title.objects.get(
+            title='Hatherleigh',
+            moderate_state__slug=PENDING,
+        )
+
+    def _get_hatherleigh_published(self):
+        return Title.objects.get(
+            title='Hatherleigh',
+            moderate_state__slug=PUBLISHED,
+        )
+
+    def _get_hatherleigh_market(self):
+        return Title.objects.get(title='Hatherleigh Market')
 
     def test_create(self):
         response = self._create()
         self.assertEqual(response.status_code, 302)
-        title = Title.objects.get(title='Hatherleigh')
+        title = self._get_hatherleigh()
         self.assertEqual(PENDING, title.moderate_state.slug)
 
+    def test_update(self):
+        self._create()
+        title = self._get_hatherleigh()
+        response = self.client.post(
+            reverse(
+                'example.title.update',
+                kwargs=dict(pk=title.pk),
+            ),
+            {
+                'title': 'Hatherleigh Market',
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        # Get 'Hatherleigh Market'
+        self._get_hatherleigh_market()
+        # 'Hatherleigh' should no longer exist
+        self.assertRaises(
+            Title.DoesNotExist,
+            self._get_hatherleigh
+        )
 
-    #def test_publish(self):
-    #    c = get_title_content()
-    #    response = self.client.post(
-    #        reverse('example.title.publish', kwargs={'pk': c.pk}),
-    #    )
-    #    self.assertEqual(response.status_code, 302)
-
-    #def test_update(self):
-    #    c = get_title_content()
-    #    response = self.client.post(
-    #        reverse('example.title.update', kwargs={'pk': c.pk}),
-    #        {'title': 'Hatherleigh'}
-    #    )
-    #    self.assertEqual(response.status_code, 302)
+    def test_publish(self):
+        self._create()
+        title = self._get_hatherleigh()
+        response = self.client.post(
+            reverse(
+                'example.title.publish',
+                kwargs=dict(pk=title.pk),
+            )
+        )
+        self.assertEqual(response.status_code, 302)
+        self._get_hatherleigh_pending()
+        self._get_hatherleigh_published()
