@@ -69,7 +69,7 @@ def default_block_state():
 
 def default_scenario_block():
     default_block_state()
-    init_page('Home', 0)
+    init_page('Home', 0, 'home.html')
     make_section('Body')
     make_section('Footer')
-    init_page('Information', 1)
+    init_page('Information', 1, 'information.html')

@@ -22,12 +22,10 @@ def init_section(name):
     return result
 
 
-def init_page(name, order, is_home=None, template_name=None):
+def init_page(name, order, template_name, is_home=None):
     """Create a page if it doesn't already exist."""
     if not is_home:
         is_home = False
-    if not template_name:
-        template_name = 'block/base.html'
     try:
         result = Page.objects.get(slug=slugify(name))
         update = False
@@ -44,6 +42,9 @@ def init_page(name, order, is_home=None, template_name=None):
             result.save()
     except Page.DoesNotExist:
         result = make_page(
-            name, order, is_home=is_home, template_name=template_name
+            name,
+            order,
+            is_home=is_home,
+            template_name=template_name,
         )
     return result
