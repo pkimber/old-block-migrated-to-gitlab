@@ -6,13 +6,16 @@ from django.db import IntegrityError
 from block.models import BlockError
 
 
-def check_content_methods(model_instance, ignore_remove=None):
+def check_content_methods(
+            model_instance, ignore_remove=None, check_elements=None):
     """Call the standard methods used by the block content.
 
     An exception will be thrown if the method is not defined
     """
     # check the standard URLs
     model_instance.url_publish()
+    if model_instance.has_elements():
+        model_instance.url_elements()
     if ignore_remove:
         if hasattr(model_instance, 'url_remove'):
             raise BlockError(

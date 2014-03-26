@@ -175,11 +175,6 @@ class BlockModel(TimeStampedModel):
         except ObjectDoesNotExist:
             pass
 
-    def _get_published(self):
-        return self.content.get(
-            moderate_state=ModerateState._published()
-        )
-
     def _get_removed(self):
         return self.content.get(
             moderate_state=ModerateState._removed()
@@ -188,7 +183,7 @@ class BlockModel(TimeStampedModel):
     def _remove_published_content(self, user):
         """publishing new content, so remove currently published content."""
         try:
-            c = self._get_published()
+            c = self.get_published()
             c._set_moderated(user, ModerateState._removed())
             c.save()
         except ObjectDoesNotExist:
@@ -218,11 +213,11 @@ class BlockModel(TimeStampedModel):
             self._delete_removed_content()
             self._remove_published_content(user)
             # copy the pending record to a new published record.
-            c = copy_model_instance(pending)
-            c._set_moderated(user, ModerateState._published())
-            c.save()
+            published_instance = copy_model_instance(pending)
+            published_instance._set_moderated(user, ModerateState._published())
+            published_instance.save()
             # give pending class the opportunity to copy data
-            pending.copy_elements(c)
+            pending.copy_elements(published_instance)
             # mark the pending record as 'pushed' (published)
             pending.set_pending_pushed()
             pending.save()
@@ -242,7 +237,7 @@ class BlockModel(TimeStampedModel):
         except ObjectDoesNotExist:
             pass
         try:
-            published = self._get_published()
+            published = self.get_published()
         except ObjectDoesNotExist:
             pass
         if not pending and not published:
@@ -371,7 +366,15 @@ class ContentModel(TimeStampedModel):
         self.moderate_state = moderate_state
 
     def copy_elements(self, instance):
+        """If the content type has elements e.g. accordion, then override this
+        method to copy the elements from 'pending' to 'published'."""
         pass
+
+    def has_elements(self):
+        """If the content type has elements e.g. accordion, then override this
+        method and return 'True'.
+        """
+        return False
 
     def set_pending_edit(self):
         """Content has been edited... so update the state.
