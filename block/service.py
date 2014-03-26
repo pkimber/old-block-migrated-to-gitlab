@@ -22,7 +22,7 @@ def init_section(name):
     return result
 
 
-def init_page(name, order, is_home=None):
+def init_page(name, order, is_home=None, template_name='block/base.html'):
     """Create a page if it doesn't already exist."""
     if not is_home:
         is_home = False
@@ -35,8 +35,11 @@ def init_page(name, order, is_home=None):
         if is_home != result.is_home:
             result.is_home = is_home
             update = True
+        if template_name != result.template_name:
+            result.template_name = template_name
+            update = True
         if update:
             result.save()
     except Page.DoesNotExist:
-        result = make_page(name, order, is_home=is_home)
+        result = make_page(name, order, is_home=is_home, template_name=template_name)
     return result

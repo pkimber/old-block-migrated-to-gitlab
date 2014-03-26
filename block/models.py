@@ -122,6 +122,7 @@ class Page(TimeStampedModel):
     slug = models.SlugField(max_length=100, unique=True)
     order = models.IntegerField(default=0)
     is_home = models.BooleanField(default=False)
+    template_name = models.CharField(max_length=150)
     objects = PageManager()
 
     class Meta:
