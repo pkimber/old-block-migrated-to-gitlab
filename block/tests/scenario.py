@@ -17,7 +17,6 @@ from block.service import init_page
 from block.tests.model_maker import (
     make_edit_state,
     make_moderate_state,
-    make_page,
     make_section,
 )
 
