@@ -13,6 +13,7 @@ from block.models import (
     REMOVED,
     Section,
 )
+from block.service import init_page
 from block.tests.model_maker import (
     make_edit_state,
     make_moderate_state,
@@ -68,7 +69,7 @@ def default_block_state():
 
 def default_scenario_block():
     default_block_state()
-    make_page('Home', 0)
+    init_page('Home', 0)
     make_section('Body')
     make_section('Footer')
-    make_page('Information', 1)
+    init_page('Information', 1)

@@ -26,7 +26,7 @@ class TestTitle(TestCase):
     def setUp(self):
         default_block_state()
         default_scenario_login()
-        self.page = make_page('home', 0)
+        self.page = make_page('home', 0, 'test.html')
         self.body = make_section('body')
 
     def test_next_order(self):

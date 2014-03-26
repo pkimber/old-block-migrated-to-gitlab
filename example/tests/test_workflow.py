@@ -30,7 +30,7 @@ class TestWorkflow(TestCase):
         default_block_state()
         default_scenario_login()
         self.block = make_title_block(
-            make_page('home', 0),
+            make_page('home', 0, 'test.html'),
             make_section('body'),
         )
         self.content = make_title(

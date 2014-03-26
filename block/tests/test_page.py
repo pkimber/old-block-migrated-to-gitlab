@@ -10,9 +10,9 @@ from block.tests.model_maker import make_page
 class TestPage(TestCase):
 
     def setUp(self):
-        self.page = make_page('Home', 0)
-        self.page = make_page('Information', 1)
-        self.page = make_page('Portfolio', 2)
+        self.page = make_page('Home', 0, 'test.html')
+        self.page = make_page('Information', 1, 'test.html')
+        self.page = make_page('Portfolio', 2, 'test.html')
 
     def test_menu(self):
         self.assertEqual(3, len(Page.objects.menu()))
