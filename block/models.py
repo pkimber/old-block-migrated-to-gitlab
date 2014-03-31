@@ -5,6 +5,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from django.db import (
     models,
     transaction,
@@ -115,23 +116,42 @@ class PageManager(models.Manager):
 class Page(TimeStampedModel):
     """Which page on the web site.
 
+    The 'slug_menu' is an optional field that can be used to add a page to a
+    sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
+    set to 'faq'.
+
     An order of zero (0) indicates that the page should be excluded from a
-    menu.
+    menu - see 'PageManager', 'menu' (although it doesn't look like it
+    excludes items with an order of zero!).
     """
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100)
+    slug_menu = models.SlugField(max_length=100, blank=True)
     order = models.IntegerField(default=0)
     is_home = models.BooleanField(default=False)
     template_name = models.CharField(max_length=150)
     objects = PageManager()
 
     class Meta:
-        ordering = ['name']
+        ordering = ['order', 'slug', 'slug_menu']
+        unique_together = ('slug', 'slug_menu')
         verbose_name = 'Page'
         verbose_name_plural = 'Pages'
 
     def __str__(self):
         return '{}'.format(self.name)
+
+    def get_absolute_url(self):
+        if self.slug_menu:
+            return reverse(
+                'project.page.design.menu',
+                kwargs=dict(page=self.slug, menu=self.slug_menu,)
+            )
+        else:
+            return reverse(
+                'project.page.design',
+                kwargs=dict(page=self.slug,)
+            )
 
 reversion.register(Page)
 

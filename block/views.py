@@ -29,13 +29,19 @@ class ContentPageMixin(BaseMixin):
         return context
 
     def get_page(self):
+        menu = self.kwargs.get('menu', None)
         page = self.kwargs.get('page', None)
         if not page:
             raise BlockError("no 'page' parameter in url")
         try:
-            return Page.objects.get(slug=page)
+            if menu:
+                return Page.objects.get(slug=page, slug_menu=menu)
+            else:
+                return Page.objects.get(slug=page)
         except Page.DoesNotExist:
-            raise BlockError("Page '{}' does not exist".format(page))
+            raise BlockError(
+                "Page '{}' (menu '{}') does not exist".format(page, menu)
+            )
 
     def get_section(self):
         section = self.kwargs.get('section', None)

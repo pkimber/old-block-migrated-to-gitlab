@@ -22,12 +22,17 @@ def init_section(name):
     return result
 
 
-def init_page(name, order, template_name, is_home=None):
+def init_page(name, order, template_name, is_home=None, slug_menu=None):
     """Create a page if it doesn't already exist."""
     if not is_home:
         is_home = False
+    if not slug_menu:
+        slug_menu = ''
     try:
-        result = Page.objects.get(slug=slugify(name))
+        result = Page.objects.get(
+            slug=slugify(name),
+            slug_menu=slugify(slug_menu),
+        )
         update = False
         if order != result.order:
             result.order = order
@@ -46,5 +51,6 @@ def init_page(name, order, template_name, is_home=None):
             order,
             is_home=is_home,
             template_name=template_name,
+            slug_menu=slugify(slug_menu),
         )
     return result
