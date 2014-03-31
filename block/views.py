@@ -52,6 +52,9 @@ class ContentPageMixin(BaseMixin):
         except Section.DoesNotExist:
             raise BlockError("Section '{}' does not exist".format(section))
 
+    def get_success_url(self):
+        return self.object.block.page.get_absolute_url()
+
 
 class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
 
@@ -71,13 +74,6 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
         self.object.order = self.model.objects.next_order()
         return super(ContentCreateView, self).form_valid(form)
 
-    def get_success_url(self):
-        page = self.get_page()
-        return reverse(
-            'project.page.design',
-            kwargs=dict(page=page.slug)
-        )
-
 
 class ContentPublishView(BaseMixin, UpdateView):
 
@@ -94,10 +90,7 @@ class ContentPublishView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse(
-            'project.page.design',
-            kwargs=dict(page=self.object.block.page.slug)
-        )
+        return self.object.block.page.get_absolute_url()
 
 
 class ContentRemoveView(BaseMixin, UpdateView):
@@ -114,10 +107,7 @@ class ContentRemoveView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse(
-            'project.page.design',
-            kwargs=dict(page=self.object.block.page.slug)
-        )
+        return self.object.block.page.get_absolute_url()
 
 
 class ContentUpdateView(BaseMixin, UpdateView):
@@ -138,7 +128,4 @@ class ContentUpdateView(BaseMixin, UpdateView):
         return self.object.block.section
 
     def get_success_url(self):
-        return reverse(
-            'project.page.design',
-            kwargs=dict(page=self.object.block.page.slug)
-        )
+        return self.object.block.page.get_absolute_url()
