@@ -142,16 +142,14 @@ class Page(TimeStampedModel):
         return '{}'.format(self.name)
 
     def get_absolute_url(self):
+        return reverse('project.page.design', kwargs=self.get_url_kwargs())
+
+    def get_url_kwargs(self):
+        result = dict(page=self.slug,)
         if self.slug_menu:
-            return reverse(
-                'project.page.design.menu',
-                kwargs=dict(page=self.slug, menu=self.slug_menu,)
-            )
-        else:
-            return reverse(
-                'project.page.design',
-                kwargs=dict(page=self.slug,)
-            )
+            result.update(dict(menu=self.slug_menu,))
+        return result
+
 
 reversion.register(Page)
 

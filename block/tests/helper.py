@@ -12,6 +12,8 @@ def check_content_methods(
 
     An exception will be thrown if the method is not defined
     """
+    # check the page methods
+    model_instance.block.page.get_absolute_url()
     # check the standard URLs
     model_instance.url_publish()
     if model_instance.has_elements():
