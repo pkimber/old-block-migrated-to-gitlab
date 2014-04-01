@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from block.tests.helper import check_content_methods
+from block.tests.helper import check_content
 from block.tests.model_maker import (
     make_page,
     make_section,
@@ -39,7 +39,7 @@ class TestTitle(TestCase):
             5,
             'ABC'
         )
-        check_content_methods(c)
+        check_content(c)
 
     def test_pending_order(self):
         """Pending items should be in 'order' order."""

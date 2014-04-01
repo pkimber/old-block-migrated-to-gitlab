@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from block.models import BlockError
 
 
-def check_content_methods(
+def check_content(
             model_instance, ignore_remove=None, check_elements=None):
     """Call the standard methods used by the block content.
 
@@ -57,3 +57,12 @@ def check_content_methods(
             "The {} model does not have an 'order' field"
             "".format(model_instance.__class__)
         )
+
+
+def check_element(model_instance):
+    """Call the standard methods used by an element.
+
+    An exception will be thrown if the method is not defined
+    """
+    # check the element attributes
+    model_instance.get_parent()

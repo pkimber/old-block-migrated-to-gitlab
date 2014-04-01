@@ -3,9 +3,11 @@ from __future__ import unicode_literals
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
+    DeleteView,
     UpdateView,
 )
 
@@ -129,3 +131,39 @@ class ContentUpdateView(BaseMixin, UpdateView):
 
     def get_success_url(self):
         return self.object.block.page.get_absolute_url()
+
+
+class ElementCreateView(BaseMixin, CreateView):
+    """Update the parent (content) object so it knows it has been changed."""
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        content = self.object.get_parent()
+        content.set_pending_edit()
+        content.save()
+        return super(ElementCreateView, self).form_valid(form)
+
+
+class ElementDeleteView(BaseMixin, DeleteView):
+    """Update the parent (content) object so it knows it has been changed."""
+
+    def delete(self, request, *args, **kwargs):
+        with transaction.atomic():
+            result = super(ElementDeleteView, self).delete(
+                request, *args, **kwargs
+            )
+            content = self.object.get_parent()
+            content.set_pending_edit()
+            content.save()
+        return result
+
+
+class ElementUpdateView(BaseMixin, UpdateView):
+    """Update the parent (content) object so it knows it has been changed."""
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        content = self.object.get_parent()
+        content.set_pending_edit()
+        content.save()
+        return super(ElementUpdateView, self).form_valid(form)
