@@ -28,7 +28,7 @@ setup(
             'templates/block/*.*',
         ],
     },
-    version='0.0.05',
+    version='0.0.06',
     description='block',
     author='Patrick Kimber',
     author_email='code@pkimber.net',
