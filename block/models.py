@@ -236,7 +236,7 @@ class BlockModel(TimeStampedModel):
             published_instance._set_moderated(user, ModerateState._published())
             published_instance.save()
             # give pending class the opportunity to copy data
-            pending.copy_elements(published_instance)
+            pending.copy_related_data(published_instance)
             # mark the pending record as 'pushed' (published)
             pending.set_pending_pushed()
             pending.save()
@@ -384,9 +384,14 @@ class ContentModel(TimeStampedModel):
         self.user_moderated = user
         self.moderate_state = moderate_state
 
-    def copy_elements(self, instance):
-        """If the content type has elements e.g. accordion, then override this
-        method to copy the elements from 'pending' to 'published'."""
+    def copy_related_data(self, published_instance):
+        """Copy related data from this instance to the published instance.
+
+        If the content type has many to many keys or elements
+        e.g. accordion, then override this method to copy the data from
+        'pending' to 'published'.
+
+        """
         pass
 
     def has_elements(self):
