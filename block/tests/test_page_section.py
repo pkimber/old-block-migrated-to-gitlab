@@ -37,7 +37,7 @@ class TestPageSection(TestCase):
         self.assertEqual('Home Body', str(home_body))
 
     def test_page_section_duplicate(self):
-        home_body = make_page_section(
+        make_page_section(
             self.home,
             self.body,
             'example',

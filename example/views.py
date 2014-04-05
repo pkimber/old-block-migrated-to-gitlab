@@ -1,18 +1,14 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.views.generic import TemplateView
-
 from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
 )
 
 from block.forms import ContentEmptyForm
-from block.tests.scenario import get_section_body
 from block.views import (
     ContentCreateView,
-    ContentPageMixin,
     ContentPublishView,
     ContentRemoveView,
     ContentUpdateView,

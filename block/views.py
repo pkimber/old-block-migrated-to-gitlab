@@ -55,11 +55,10 @@ class ContentPageMixin(BaseMixin):
             )
 
     def get_page_section(self):
+        page = self.get_page()
+        section = self.get_section()
         try:
-            return PageSection.objects.get(
-                page=self.get_page(),
-                section=self.get_section(),
-            )
+            return PageSection.objects.get(page=page, section=section)
         except PageSection.DoesNotExist:
             raise BlockError(
                 "Page section '{}/{}' does not exist".format(
@@ -85,8 +84,6 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        page = self.get_page()
-        section = self.get_section()
         try:
             block = self.block_class(page_section=self.get_page_section())
         except AttributeError:
