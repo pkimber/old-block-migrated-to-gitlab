@@ -179,6 +179,15 @@ class PageSection(models.Model):
     block_model = models.CharField(max_length=100)
     url_name = models.TextField()
 
+    class Meta:
+        ordering = ('page__slug', 'section__slug')
+        unique_together = ('page', 'section')
+        verbose_name = 'Page section'
+        verbose_name_plural = 'Page sections'
+
+    def __str__(self):
+        return '{} {}'.format(self.page.name, self.section.name)
+
 reversion.register(PageSection)
 
 

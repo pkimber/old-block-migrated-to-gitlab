@@ -19,8 +19,14 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('block', ['PageSection'])
 
+        # Adding unique constraint on 'PageSection', fields ['page', 'section']
+        db.create_unique('block_pagesection', ['page_id', 'section_id'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'PageSection', fields ['page', 'section']
+        db.delete_unique('block_pagesection', ['page_id', 'section_id'])
+
         # Deleting model 'PageSection'
         db.delete_table('block_pagesection')
 
@@ -39,11 +45,11 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'})
         },
         'block.page': {
-            'Meta': {'ordering': "['order', 'slug', 'slug_menu']", 'object_name': 'Page', 'unique_together': "(('slug', 'slug_menu'),)"},
+            'Meta': {'ordering': "['order', 'slug', 'slug_menu']", 'unique_together': "(('slug', 'slug_menu'),)", 'object_name': 'Page'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_home': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'blank': 'True', 'auto_now': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'order': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
@@ -51,7 +57,7 @@ class Migration(SchemaMigration):
             'template_name': ('django.db.models.fields.CharField', [], {'max_length': '150'})
         },
         'block.pagesection': {
-            'Meta': {'object_name': 'PageSection'},
+            'Meta': {'ordering': "('page__slug', 'section__slug')", 'unique_together': "(('page', 'section'),)", 'object_name': 'PageSection'},
             'block_app': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'block_model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -63,7 +69,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('name',)", 'object_name': 'Section'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'blank': 'True', 'auto_now': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '100', 'unique': 'True'})
         }
