@@ -6,10 +6,9 @@ from block.models import (
     PUBLISHED,
 )
 from block.tests.scenario import (
-    get_page_home,
-    get_page_information,
-    get_section_body,
-    get_section_footer,
+    get_page_section_home_body,
+    get_page_section_home_footer,
+    get_page_section_information_body,
 )
 from login.tests.scenario import get_user_staff
 
@@ -63,14 +62,12 @@ def get_monkokehampton():
 
 
 def default_scenario_example():
-    # pages
-    home = get_page_home()
-    information = get_page_information()
-    # sections
-    body = get_section_body()
-    footer = get_section_footer()
+    # page sections
+    home_body = get_page_section_home_body()
+    home_footer = get_page_section_home_footer()
+    information_body = get_page_section_information_body()
     # Home, Hatherleigh
-    hatherleigh_body_1 = make_title_block(home, body)
+    hatherleigh_body_1 = make_title_block(home_body)
     make_title(
         hatherleigh_body_1,
         1,
@@ -80,7 +77,7 @@ def default_scenario_example():
     c = hatherleigh_body_1.get_pending()
     c.title = 'Hatherleigh Three'
     c.save()
-    hatherleigh_body_2 = make_title_block(home, body)
+    hatherleigh_body_2 = make_title_block(home_body)
     make_title(
         hatherleigh_body_2,
         2,
@@ -88,7 +85,7 @@ def default_scenario_example():
     )
     hatherleigh_body_2.remove(get_user_staff())
     # Home, Jacobstowe
-    jacobstowe_body = make_title_block(home, body)
+    jacobstowe_body = make_title_block(home_body)
     make_title(
         jacobstowe_body,
         2,
@@ -96,7 +93,7 @@ def default_scenario_example():
     )
     jacobstowe_body.publish(get_user_staff())
     # Home, Footer
-    jacobstowe_footer = make_title_block(home, footer)
+    jacobstowe_footer = make_title_block(home_footer)
     make_title(
         jacobstowe_footer,
         1,
@@ -104,7 +101,7 @@ def default_scenario_example():
     )
     jacobstowe_footer.publish(get_user_staff())
     # Information, Monkokehampton
-    monkokehampton_body = make_title_block(information, body)
+    monkokehampton_body = make_title_block(information_body)
     make_title(
         monkokehampton_body,
         1,

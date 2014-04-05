@@ -4,17 +4,26 @@ from __future__ import unicode_literals
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.db.models import get_model
 from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
     DeleteView,
     UpdateView,
+    TemplateView,
+)
+
+from braces.views import (
+    LoginRequiredMixin,
+    StaffuserRequiredMixin,
 )
 
 from base.view_utils import BaseMixin
-from block.models import (
+
+from .models import (
     BlockError,
     Page,
+    PageSection,
     Section,
 )
 
@@ -45,6 +54,20 @@ class ContentPageMixin(BaseMixin):
                 "Page '{}' (menu '{}') does not exist".format(page, menu)
             )
 
+    def get_page_section(self):
+        try:
+            return PageSection.objects.get(
+                page=self.get_page(),
+                section=self.get_section(),
+            )
+        except PageSection.DoesNotExist:
+            raise BlockError(
+                "Page section '{}/{}' does not exist".format(
+                    page.slug,
+                    section.slug,
+                )
+            )
+
     def get_section(self):
         section = self.kwargs.get('section', None)
         if not section:
@@ -55,7 +78,7 @@ class ContentPageMixin(BaseMixin):
             raise BlockError("Section '{}' does not exist".format(section))
 
     def get_success_url(self):
-        return self.object.block.page.get_absolute_url()
+        return self.object.block.page_section.page.get_absolute_url()
 
 
 class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
@@ -65,7 +88,7 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
         page = self.get_page()
         section = self.get_section()
         try:
-            block = self.block_class(page=page, section=section)
+            block = self.block_class(page_section=self.get_page_section())
         except AttributeError:
             raise BlockError(
                 "You need to add the 'block_class' attribute "
@@ -92,7 +115,7 @@ class ContentPublishView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page.get_absolute_url()
+        return self.object.block.page_section.page.get_absolute_url()
 
 
 class ContentRemoveView(BaseMixin, UpdateView):
@@ -109,7 +132,7 @@ class ContentRemoveView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page.get_absolute_url()
+        return self.object.block.page_section.page.get_absolute_url()
 
 
 class ContentUpdateView(BaseMixin, UpdateView):
@@ -130,7 +153,7 @@ class ContentUpdateView(BaseMixin, UpdateView):
         return self.object.block.section
 
     def get_success_url(self):
-        return self.object.block.page.get_absolute_url()
+        return self.object.block.page_section.page.get_absolute_url()
 
 
 class ElementCreateView(BaseMixin, CreateView):
@@ -167,3 +190,52 @@ class ElementUpdateView(BaseMixin, UpdateView):
         content.set_pending_edit()
         content.save()
         return super(ElementUpdateView, self).form_valid(form)
+
+
+class PageDesignView(
+        LoginRequiredMixin, StaffuserRequiredMixin,
+        ContentPageMixin, TemplateView):
+
+    def get_template_names(self) :
+        page = self.get_page()
+        template_name = ''
+        if page.template_name :
+            template_name = page.template_name
+        return [ template_name ]
+
+    def get_context_data(self, **kwargs):
+        context = super(PageDesignView, self).get_context_data(**kwargs)
+        page = self.get_page()
+        context.update(design=True)
+        for e in PageSection.objects.filter(page=page) :
+            block_create_url = '{}_create_url'.format(e.section.slug)
+            block_list_name = '{}_list'.format(e.section.slug)
+            block_model = get_model(e.block_app, e.block_model)
+            kwargs = dict(section=e.section.slug)
+            kwargs.update(page.get_url_kwargs())
+            context.update({
+                block_list_name: block_model.objects.pending(e),
+                block_create_url: reverse(e.url_name, kwargs=kwargs),
+            })
+        return context
+
+
+class PageView(ContentPageMixin, BaseMixin, TemplateView):
+
+    def get_template_names(self) :
+        page = self.get_page()
+        template_name = ''
+        if page.template_name :
+            template_name = page.template_name
+        return [template_name,]
+
+    def get_context_data(self, **kwargs):
+        context = super(PageView, self).get_context_data(**kwargs)
+        page = self.get_page()
+        for e in PageSection.objects.filter(page=page):
+            block_list_name = '{}_list'.format(e.section.slug)
+            block_model = get_model(e.block_app, e.block_model)
+            context.update({
+                block_list_name: block_model.objects.published(e),
+            })
+        return context

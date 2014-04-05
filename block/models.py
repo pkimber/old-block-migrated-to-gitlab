@@ -170,11 +170,22 @@ class Section(TimeStampedModel):
 reversion.register(Section)
 
 
-class BlockModel(TimeStampedModel):
-    """Abstract base class for blocks of one type."""
+class PageSection(models.Model):
+    """Section of a page."""
 
     page = models.ForeignKey(Page)
     section = models.ForeignKey(Section)
+    block_app = models.CharField(max_length=100)
+    block_model = models.CharField(max_length=100)
+    url_name = models.TextField()
+
+reversion.register(PageSection)
+
+
+class BlockModel(TimeStampedModel):
+    """Abstract base class for blocks of one type."""
+
+    page_section = models.ForeignKey(PageSection)
 
     class Meta:
         abstract = True
@@ -183,7 +194,9 @@ class BlockModel(TimeStampedModel):
 
     def __str__(self):
         return '{}: page {}, section {}'.format(
-            self.pk, self.page.name, self.section.name
+            self.pk,
+            self.page_section.page.name,
+            self.page_section.section.name,
         )
 
     def _delete_removed_content(self):
@@ -290,7 +303,7 @@ class ContentManager(models.Manager):
         else:
             return 1
 
-    def pending(self, page, section, kwargs=None):
+    def pending(self, page_section, kwargs=None):
         """Return a list of pending content for a section.
 
         Note: we return a list of content instances not a queryset.
@@ -298,8 +311,7 @@ class ContentManager(models.Manager):
         """
         pending = ModerateState._pending()
         qs = self.model.objects.filter(
-            block__page=page,
-            block__section=section,
+            block__page_section=page_section,
             moderate_state=pending,
         )
         order_by = None
@@ -312,12 +324,11 @@ class ContentManager(models.Manager):
             qs = qs.order_by('order')
         return qs
 
-    def published(self, page, section):
+    def published(self, page_section):
         """Return a published content for a page."""
         published = ModerateState._published()
         return self.model.objects.filter(
-            block__page=page,
-            block__section=section,
+            block__page_section=page_section,
             moderate_state=published,
         ).order_by(
             'order',

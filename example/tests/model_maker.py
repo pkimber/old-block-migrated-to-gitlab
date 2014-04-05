@@ -9,11 +9,8 @@ from example.models import (
 )
 
 
-def make_title_block(page, section, **kwargs):
-    defaults = dict(
-        page=page,
-        section=section,
-    )
+def make_title_block(page_section, **kwargs):
+    defaults = dict(page_section=page_section)
     defaults.update(kwargs)
     return clean_and_save(TitleBlock(**defaults))
 

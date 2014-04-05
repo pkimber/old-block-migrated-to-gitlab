@@ -10,6 +10,7 @@ from block.models import (
 )
 from block.tests.model_maker import (
     make_page,
+    make_page_section,
     make_section,
 )
 from block.tests.scenario import default_block_state
@@ -29,10 +30,16 @@ class TestWorkflow(TestCase):
     def setUp(self):
         default_block_state()
         default_scenario_login()
-        self.block = make_title_block(
-            make_page('home', 0, 'test.html'),
-            make_section('body'),
+        home = make_page('home', 0, 'test.html')
+        body = make_section('body')
+        home_body = make_page_section(
+            home,
+            body,
+            'example',
+            'Title',
+            'example/home.html'
         )
+        self.block = make_title_block(home_body)
         self.content = make_title(
             self.block,
             1,

@@ -6,6 +6,7 @@ from django.test import TestCase
 from block.tests.helper import check_content
 from block.tests.model_maker import (
     make_page,
+    make_page_section,
     make_section,
 )
 from block.tests.scenario import default_block_state
@@ -26,8 +27,15 @@ class TestTitle(TestCase):
     def setUp(self):
         default_block_state()
         default_scenario_login()
-        self.page = make_page('home', 0, 'test.html')
-        self.body = make_section('body')
+        home = make_page('home', 0, 'test.html')
+        body = make_section('body')
+        self.home_body = make_page_section(
+            home,
+            body,
+            'example',
+            'Title',
+            'example.title.create'
+        )
 
     def test_next_order(self):
         #self.assertGreater(Content.objects.next_order(self.section), 3)
@@ -35,7 +43,7 @@ class TestTitle(TestCase):
 
     def test_content_methods(self):
         c = make_title(
-            make_title_block(self.page, self.body),
+            make_title_block(self.home_body),
             5,
             'ABC'
         )
@@ -44,11 +52,11 @@ class TestTitle(TestCase):
     def test_pending_order(self):
         """Pending items should be in 'order' order."""
         make_title(
-            make_title_block(self.page, self.body),
+            make_title_block(self.home_body),
             5,
             'ABC'
         )
-        block_2 = make_title_block(self.page, self.body)
+        block_2 = make_title_block(self.home_body)
         make_title(
             block_2,
             3,
@@ -56,11 +64,11 @@ class TestTitle(TestCase):
         )
         block_2.publish(get_user_staff())
         make_title(
-            make_title_block(self.page, self.body),
+            make_title_block(self.home_body),
             1,
             'XYZ'
         )
-        pending = Title.objects.pending(self.page, self.body)
+        pending = Title.objects.pending(self.home_body)
         self.assertListEqual(
             [
                 'XYZ',
@@ -72,21 +80,21 @@ class TestTitle(TestCase):
 
     def test_published_order(self):
         """Published items should by in 'order' order."""
-        block_1 = make_title_block(self.page, self.body)
+        block_1 = make_title_block(self.home_body)
         make_title(
             block_1,
             9,
             'ABC'
         )
         block_1.publish(get_user_staff())
-        block_2 = make_title_block(self.page, self.body)
+        block_2 = make_title_block(self.home_body)
         make_title(
             block_2,
             8,
             'XYZ'
         )
         block_2.publish(get_user_staff())
-        published = Title.objects.published(self.page, self.body)
+        published = Title.objects.published(self.home_body)
         self.assertListEqual(
             ['XYZ', 'ABC'],
             [t.title for t in published]

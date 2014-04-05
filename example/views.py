@@ -25,44 +25,6 @@ from .models import (
 )
 
 
-class PageBaseView(ContentPageMixin, TemplateView):
-
-    template_name = 'example/page_content.html'
-
-    def _get_body(self):
-        return get_section_body()
-
-
-class PageDesignView(LoginRequiredMixin, StaffuserRequiredMixin, PageBaseView):
-
-    def get_context_data(self, **kwargs):
-        context = super(PageDesignView, self).get_context_data(**kwargs)
-        content = Title.objects.pending(
-            self.get_page(),
-            self._get_body()
-        )
-        context.update(dict(
-            design=True,
-            content=content,
-        ))
-        return context
-
-
-class PageView(PageBaseView):
-
-    def get_context_data(self, **kwargs):
-        context = super(PageView, self).get_context_data(**kwargs)
-        content = Title.objects.published(
-            self.get_page(),
-            self._get_body()
-        )
-        context.update(dict(
-            design=False,
-            content=content,
-        ))
-        return context
-
-
 class TitleCreateView(
         LoginRequiredMixin, StaffuserRequiredMixin, ContentCreateView):
 

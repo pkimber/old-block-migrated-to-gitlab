@@ -7,9 +7,12 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
-from .views import (
+from block.views import (
     PageDesignView,
     PageView,
+)
+
+from .views import (
     TitleCreateView,
     TitlePublishView,
     TitleRemoveView,

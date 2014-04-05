@@ -7,17 +7,21 @@ from block.models import (
     EditState,
     ModerateState,
     Page,
+    PageSection,
     PENDING,
     PUBLISHED,
     PUSH,
     REMOVED,
     Section,
 )
-from block.service import init_page
+from block.service import (
+    init_page,
+    init_page_section,
+    init_section,
+)
 from block.tests.model_maker import (
     make_edit_state,
     make_moderate_state,
-    make_section,
 )
 
 
@@ -27,6 +31,27 @@ def get_page_home():
 
 def get_page_information():
     return Page.objects.get(slug='information')
+
+
+def get_page_section_home_body():
+    return PageSection.objects.get(
+        page=get_page_home(),
+        section=get_section_body()
+    )
+
+
+def get_page_section_home_footer():
+    return PageSection.objects.get(
+        page=get_page_home(),
+        section=get_section_footer()
+    )
+
+
+def get_page_section_information_body():
+    return PageSection.objects.get(
+        page=get_page_information(),
+        section=get_section_body()
+    )
 
 
 def get_section_body():
@@ -68,7 +93,28 @@ def default_block_state():
 
 def default_scenario_block():
     default_block_state()
-    init_page('Home', 0, 'home.html')
-    make_section('Body')
-    make_section('Footer')
-    init_page('Information', 1, 'information.html')
+    home = init_page('Home', 0, 'example/page_content.html')
+    body = init_section('Body')
+    init_page_section(
+        home,
+        body,
+        'example',
+        'Title',
+        'example.title.create'
+    )
+    footer = init_section('Footer')
+    init_page_section(
+        home,
+        footer,
+        'example',
+        'Title',
+        'example.title.create'
+    )
+    information = init_page('Information', 1, 'example/page_content.html')
+    init_page_section(
+        information,
+        body,
+        'example',
+        'Title',
+        'example.title.create'
+    )

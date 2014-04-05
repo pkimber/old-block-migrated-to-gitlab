@@ -5,10 +5,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from base.tests.model_maker import clean_and_save
-from block.tests.scenario import (
-    get_page_home,
-    get_section_body,
-)
+from block.tests.scenario import get_page_section_home_body
 from login.tests.scenario import (
     default_scenario_login,
     get_user_staff,
@@ -61,10 +58,9 @@ class TestModerate(TestCase):
         )
 
     def test_published(self):
-        home = get_page_home()
-        body = get_section_body()
+        home_body = get_page_section_home_body()
         result = [
-            c.title for c in Title.objects.published(home, body)
+            c.title for c in Title.objects.published(home_body)
         ]
         self.assertListEqual(
             [
@@ -75,10 +71,9 @@ class TestModerate(TestCase):
         )
 
     def test_pending(self):
-        home = get_page_home()
-        body = get_section_body()
+        home_body = get_page_section_home_body()
         result = [
-            c.title for c in Title.objects.pending(home, body)
+            c.title for c in Title.objects.pending(home_body)
         ]
         self.assertListEqual(
             [
@@ -101,13 +96,9 @@ class TestModerate(TestCase):
     def test_publish(self):
         b = get_block_hatherleigh_three()
         b.publish(get_user_staff())
-        page = get_page_home()
-        section = get_section_body()
+        home_body = get_page_section_home_body()
         result = list(
-            Title.objects.published(
-                page,
-                section,
-            ).values_list(
+            Title.objects.published(home_body).values_list(
                 'title', flat=True
             )
         )
@@ -132,10 +123,9 @@ class TestModerate(TestCase):
         """remove pending content."""
         b = get_block_hatherleigh_three()
         b.remove(get_user_staff())
-        home = get_page_home()
-        body = get_section_body()
+        home_body = get_page_section_home_body()
         result = [
-            c.title for c in Title.objects.pending(home, body)
+            c.title for c in Title.objects.pending(home_body)
         ]
         self.assertListEqual(
             [
@@ -148,10 +138,9 @@ class TestModerate(TestCase):
         """remove pending content."""
         b = get_block_hatherleigh_two()
         b.remove(get_user_staff())
-        home = get_page_home()
-        body = get_section_body()
+        home_body = get_page_section_home_body()
         result = [
-            c.title for c in Title.objects.published(home, body)
+            c.title for c in Title.objects.published(home_body)
         ]
         self.assertListEqual(
             ['Jacobstowe One', ],
@@ -163,10 +152,9 @@ class TestModerate(TestCase):
         content = get_jacobstowe_one_pending()
         content.title = 'Jacobstowe Edit'
         content.save()
-        page = get_page_home()
-        section = get_section_body()
+        home_body = get_page_section_home_body()
         result = [
-            c.title for c in Title.objects.pending(page, section)
+            c.title for c in Title.objects.pending(home_body)
         ]
         self.assertListEqual(
             [
