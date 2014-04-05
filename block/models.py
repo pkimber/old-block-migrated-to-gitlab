@@ -177,7 +177,7 @@ class PageSection(models.Model):
     section = models.ForeignKey(Section)
     block_app = models.CharField(max_length=100)
     block_model = models.CharField(max_length=100)
-    url_name = models.TextField()
+    create_url_name = models.CharField(max_length=100, blank=True)
 
     class Meta:
         ordering = ('page__slug', 'section__slug')

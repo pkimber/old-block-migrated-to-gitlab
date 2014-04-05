@@ -189,21 +189,25 @@ class ElementUpdateView(BaseMixin, UpdateView):
         return super(ElementUpdateView, self).form_valid(form)
 
 
-class PageDesignView(
-        LoginRequiredMixin, StaffuserRequiredMixin,
-        ContentPageMixin, TemplateView):
+class PageTemplateMixin(object):
 
     def get_template_names(self) :
         page = self.get_page()
-        template_name = ''
-        if page.template_name :
+        if page.template_name:
             template_name = page.template_name
-        return [ template_name ]
+        else:
+            raise BlockError(
+                "Page '{}' has no 'template_name'".format(page.slug)
+            )
+        return [template_name,]
+
+
+class PageDesignMixin(object):
 
     def get_context_data(self, **kwargs):
-        context = super(PageDesignView, self).get_context_data(**kwargs)
+        context = super(PageDesignMixin, self).get_context_data(**kwargs)
         page = self.get_page()
-        context.update(design=True)
+        context.update(dict(design=True))
         for e in PageSection.objects.filter(page=page) :
             block_create_url = '{}_create_url'.format(e.section.slug)
             block_list_name = '{}_list'.format(e.section.slug)
@@ -212,23 +216,27 @@ class PageDesignView(
             kwargs.update(page.get_url_kwargs())
             context.update({
                 block_list_name: block_model.objects.pending(e),
-                block_create_url: reverse(e.url_name, kwargs=kwargs),
             })
+            if e.create_url_name:
+                context.update({
+                    block_create_url: reverse(e.create_url_name, kwargs=kwargs),
+                })
         return context
 
 
-class PageView(ContentPageMixin, BaseMixin, TemplateView):
+class PageDesignView(
+        LoginRequiredMixin, StaffuserRequiredMixin,
+        PageDesignMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
 
-    def get_template_names(self) :
-        page = self.get_page()
-        template_name = ''
-        if page.template_name :
-            template_name = page.template_name
-        return [template_name,]
+    pass
+
+
+class PageMixin(object):
 
     def get_context_data(self, **kwargs):
-        context = super(PageView, self).get_context_data(**kwargs)
+        context = super(PageMixin, self).get_context_data(**kwargs)
         page = self.get_page()
+        context.update(dict(design=False))
         for e in PageSection.objects.filter(page=page):
             block_list_name = '{}_list'.format(e.section.slug)
             block_model = get_model(e.block_app, e.block_model)
@@ -236,3 +244,10 @@ class PageView(ContentPageMixin, BaseMixin, TemplateView):
                 block_list_name: block_model.objects.published(e),
             })
         return context
+
+
+class PageView(
+        PageMixin, PageTemplateMixin, ContentPageMixin,
+        BaseMixin, TemplateView):
+
+    pass

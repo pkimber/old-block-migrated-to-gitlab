@@ -58,7 +58,9 @@ def init_page(name, order, template_name, is_home=None, slug_menu=None):
     return result
 
 
-def init_page_section(page, section, block_app, block_model, url_name):
+def init_page_section(page, section, block_app, block_model, create_url_name):
+    if not create_url_name:
+        create_url_name = ''
     try:
         result = PageSection.objects.get(page=page, section=section)
         update = False
@@ -68,8 +70,8 @@ def init_page_section(page, section, block_app, block_model, url_name):
         if block_model != result.block_model:
             result.block_model = block_model
             update = True
-        if url_name != result.url_name:
-            result.url_name = url_name
+        if create_url_name != result.create_url_name:
+            result.create_url_name = create_url_name
             update = True
         if update:
             result.save()
@@ -79,6 +81,6 @@ def init_page_section(page, section, block_app, block_model, url_name):
             section,
             block_app,
             block_model,
-            url_name,
+            create_url_name,
         )
     return result
