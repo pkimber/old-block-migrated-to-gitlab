@@ -51,7 +51,7 @@ class ContentPageMixin(BaseMixin):
                 return Page.objects.get(slug=page)
         except Page.DoesNotExist:
             raise BlockError(
-                "Page '{}' (menu '{}') does not exist".format(page, menu)
+                "Page '{}', menu '{}' does not exist".format(page, menu)
             )
 
     def get_page_section(self):
@@ -247,7 +247,6 @@ class PageMixin(object):
 
 
 class PageView(
-        PageMixin, PageTemplateMixin, ContentPageMixin,
-        BaseMixin, TemplateView):
+        PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
 
     pass
