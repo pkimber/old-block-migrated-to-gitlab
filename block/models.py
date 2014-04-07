@@ -158,6 +158,9 @@ class Section(TimeStampedModel):
     """Section of the page e.g. content, header, footer."""
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
+    block_app = models.CharField(max_length=100)
+    block_model = models.CharField(max_length=100)
+    create_url_name = models.CharField(max_length=100, blank=True)
 
     class Meta:
         ordering = ('name',)
@@ -175,9 +178,6 @@ class PageSection(models.Model):
 
     page = models.ForeignKey(Page)
     section = models.ForeignKey(Section)
-    block_app = models.CharField(max_length=100)
-    block_model = models.CharField(max_length=100)
-    create_url_name = models.CharField(max_length=100, blank=True)
 
     class Meta:
         ordering = ('page__slug', 'section__slug')

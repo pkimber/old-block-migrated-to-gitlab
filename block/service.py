@@ -15,12 +15,31 @@ from block.tests.model_maker import (
 )
 
 
-def init_section(name):
+def init_section(name, block_app, block_model, create_url_name):
     """Create a section if it doesn't already exist."""
+    if not create_url_name:
+        create_url_name = ''
     try:
         result = Section.objects.get(slug=slugify(name))
+        update = False
+        if block_app != result.block_app:
+            result.block_app = block_app
+            update = True
+        if block_model != result.block_model:
+            result.block_model = block_model
+            update = True
+        if create_url_name != result.create_url_name:
+            result.create_url_name = create_url_name
+            update = True
+        if update:
+            result.save()
     except Section.DoesNotExist:
-        result = make_section(name)
+        result = make_section(
+            name,
+            block_app,
+            block_model,
+            create_url_name,
+        )
     return result
 
 
@@ -58,29 +77,9 @@ def init_page(name, order, template_name, is_home=None, slug_menu=None):
     return result
 
 
-def init_page_section(page, section, block_app, block_model, create_url_name):
-    if not create_url_name:
-        create_url_name = ''
+def init_page_section(page, section):
     try:
         result = PageSection.objects.get(page=page, section=section)
-        update = False
-        if block_app != result.block_app:
-            result.block_app = block_app
-            update = True
-        if block_model != result.block_model:
-            result.block_model = block_model
-            update = True
-        if create_url_name != result.create_url_name:
-            result.create_url_name = create_url_name
-            update = True
-        if update:
-            result.save()
     except PageSection.DoesNotExist:
-        result = make_page_section(
-            page,
-            section,
-            block_app,
-            block_model,
-            create_url_name,
-        )
+        result = make_page_section(page, section)
     return result

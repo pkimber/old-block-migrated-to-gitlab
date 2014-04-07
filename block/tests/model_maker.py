@@ -43,21 +43,21 @@ def make_page(name, order, template_name, **kwargs):
     return clean_and_save(Page(**defaults))
 
 
-def make_page_section(page, section, block_app, block_model, create_url_name):
+def make_page_section(page, section):
     defaults = dict(
         page=page,
         section=section,
-        block_app=block_app,
-        block_model=block_model,
-        create_url_name=create_url_name,
     )
     return clean_and_save(PageSection(**defaults))
 
 
-def make_section(name, **kwargs):
+def make_section(name, block_app, block_model, create_url_name, **kwargs):
     defaults = dict(
         name=name,
         slug=slugify(name),
+        block_app=block_app,
+        block_model=block_model,
+        create_url_name=create_url_name,
     )
     defaults.update(kwargs)
     return clean_and_save(Section(**defaults))

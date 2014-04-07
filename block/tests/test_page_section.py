@@ -15,41 +15,25 @@ class TestPageSection(TestCase):
 
     def setUp(self):
         self.home = make_page('Home', 0, 'test.html')
-        self.body = make_section('Body')
+        self.body = make_section(
+            'Body',
+            'example',
+            'Title',
+            'example.title.create'
+        )
 
     def test_make_page_section(self):
-        make_page_section(
-            self.home,
-            self.body,
-            'example',
-            'Title',
-            'example.title.create'
-        )
+        make_page_section(self.home, self.body)
 
     def test_page_section(self):
-        home_body = make_page_section(
-            self.home,
-            self.body,
-            'example',
-            'Title',
-            'example.title.create'
-        )
+        home_body = make_page_section(self.home, self.body)
         self.assertEqual('Home Body', str(home_body))
 
     def test_page_section_duplicate(self):
-        make_page_section(
-            self.home,
-            self.body,
-            'example',
-            'Title',
-            'example.title.create'
-        )
+        make_page_section(self.home, self.body)
         self.assertRaises(
             IntegrityError,
             make_page_section,
             self.home,
             self.body,
-            'example',
-            'Title',
-            'example.title.create'
         )

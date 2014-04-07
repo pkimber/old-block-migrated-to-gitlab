@@ -94,27 +94,19 @@ def default_block_state():
 def default_scenario_block():
     default_block_state()
     home = init_page('Home', 0, 'example/page_content.html')
-    body = init_section('Body')
-    init_page_section(
-        home,
-        body,
+    body = init_section(
+        'Body',
         'example',
         'Title',
         'example.title.create'
     )
-    footer = init_section('Footer')
-    init_page_section(
-        home,
-        footer,
+    init_page_section(home, body)
+    footer = init_section(
+        'Footer',
         'example',
         'Title',
         'example.title.create'
     )
+    init_page_section(home, footer)
     information = init_page('Information', 1, 'example/page_content.html')
-    init_page_section(
-        information,
-        body,
-        'example',
-        'Title',
-        'example.title.create'
-    )
+    init_page_section(information, body)

@@ -31,14 +31,13 @@ class TestWorkflow(TestCase):
         default_block_state()
         default_scenario_login()
         home = make_page('home', 0, 'test.html')
-        body = make_section('body')
-        home_body = make_page_section(
-            home,
-            body,
+        body = make_section(
+            'body',
             'example',
             'Title',
             'example/home.html'
         )
+        home_body = make_page_section(home, body)
         self.block = make_title_block(home_body)
         self.content = make_title(
             self.block,

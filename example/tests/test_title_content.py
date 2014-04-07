@@ -28,14 +28,13 @@ class TestTitle(TestCase):
         default_block_state()
         default_scenario_login()
         home = make_page('home', 0, 'test.html')
-        body = make_section('body')
-        self.home_body = make_page_section(
-            home,
-            body,
+        body = make_section(
+            'body',
             'example',
             'Title',
             'example.title.create'
         )
+        self.home_body = make_page_section(home, body)
 
     def test_next_order(self):
         #self.assertGreater(Content.objects.next_order(self.section), 3)

@@ -211,15 +211,20 @@ class PageDesignMixin(object):
         for e in PageSection.objects.filter(page=page) :
             block_create_url = '{}_create_url'.format(e.section.slug)
             block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_model(e.block_app, e.block_model)
+            block_model = get_model(
+                e.section.block_app,
+                e.section.block_model,
+            )
             kwargs = dict(section=e.section.slug)
             kwargs.update(page.get_url_kwargs())
             context.update({
                 block_list_name: block_model.objects.pending(e),
             })
-            if e.create_url_name:
+            if e.section.create_url_name:
                 context.update({
-                    block_create_url: reverse(e.create_url_name, kwargs=kwargs),
+                    block_create_url: reverse(
+                        e.section.create_url_name, kwargs=kwargs
+                    ),
                 })
         return context
 
@@ -239,7 +244,10 @@ class PageMixin(object):
         context.update(dict(design=False))
         for e in PageSection.objects.filter(page=page):
             block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_model(e.block_app, e.block_model)
+            block_model = get_model(
+                e.section.block_app,
+                e.section.block_model,
+            )
             context.update({
                 block_list_name: block_model.objects.published(e),
             })
