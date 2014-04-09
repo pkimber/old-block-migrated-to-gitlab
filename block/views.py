@@ -28,6 +28,19 @@ from .models import (
 )
 
 
+def _get_block_model(page_section):
+    block_model = get_model(
+        page_section.section.block_app,
+        page_section.section.block_model,
+    )
+    if not block_model:
+        raise BlockError("Block model '{}.{}' does not exist.".format(
+            page_section.section.block_app,
+            page_section.section.block_model,
+        ))
+    return block_model
+
+
 class ContentPageMixin(BaseMixin):
     """Page information."""
 
@@ -211,10 +224,7 @@ class PageDesignMixin(object):
         for e in PageSection.objects.filter(page=page) :
             block_create_url = '{}_create_url'.format(e.section.slug)
             block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_model(
-                e.section.block_app,
-                e.section.block_model,
-            )
+            block_model = _get_block_model(e)
             kwargs = dict(section=e.section.slug)
             kwargs.update(page.get_url_kwargs())
             context.update({
@@ -244,10 +254,7 @@ class PageMixin(object):
         context.update(dict(design=False))
         for e in PageSection.objects.filter(page=page):
             block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_model(
-                e.section.block_app,
-                e.section.block_model,
-            )
+            block_model = _get_block_model(e)
             context.update({
                 block_list_name: block_model.objects.published(e),
             })
