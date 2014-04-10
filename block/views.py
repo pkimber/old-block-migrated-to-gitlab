@@ -125,7 +125,7 @@ class ContentPublishView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_absolute_url()
+        return self.object.block.page_section.page.get_design_url()
 
 
 class ContentRemoveView(BaseMixin, UpdateView):
@@ -142,7 +142,7 @@ class ContentRemoveView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_absolute_url()
+        return self.object.block.page_section.page.get_design_url()
 
 
 class ContentUpdateView(BaseMixin, UpdateView):
@@ -163,7 +163,7 @@ class ContentUpdateView(BaseMixin, UpdateView):
         return self.object.block.section
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_absolute_url()
+        return self.object.block.page_section.page.get_design_url()
 
 
 class ElementCreateView(BaseMixin, CreateView):
