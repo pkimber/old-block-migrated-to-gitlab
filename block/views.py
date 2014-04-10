@@ -90,7 +90,7 @@ class ContentPageMixin(BaseMixin):
             raise BlockError("Section '{}' does not exist".format(section))
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_absolute_url()
+        return self.object.block.page_section.page.get_design_url()
 
 
 class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
