@@ -13,7 +13,7 @@ from block.tests.model_maker import (
     make_page_section,
     make_section,
 )
-from block.tests.scenario import default_block_state
+from block.tests.scenario import init_app_block
 from login.tests.scenario import (
     default_scenario_login,
     get_user_staff,
@@ -28,7 +28,7 @@ from example.tests.model_maker import (
 class TestWorkflow(TestCase):
 
     def setUp(self):
-        default_block_state()
+        init_app_block()
         default_scenario_login()
         home = make_page('home', 0, 'test.html')
         body = make_section(

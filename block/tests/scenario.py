@@ -62,7 +62,7 @@ def get_section_footer():
     return Section.objects.get(slug='footer')
 
 
-def default_block_state():
+def init_app_block():
     """Edit and moderate state."""
     try:
         EditState._add()
@@ -92,7 +92,7 @@ def default_block_state():
 
 
 def default_scenario_block():
-    default_block_state()
+    init_app_block()
     home = init_page('Home', 0, 'example/page_content.html')
     body = init_section(
         'Body',
