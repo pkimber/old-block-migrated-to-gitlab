@@ -220,7 +220,10 @@ class PageDesignMixin(object):
     def get_context_data(self, **kwargs):
         context = super(PageDesignMixin, self).get_context_data(**kwargs)
         page = self.get_page()
-        context.update(dict(design=True))
+        context.update(dict(
+            design=True,
+            is_block_page=True,
+        ))
         for e in PageSection.objects.filter(page=page) :
             block_create_url = '{}_create_url'.format(e.section.slug)
             block_list_name = '{}_list'.format(e.section.slug)
@@ -251,7 +254,10 @@ class PageMixin(object):
     def get_context_data(self, **kwargs):
         context = super(PageMixin, self).get_context_data(**kwargs)
         page = self.get_page()
-        context.update(dict(design=False))
+        context.update(dict(
+            design=False,
+            is_block_page=True,
+        ))
         for e in PageSection.objects.filter(page=page):
             block_list_name = '{}_list'.format(e.section.slug)
             block_model = _get_block_model(e)
