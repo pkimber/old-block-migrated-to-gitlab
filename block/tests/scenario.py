@@ -40,13 +40,6 @@ def get_page_section_home_body():
     )
 
 
-def get_page_section_home_footer():
-    return PageSection.objects.get(
-        page=get_page_home(),
-        section=get_section_footer()
-    )
-
-
 def get_page_section_information_body():
     return PageSection.objects.get(
         page=get_page_information(),
@@ -56,10 +49,6 @@ def get_page_section_information_body():
 
 def get_section_body():
     return Section.objects.get(slug='body')
-
-
-def get_section_footer():
-    return Section.objects.get(slug='footer')
 
 
 def init_app_block():
@@ -93,20 +82,31 @@ def init_app_block():
 
 def default_scenario_block():
     init_app_block()
-    home = init_page('Home', 0, 'example/page_content.html')
+    # body section
     body = init_section(
         'Body',
         'example',
         'Title',
         'example.title.create'
     )
-    init_page_section(home, body)
-    footer = init_section(
-        'Footer',
-        'example',
-        'Title',
-        'example.title.create'
+    # home
+    home = init_page(
+        'Home',
+        0,
+        'example/page.html'
     )
-    init_page_section(home, footer)
-    information = init_page('Information', 1, 'example/page_content.html')
+    init_page_section(home, body)
+    # information
+    information = init_page(
+        'Information',
+        1,
+        'example/page.html'
+    )
     init_page_section(information, body)
+    # contact
+    contact = init_page(
+        'Contact',
+        2,
+        'example/page.html'
+    )
+    init_page_section(contact, body)

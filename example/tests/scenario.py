@@ -7,7 +7,6 @@ from block.models import (
 )
 from block.tests.scenario import (
     get_page_section_home_body,
-    get_page_section_home_footer,
     get_page_section_information_body,
 )
 from login.tests.scenario import get_user_staff
@@ -64,7 +63,6 @@ def get_monkokehampton():
 def default_scenario_example():
     # page sections
     home_body = get_page_section_home_body()
-    home_footer = get_page_section_home_footer()
     information_body = get_page_section_information_body()
     # Home, Hatherleigh
     hatherleigh_body_1 = make_title_block(home_body)
@@ -92,14 +90,6 @@ def default_scenario_example():
         'Jacobstowe One'
     )
     jacobstowe_body.publish(get_user_staff())
-    # Home, Footer
-    jacobstowe_footer = make_title_block(home_footer)
-    make_title(
-        jacobstowe_footer,
-        1,
-        'Villages for You'
-    )
-    jacobstowe_footer.publish(get_user_staff())
     # Information, Monkokehampton
     monkokehampton_body = make_title_block(information_body)
     make_title(

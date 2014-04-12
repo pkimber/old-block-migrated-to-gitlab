@@ -2,9 +2,27 @@
 {% load block_tags %}
 
 {% block menu %}
-  <li {% if design %}class="pure-menu-selected"{% endif %}>
-    <a href="{% url 'project.page.design' 'home' %}">Design</a>
+  <li>
+    <a href="{% if design %}..{% else %}{{ page.get_design_url }}{% endif %}"
+      title="{% if design %}View{% else %}Design{% endif %}" >
+      {% if design %}
+        <i class="fa fa-square-o"></i>
+        View
+      {% else %}
+        <i class="fa fa-edit"></i>
+        Design
+      {% endif %}
+    </a>
   </li>
+  {% for p in pages %}
+    {% if p.order %}
+      <li>
+        <a href="{{ p.get_absolute_url }}">
+          {{ p.name }}
+        </a>
+      </li>
+    {% endif %}
+  {% endfor %}
 {% endblock menu %}
 
 {% block content %}
@@ -43,18 +61,7 @@
             {% endfor %}
           </tbody>
         </table>
-        {% if design %}
-          <div class="pure-menu pure-menu-open pure-menu-horizontal">
-            <ul>
-              <li>
-                <a href="{% url 'example.title.create' page.slug 'body' %}">
-                  <i class="fa fa-edit"></i>
-                  Create title
-                </a>
-              </li>
-            </ul>
-          </div>
-        {% endif %}
+        {% if design %}{% block_add body_create_url %}{% endif %}
       </div>
     </div>
   </div>
