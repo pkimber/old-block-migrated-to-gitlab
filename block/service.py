@@ -43,7 +43,8 @@ def init_section(name, block_app, block_model, create_url_name):
     return result
 
 
-def init_page(name, order, template_name, is_home=None, slug_menu=None):
+def init_page(
+        name, slug_page, order, template_name, is_home=None, slug_menu=None):
     """Create a page if it doesn't already exist."""
     if not is_home:
         is_home = False
@@ -51,10 +52,13 @@ def init_page(name, order, template_name, is_home=None, slug_menu=None):
         slug_menu = ''
     try:
         result = Page.objects.get(
-            slug=slugify(name),
+            slug=slug_page,
             slug_menu=slugify(slug_menu),
         )
         update = False
+        if name != result.name:
+            result.name = name
+            update = True
         if order != result.order:
             result.order = order
             update = True
@@ -69,6 +73,7 @@ def init_page(name, order, template_name, is_home=None, slug_menu=None):
     except Page.DoesNotExist:
         result = make_page(
             name,
+            slug_page,
             order,
             is_home=is_home,
             template_name=template_name,

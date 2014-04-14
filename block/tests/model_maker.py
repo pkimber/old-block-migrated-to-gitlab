@@ -32,11 +32,11 @@ def make_moderate_state(name, **kwargs):
     return clean_and_save(ModerateState(**defaults))
 
 
-def make_page(name, order, template_name, **kwargs):
+def make_page(name, slug_page, order, template_name, **kwargs):
     defaults = dict(
         name=name,
+        slug=slug_page,
         order=order,
-        slug=slugify(name),
         template_name=template_name,
     )
     defaults.update(kwargs)
