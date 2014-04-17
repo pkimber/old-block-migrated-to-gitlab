@@ -27,7 +27,7 @@ class TestTitle(TestCase):
     def setUp(self):
         init_app_block()
         default_scenario_login()
-        home = make_page('home', 0, 'test.html')
+        home = make_page('Home', 'home', 0, 'test.html')
         body = make_section(
             'body',
             'example',

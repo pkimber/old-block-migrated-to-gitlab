@@ -24,7 +24,7 @@ class TestService(TestCase):
             pass
 
     def test_init(self):
-        init_page(self.HOME, 0, 'home.html')
+        init_page(self.HOME, self.SLUG, 0, 'home.html')
         try:
             Page.objects.get(slug=self.SLUG)
         except Page.DoesNotExist:
@@ -32,31 +32,31 @@ class TestService(TestCase):
 
     def test_init_change_order(self):
         # create page (order 1)
-        init_page(self.HOME, 1, 'home.html')
+        init_page(self.HOME, self.SLUG, 1, 'home.html')
         page = Page.objects.get(slug=self.SLUG)
         self.assertEqual(1, page.order)
         # update page (order 3)
-        init_page(self.HOME, 3, 'my.html')
+        init_page(self.HOME, self.SLUG, 3, 'my.html')
         page = Page.objects.get(slug=self.SLUG)
         self.assertEqual(3, page.order)
         self.assertEqual('my.html', page.template_name)
 
     def test_init_is_home(self):
-        init_page(self.HOME, 0, 'home.html', is_home=True)
+        init_page(self.HOME, self.SLUG, 0, 'home.html', is_home=True)
         page = Page.objects.get(slug=self.SLUG)
         self.assertTrue(page.is_home)
 
     def test_init_is_not_home(self):
-        init_page(self.HOME, 0, 'home.html')
+        init_page(self.HOME, self.SLUG, 0, 'home.html')
         page = Page.objects.get(slug=self.SLUG)
         self.assertFalse(page.is_home)
 
     def test_init_set_home(self):
         # create page (is not a home page)
-        init_page(self.HOME, 0, 'home.html')
+        init_page(self.HOME, self.SLUG, 0, 'home.html')
         page = Page.objects.get(slug=self.SLUG)
         self.assertFalse(page.is_home)
         # update page (is now a home page)
-        init_page(self.HOME, 0, 'home.html', is_home=True)
+        init_page(self.HOME, self.SLUG, 0, 'home.html', is_home=True)
         page = Page.objects.get(slug=self.SLUG)
         self.assertTrue(page.is_home)

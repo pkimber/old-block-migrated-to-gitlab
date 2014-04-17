@@ -30,7 +30,7 @@ def get_page_home():
 
 
 def get_page_information():
-    return Page.objects.get(slug='information')
+    return Page.objects.get(slug='info')
 
 
 def get_page_section_home_body():
@@ -92,6 +92,7 @@ def default_scenario_block():
     # home
     home = init_page(
         'Home',
+        'home',
         0,
         'example/page.html'
     )
@@ -99,6 +100,7 @@ def default_scenario_block():
     # information
     information = init_page(
         'Information',
+        'info',
         1,
         'example/page.html'
     )
@@ -106,6 +108,7 @@ def default_scenario_block():
     # contact
     contact = init_page(
         'Contact',
+        'contact',
         2,
         'example/page.html'
     )

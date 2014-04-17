@@ -14,7 +14,7 @@ from block.tests.model_maker import (
 class TestPageSection(TestCase):
 
     def setUp(self):
-        self.home = make_page('Home', 0, 'test.html')
+        self.home = make_page('Home', 'home', 0, 'test.html')
         self.body = make_section(
             'Body',
             'example',
