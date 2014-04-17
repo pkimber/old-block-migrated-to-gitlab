@@ -16,6 +16,8 @@ def check_content(
     model_instance.block.page_section.page.get_absolute_url()
     # check the standard URLs
     model_instance.url_publish()
+    check_urledit(model_instance)
+
     if model_instance.has_elements():
         model_instance.url_elements()
     if ignore_remove:
@@ -66,3 +68,15 @@ def check_element(model_instance):
     """
     # check the element attributes
     model_instance.get_parent()
+
+def check_urledit(model_instance):
+    """Call the standard methods used by a model with a url
+
+    An exception will be thrown if the method is not defined
+    """
+    # check the url attributes
+    if ('has_url' in dir(model_instance)):
+        model_instance.get_url_text()
+        model_instance.get_url_link()
+        model_instance.set_url('', '')
+        model_instance.url_urledit()
