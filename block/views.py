@@ -61,7 +61,7 @@ class ContentPageMixin(BaseMixin):
             if menu:
                 return Page.objects.get(slug=page, slug_menu=menu)
             else:
-                return Page.objects.get(slug=page)
+                return Page.objects.get(slug=page, slug_menu='')
         except Page.DoesNotExist:
             raise BlockError(
                 "Page '{}', menu '{}' does not exist".format(page, menu)
