@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
     DeleteView,
+    ListView,
     UpdateView,
     TemplateView,
 )
@@ -200,6 +201,13 @@ class ElementUpdateView(BaseMixin, UpdateView):
         content.set_pending_edit()
         content.save()
         return super(ElementUpdateView, self).form_valid(form)
+
+
+class PageListView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
+
+    model = Page
+    paginate_by = 20
 
 
 class PageTemplateMixin(object):

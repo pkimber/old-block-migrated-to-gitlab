@@ -106,6 +106,11 @@ class TestView(TestCase):
             self._get_hatherleigh
         )
 
+    def test_page_list(self):
+        url = reverse('block.page.list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_publish(self):
         self._create()
         response = self._publish()

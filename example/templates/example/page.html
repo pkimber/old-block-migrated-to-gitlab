@@ -2,18 +2,6 @@
 {% load block_tags %}
 
 {% block menu %}
-  <li>
-    <a href="{% if design %}..{% else %}{{ page.get_design_url }}{% endif %}"
-      title="{% if design %}View{% else %}Design{% endif %}" >
-      {% if design %}
-        <i class="fa fa-square-o"></i>
-        View
-      {% else %}
-        <i class="fa fa-edit"></i>
-        Design
-      {% endif %}
-    </a>
-  </li>
   {% for p in pages %}
     {% if p.order %}
       <li>
@@ -23,6 +11,21 @@
       </li>
     {% endif %}
   {% endfor %}
+  {% if user.is_staff %}
+    <li>
+      <a href="{% if design %}..{% else %}{{ page.get_design_url }}{% endif %}"
+        title="{% if design %}View{% else %}Design{% endif %}" >
+        {% if design %}
+          <i class="fa fa-square-o"></i>
+          View
+        {% else %}
+          <i class="fa fa-edit"></i>
+          Design
+        {% endif %}
+      </a>
+    </li>
+  {% endif %}
+  {{ block.super }}
 {% endblock menu %}
 
 {% block content %}

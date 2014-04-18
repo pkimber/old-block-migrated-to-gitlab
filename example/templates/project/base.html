@@ -14,9 +14,17 @@
 {% endblock sub_heading %}
 
 {% block menu %}
-  <li>
-    <a href="{% url "admin:index" %}">Admin</a>
-  </li>
+  {% if user.is_staff %}
+    <li>
+      <a href="{% url 'block.page.list' %}">
+        <i class="fa fa-file-text-o"></i>
+        Pages
+      </a>
+    </li>
+    <li>
+      <a href="{% url "admin:index" %}">Admin</a>
+    </li>
+  {% endif %}
   {{ block.super }}
 {% endblock menu %}
 

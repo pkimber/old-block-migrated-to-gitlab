@@ -30,6 +30,21 @@ urlpatterns = patterns(
         kwargs=dict(page='home'),
         name='project.home'
         ),
+    # admin, login
+    url(regex=r'^admin/',
+        view=include(admin.site.urls)
+        ),
+    url(regex=r'^block/',
+        view=include('block.urls')
+        ),
+    url(regex=r'^',
+        view=include('login.urls')
+        ),
+    # home page when logged in
+    url(r'^home/user/$',
+        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        name='project.home.user'
+        ),
     # block page view
     url(regex=r'^(?P<page>[-\w\d]+)/$',
         view=PageView.as_view(),
@@ -56,18 +71,6 @@ urlpatterns = patterns(
     url(regex=r'^title/(?P<pk>\d+)/remove/$',
         view=TitleRemoveView.as_view(),
         name='example.title.remove'
-        ),
-    # admin, login
-    url(regex=r'^admin/',
-        view=include(admin.site.urls)
-        ),
-    url(regex=r'^',
-        view=include('login.urls')
-        ),
-    # home page when logged in
-    url(r'^home/user/$',
-        view=RedirectView.as_view(url=reverse_lazy('project.home')),
-        name='project.home.user'
         ),
 )
 
