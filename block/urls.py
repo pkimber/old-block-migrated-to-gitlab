@@ -10,7 +10,7 @@ from .views import PageListView
 
 urlpatterns = patterns(
     '',
-    url(regex=r'^$',
+    url(regex=r'^page/$',
         view=PageListView.as_view(),
         name='block.page.list'
         ),
