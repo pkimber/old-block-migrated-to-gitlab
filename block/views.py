@@ -207,7 +207,10 @@ class PageListView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
 
     model = Page
-    paginate_by = 20
+    paginate_by = 15
+
+    def get_queryset(self):
+        return Page.objects.all().order_by('name')
 
 
 class PageTemplateMixin(object):
