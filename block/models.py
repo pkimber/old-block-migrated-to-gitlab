@@ -305,12 +305,7 @@ class ContentManager(models.Manager):
     def next_order(self):
         result = self.model.objects.aggregate(max_order=Max('order'))
         max_order = result.get('max_order', 0)
-        if max_order == 0:
-            raise BlockError(
-                "Cannot get the maximum value of the 'order' field "
-                "in the '{}' class.".format(self.model.__name__)
-            )
-        elif max_order:
+        if max_order:
             return max_order + 1
         else:
             return 1
