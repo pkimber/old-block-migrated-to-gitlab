@@ -15,7 +15,7 @@ from block.tests.model_maker import (
 )
 
 
-def init_section(name, block_app, block_model, create_url_name):
+def init_section(name, block_app, block_model, create_url_name, paginated=None):
     """Create a section if it doesn't already exist."""
     if not create_url_name:
         create_url_name = ''
@@ -31,6 +31,18 @@ def init_section(name, block_app, block_model, create_url_name):
         if create_url_name != result.create_url_name:
             result.create_url_name = create_url_name
             update = True
+        if ((paginated and not result.paginated)
+          or (not paginated and result.paginated)
+          or (paginated and result.paginated
+            and (paginated.items_per_page != result.paginated.items_per_page or
+            paginated.order_by_field != result.paginated.order_by_field))):
+            if (result.paginated):
+                result.paginated.items_per_page = paginated.items_per_page
+                result.paginated.order_by_field = paginated.order_by_field
+            else:
+                result.paginated = paginated
+            result.paginated.save()
+            update = True
         if update:
             result.save()
     except Section.DoesNotExist:
@@ -39,6 +51,7 @@ def init_section(name, block_app, block_model, create_url_name):
             block_app,
             block_model,
             create_url_name,
+            paginated=paginated
         )
     return result
 

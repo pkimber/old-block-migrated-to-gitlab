@@ -156,6 +156,16 @@ class Page(TimeStampedModel):
 
 reversion.register(Page)
 
+class PaginatedSection(models.Model):
+    """Parameters for a Paginated Section"""
+    items_per_page = models.IntegerField(default=10)
+    order_by_field = models.CharField(max_length=100)
+
+    def __str__(self):
+      return '{} - {}'.format(self.items_per_page, self.order_by_field)
+
+reversion.register(PaginatedSection)
+
 
 class Section(TimeStampedModel):
     """Section of the page e.g. content, header, footer."""
@@ -164,6 +174,7 @@ class Section(TimeStampedModel):
     block_app = models.CharField(max_length=100)
     block_model = models.CharField(max_length=100)
     create_url_name = models.CharField(max_length=100, blank=True)
+    paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
 
     class Meta:
         ordering = ('name',)
