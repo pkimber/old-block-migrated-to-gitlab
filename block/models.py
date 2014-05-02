@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import datetime
-
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -11,6 +9,7 @@ from django.db import (
     transaction,
 )
 from django.db.models import Max
+from django.utils import timezone
 
 import reversion
 
@@ -409,7 +408,7 @@ class ContentModel(TimeStampedModel):
     is_removed = property(_is_removed)
 
     def _set_moderated(self, user, moderate_state):
-        self.date_moderated = datetime.now()
+        self.date_moderated = timezone.now()
         self.user_moderated = user
         self.moderate_state = moderate_state
 
