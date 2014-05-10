@@ -320,7 +320,6 @@ class PageMixin(object):
                         block_list = paginator.page(paginator.num_pages)
             except:
                 pass
-
             context.update({
                 block_list_name: block_list,
             })

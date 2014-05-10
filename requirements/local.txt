@@ -3,7 +3,6 @@
 -e ../base
 -e ../login
 beautifulsoup4
-fabric
 gitpython
 hgapi
 ipdb
