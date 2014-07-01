@@ -299,14 +299,14 @@ class PageMixin(object):
             block_model = get_block_model(e)
             block_list = block_model.objects.published(e)
             try:
-                if (e.section.paginated):
+                if e.section.paginated:
                     # this is the block that requires pagination
-                    if (e.section.paginated.order_by_field != None):
+                    if e.section.paginated.order_by_field:
                         all_objects = block_list.order_by(e.section.paginated.order_by_field)
                     else:
                         all_objects = block_list
 
-                    if (e.section.paginated.items_per_page):
+                    if e.section.paginated.items_per_page:
                         paginator = Paginator(all_objects,
                             e.section.paginated.items_per_page)
                     pageNo = self.request.GET.get('page')
