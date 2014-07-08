@@ -3,18 +3,22 @@ from __future__ import unicode_literals
 
 import factory
 
-from django.template.defaultfilters import slugify
-
-from factory.django import DjangoModelFactory
-from factory.fuzzy import FuzzyText
-
 from block.models import Page
 
 
-class PageFactory(DjangoModelFactory):
+class PageFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Page
 
-    slug = slugify(factory.Sequence(lambda n: 'page{}'.format(n)))
-    slug_menu = slugify(factory.LazyAttribute(lambda o: '{}_menu'.format(o.slug)))
+    @factory.sequence
+    def slug(n):
+        return 'page_{:02d}'.format(n)
+
+    @factory.sequence
+    def slug_menu(n):
+        return 'menu_{:02d}'.format(n)
+
+    @factory.sequence
+    def template_name(n):
+        return 'example/template_{:02d}.html'.format(n)
