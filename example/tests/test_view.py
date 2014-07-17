@@ -13,10 +13,10 @@ from block.tests.scenario import (
     get_page_home,
     get_section_body,
 )
+from login.tests.factories import TEST_PASSWORD
 from login.tests.scenario import (
     default_scenario_login,
     get_user_staff,
-    STAFF,
 )
 
 from example.models import Title
@@ -29,7 +29,7 @@ class TestView(TestCase):
         default_scenario_block()
         staff = get_user_staff()
         self.assertTrue(
-            self.client.login(username=staff.username, password=STAFF)
+            self.client.login(username=staff.username, password=TEST_PASSWORD)
         )
 
     def _create(self):
