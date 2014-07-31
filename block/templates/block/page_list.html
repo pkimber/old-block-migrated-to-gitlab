@@ -9,6 +9,27 @@
 {% endblock sub_heading %}
 
 {% block content %}
+  <style>
+    /* move to admin interface css file */
+    .data100 { 
+      display:table-cell;
+      width:100px;
+      vertical-align: top;
+    }
+    .data200 { 
+      display:inline-block;
+      width:200px;
+      vertical-align: top;
+    }
+    .data600 { 
+      display:table-cell;
+      width:600px;
+    }
+    .dataSmaller {
+      font-size: 80%;
+      padding-left: 50px;
+    }
+  </style>
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="l-box">
@@ -16,19 +37,21 @@
         <table class="pure-table pure-table-bordered">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Design</th>
+              <th class="data600">Name</th>
+              <th class="data100">Design</th>
             </tr>
           </thead>
           <tbody>
             {% for object in object_list %}
               <tr valign="top">
-                <td>
+                <td class="data600">
                   <a href="{{ object.get_absolute_url }}">
+                    {% if object.deleted %}<del>{% endif %}
                     {{ object.name }}
+                    {% if object.deleted %}</del>{% endif %}
                   </a>
                 </td>
-                <td>
+                <td class="data100">
                   <a href="{{ object.get_design_url }}">
                     <i class="fa fa-edit"></i>
                     Edit

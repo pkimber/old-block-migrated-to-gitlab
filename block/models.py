@@ -129,6 +129,7 @@ class Page(TimeStampedModel):
     order = models.IntegerField(default=0)
     is_home = models.BooleanField(default=False)
     template_name = models.CharField(max_length=150)
+    deleted = models.BooleanField(default=False)
     objects = PageManager()
 
     class Meta:
