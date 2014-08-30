@@ -43,7 +43,7 @@ urlpatterns = patterns(
     # home page when logged in
     url(r'^home/user/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
-        name='project.home.user'
+        name='project.dash'
         ),
     # block page view
     url(regex=r'^(?P<page>[-\w\d]+)/$',
