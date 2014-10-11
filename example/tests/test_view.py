@@ -4,10 +4,7 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from block.models import (
-    PENDING,
-    PUBLISHED,
-)
+from block.models import ModerateState
 from block.tests.scenario import (
     default_scenario_block,
     get_page_home,
@@ -72,13 +69,13 @@ class TestView(TestCase):
     def _get_hatherleigh_pending(self):
         return Title.objects.get(
             title='Hatherleigh',
-            moderate_state__slug=PENDING,
+            moderate_state__slug=ModerateState.PENDING,
         )
 
     def _get_hatherleigh_published(self):
         return Title.objects.get(
             title='Hatherleigh',
-            moderate_state__slug=PUBLISHED,
+            moderate_state__slug=ModerateState.PUBLISHED,
         )
 
     def _get_hatherleigh_market(self):
@@ -88,7 +85,7 @@ class TestView(TestCase):
         response = self._create()
         self.assertEqual(response.status_code, 302)
         title = self._get_hatherleigh()
-        self.assertEqual(PENDING, title.moderate_state.slug)
+        self.assertEqual(ModerateState.PENDING, title.moderate_state.slug)
         self.assertTrue(title.is_pending_added)
 
     def test_update(self):

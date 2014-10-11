@@ -1,16 +1,13 @@
 # -*- encoding: utf-8 -*-
 from __future__ import unicode_literals
 
-from block.models import (
-    PENDING,
-    PUBLISHED,
-)
 from block.tests.scenario import (
     get_page_section_home_body,
     get_page_section_information_body,
 )
 from login.tests.scenario import get_user_staff
 
+from block.models import ModerateState
 from example.models import Title
 from example.tests.model_maker import (
     make_title,
@@ -44,14 +41,14 @@ def get_hatherleigh_three():
 
 def get_jacobstowe_one_pending():
     return Title.objects.get(
-        moderate_state__slug=PENDING,
+        moderate_state__slug=ModerateState.PENDING,
         title='Jacobstowe One',
     )
 
 
 def get_jacobstowe_one_published():
     return Title.objects.get(
-        moderate_state__slug=PUBLISHED,
+        moderate_state__slug=ModerateState.PUBLISHED,
         title='Jacobstowe One',
     )
 

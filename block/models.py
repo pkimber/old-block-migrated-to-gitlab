@@ -10,6 +10,7 @@ from django.db import (
 )
 from django.db.models import Max
 from django.utils import timezone
+from django.utils.text import slugify
 
 import reversion
 
@@ -18,21 +19,34 @@ from base.model_utils import (
     TimeStampedModel,
 )
 
-ADD = 'add'
-EDIT = 'edit'
-PUSH = 'push'
-
-PENDING = 'pending'
-PUBLISHED = 'published'
-REMOVED = 'removed'
-
 
 def _default_edit_state():
-    return EditState._add()
+    return EditState.objects._add()
+
+
+#def _default_edit_state_for_migrations_only():
+#    try:
+#        result = _default_edit_state()
+#    except EditState.DoesNotExist:
+#        edit_state = EditState(**dict(name=ADD, slug=slugify(ADD)))
+#        edit_state.save()
+#        edit_state.full_clean()
+#        result = _default_edit_state()
+#    return result.pk
 
 
 def _default_moderate_state():
-    return ModerateState._pending()
+    return ModerateState.objects._pending()
+
+
+#def _default_moderate_state_for_migrations_only():
+#    try:
+#        result = _default_moderate_state()
+#    except ModerateState.DoesNotExist:
+#        edit_state = ModerateState(**dict(name=PENDING, slug=slugify(PENDING)))
+#        edit_state.save()
+#        edit_state.full_clean()
+#        result = _default_moderate_state()
 
 
 class BlockError(Exception):
@@ -45,11 +59,31 @@ class BlockError(Exception):
         return repr('%s, %s' % (self.__class__.__name__, self.value))
 
 
+class EditStateManager(models.Manager):
+
+    def _add(self):
+        """Internal use only."""
+        return EditState.objects.get(slug=EditState.ADD)
+
+    def _edit(self):
+        """Internal use only."""
+        return EditState.objects.get(slug=EditState.EDIT)
+
+    def _push(self):
+        """Internal use only."""
+        return EditState.objects.get(slug=EditState.PUSH)
+
+
 class EditState(models.Model):
     """Add, pushed or editing."""
 
+    ADD = 'add'
+    EDIT = 'edit'
+    PUSH = 'push'
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
+    objects = EditStateManager()
 
     class Meta:
         ordering = ['name']
@@ -59,27 +93,34 @@ class EditState(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
-    @staticmethod
-    def _add():
-        """Internal use only."""
-        return EditState.objects.get(slug=ADD)
-
-    @staticmethod
-    def _edit():
-        return EditState.objects.get(slug=EDIT)
-
-    @staticmethod
-    def _push():
-        return EditState.objects.get(slug=PUSH)
-
 reversion.register(EditState)
+
+
+class ModerateStateManager(models.Manager):
+
+    def _published(self):
+        """Internal use only."""
+        return self.model.objects.get(slug=ModerateState.PUBLISHED)
+
+    def _pending(self):
+        """Internal use only."""
+        return self.model.objects.get(slug=ModerateState.PENDING)
+
+    def _removed(self):
+        """Internal use only."""
+        return self.model.objects.get(slug=ModerateState.REMOVED)
 
 
 class ModerateState(models.Model):
     """Accept, remove or pending."""
 
+    PENDING = 'pending'
+    PUBLISHED = 'published'
+    REMOVED = 'removed'
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
+    objects = ModerateStateManager()
 
     class Meta:
         ordering = ['name']
@@ -88,19 +129,6 @@ class ModerateState(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
-
-    @staticmethod
-    def _published():
-        """Internal use only."""
-        return ModerateState.objects.get(slug=PUBLISHED)
-
-    @staticmethod
-    def _pending():
-        return ModerateState.objects.get(slug=PENDING)
-
-    @staticmethod
-    def _removed():
-        return ModerateState.objects.get(slug=REMOVED)
 
 reversion.register(ModerateState)
 
@@ -232,14 +260,14 @@ class BlockModel(TimeStampedModel):
 
     def _get_removed(self):
         return self.content.get(
-            moderate_state=ModerateState._removed()
+            moderate_state=ModerateState.objects._removed()
         )
 
     def _remove_published_content(self, user):
         """publishing new content, so remove currently published content."""
         try:
             c = self.get_published()
-            c._set_moderated(user, ModerateState._removed())
+            c._set_moderated(user, ModerateState.objects._removed())
             c.save()
         except ObjectDoesNotExist:
             pass
@@ -247,13 +275,13 @@ class BlockModel(TimeStampedModel):
     def get_pending(self):
         """If the block has pending content, then get it."""
         return self.content.get(
-            moderate_state=ModerateState._pending()
+            moderate_state=ModerateState.objects._pending()
         )
 
     def get_published(self):
         """If the block has published content, then get it."""
         return self.content.get(
-            moderate_state=ModerateState._published()
+            moderate_state=ModerateState.objects._published()
         )
 
     def publish(self, user):
@@ -269,7 +297,9 @@ class BlockModel(TimeStampedModel):
             self._remove_published_content(user)
             # copy the pending record to a new published record.
             published_instance = copy_model_instance(pending)
-            published_instance._set_moderated(user, ModerateState._published())
+            published_instance._set_moderated(
+                user, ModerateState.objects._published()
+            )
             published_instance.save()
             # give pending class the opportunity to copy data
             pending.copy_related_data(published_instance)
@@ -302,12 +332,16 @@ class BlockModel(TimeStampedModel):
         with transaction.atomic():
             self._delete_removed_content()
             if published:
-                published._set_moderated(user, ModerateState._removed())
+                published._set_moderated(
+                    user, ModerateState.objects._removed()
+                )
                 published.save()
                 if pending:
                     pending.delete()
             else:
-                pending._set_moderated(user, ModerateState._removed())
+                pending._set_moderated(
+                    user, ModerateState.objects._removed()
+                )
                 pending.save()
 
 
@@ -327,7 +361,7 @@ class ContentManager(models.Manager):
         Note: we return a list of content instances not a queryset.
 
         """
-        pending = ModerateState._pending()
+        pending = ModerateState.objects._pending()
         qs = self.model.objects.filter(
             block__page_section=page_section,
             moderate_state=pending,
@@ -344,7 +378,7 @@ class ContentManager(models.Manager):
 
     def published(self, page_section):
         """Return a published content for a page."""
-        published = ModerateState._published()
+        published = ModerateState.objects._published()
         return self.model.objects.filter(
             block__page_section=page_section,
             moderate_state=published,
@@ -385,27 +419,27 @@ class ContentModel(TimeStampedModel):
         return '{}'.format(self.pk)
 
     def _is_pending(self):
-        return self.moderate_state == ModerateState._pending()
+        return self.moderate_state == ModerateState.objects._pending()
     is_pending = property(_is_pending)
 
     def _is_pending_added(self):
-        return self.is_pending and self.edit_state == EditState._add()
+        return self.is_pending and self.edit_state == EditState.objects._add()
     is_pending_added = property(_is_pending_added)
 
     def _is_pending_edited(self):
-        return self.is_pending and self.edit_state == EditState._edit()
+        return self.is_pending and self.edit_state == EditState.objects._edit()
     is_pending_edited = property(_is_pending_edited)
 
     def _is_pending_pushed(self):
-        return self.is_pending and self.edit_state == EditState._push()
+        return self.is_pending and self.edit_state == EditState.objects._push()
     is_pending_pushed = property(_is_pending_pushed)
 
     def _is_published(self):
-        return self.moderate_state == ModerateState._published()
+        return self.moderate_state == ModerateState.objects._published()
     is_published = property(_is_published)
 
     def _is_removed(self):
-        return self.moderate_state == ModerateState._removed()
+        return self.moderate_state == ModerateState.objects._removed()
     is_removed = property(_is_removed)
 
     def _set_moderated(self, user, moderate_state):
@@ -437,10 +471,10 @@ class ContentModel(TimeStampedModel):
 
         """
         if self.is_pending:
-            if self.edit_state == EditState._add():
+            if self.edit_state == EditState.objects._add():
                 pass
-            elif self.edit_state == EditState._push():
-                self.edit_state = EditState._edit()
+            elif self.edit_state == EditState.objects._push():
+                self.edit_state = EditState.objects._edit()
         else:
             raise BlockError(
                 "Sorry, only pending content can be edited."
@@ -449,7 +483,7 @@ class ContentModel(TimeStampedModel):
     def set_pending_pushed(self):
         """Pending content is being 'pushed' ('published')."""
         if self.is_pending:
-            self.edit_state = EditState._push()
+            self.edit_state = EditState.objects._push()
         else:
             raise BlockError(
                 "Sorry, only pending content can be edited."

@@ -2,16 +2,10 @@
 from __future__ import unicode_literals
 
 from block.models import (
-    ADD,
-    EDIT,
     EditState,
     ModerateState,
     Page,
     PageSection,
-    PENDING,
-    PUBLISHED,
-    PUSH,
-    REMOVED,
     Section,
 )
 from block.service import (
@@ -54,30 +48,30 @@ def get_section_body():
 def init_app_block():
     """Edit and moderate state."""
     try:
-        EditState._add()
+        EditState.objects._add()
     except EditState.DoesNotExist:
-        make_edit_state(ADD)
+        make_edit_state(EditState.ADD)
     try:
-        EditState._edit()
+        EditState.objects._edit()
     except EditState.DoesNotExist:
-        make_edit_state(EDIT)
+        make_edit_state(EditState.EDIT)
     try:
-        EditState._push()
+        EditState.objects._push()
     except EditState.DoesNotExist:
-        make_edit_state(PUSH)
+        make_edit_state(EditState.PUSH)
     # moderate state
     try:
-        ModerateState._pending()
+        ModerateState.objects._pending()
     except ModerateState.DoesNotExist:
-        make_moderate_state(PENDING)
+        make_moderate_state(ModerateState.PENDING)
     try:
-        ModerateState._published()
+        ModerateState.objects._published()
     except ModerateState.DoesNotExist:
-        make_moderate_state(PUBLISHED)
+        make_moderate_state(ModerateState.PUBLISHED)
     try:
-        ModerateState._removed()
+        ModerateState.objects._removed()
     except ModerateState.DoesNotExist:
-        make_moderate_state(REMOVED)
+        make_moderate_state(ModerateState.REMOVED)
 
 
 def default_scenario_block():

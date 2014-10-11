@@ -3,11 +3,7 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from block.models import (
-    PENDING,
-    PUBLISHED,
-    REMOVED,
-)
+from block.models import ModerateState
 from block.tests.model_maker import (
     make_page,
     make_page_section,
@@ -47,27 +43,27 @@ class TestWorkflow(TestCase):
 
     def _get_pending(self):
         return self.block.content.get(
-            moderate_state__slug=PENDING
+            moderate_state__slug=ModerateState.PENDING
         )
 
     def _get_published(self):
         return self.block.content.get(
-            moderate_state__slug=PUBLISHED
+            moderate_state__slug=ModerateState.PUBLISHED
         )
 
     def _pending_count(self):
         return self.block.content.filter(
-            moderate_state__slug=PENDING
+            moderate_state__slug=ModerateState.PENDING
         ).count()
 
     def _publish_count(self):
         return self.block.content.filter(
-            moderate_state__slug=PUBLISHED
+            moderate_state__slug=ModerateState.PUBLISHED
         ).count()
 
     def _remove_count(self):
         return self.block.content.filter(
-            moderate_state__slug=REMOVED
+            moderate_state__slug=ModerateState.REMOVED
         ).count()
 
     def test_pending(self):

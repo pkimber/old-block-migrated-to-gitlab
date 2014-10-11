@@ -4,15 +4,15 @@ from __future__ import unicode_literals
 from django.test import TestCase
 
 from block.models import Page
-from block.tests.model_maker import make_page
+from block.tests.factories import PageFactory
 
 
 class TestPage(TestCase):
 
     def setUp(self):
-        self.page = make_page('Home', 'home', 0, 'test.html')
-        self.page = make_page('Information', 'info', 1, 'test.html')
-        self.page = make_page('Portfolio', 'portfolio', 2, 'test.html')
+        PageFactory(slug='home')
+        PageFactory(slug='info')
+        PageFactory(slug='portfolio')
 
     def test_menu(self):
         self.assertEqual(3, len(Page.objects.menu()))
