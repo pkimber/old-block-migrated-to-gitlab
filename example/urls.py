@@ -45,15 +45,23 @@ urlpatterns = patterns(
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
         name='project.dash'
         ),
+    # block page design
+    url(regex=r'^(?P<page>[-\w\d]+)/design/$',
+        view=PageDesignView.as_view(),
+        name='project.page.design'
+        ),
+    url(regex=r'^(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/design/$',
+        view=PageDesignView.as_view(),
+        name='project.page.design'
+        ),
     # block page view
     url(regex=r'^(?P<page>[-\w\d]+)/$',
         view=PageView.as_view(),
         name='project.page'
         ),
-    # block page design
-    url(regex=r'^(?P<page>[-\w\d]+)/design/$',
-        view=PageDesignView.as_view(),
-        name='project.page.design'
+    url(regex=r'^(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/$',
+        view=PageView.as_view(),
+        name='project.page'
         ),
     # title create, publish, update and remove
     url(regex=r'^title/create/(?P<page>[-\w\d]+)/(?P<section>[-\w\d]+)/$',

@@ -9,7 +9,13 @@ from block.tests.model_maker import (
     make_page_section,
     make_section,
 )
+from block.tests.factories import PageSectionFactory
 from block.tests.scenario import init_app_block
+from example.tests.factories import (
+    TitleBlockFactory,
+    TitleFactory,
+)
+from login.tests.factories import UserFactory
 from login.tests.scenario import (
     default_scenario_login,
     get_user_staff,
@@ -41,60 +47,41 @@ class TestTitle(TestCase):
         pass
 
     def test_content_methods(self):
-        c = make_title(
-            make_title_block(self.home_body),
-            5,
-            'ABC'
-        )
+        c = TitleFactory()
         check_content(c)
 
     def test_pending_order(self):
         """Pending items should be in 'order' order."""
-        make_title(
-            make_title_block(self.home_body),
-            5,
-            'ABC'
-        )
-        block_2 = make_title_block(self.home_body)
-        make_title(
-            block_2,
-            3,
-            'LMN'
-        )
-        block_2.publish(get_user_staff())
-        make_title(
-            make_title_block(self.home_body),
-            1,
-            'XYZ'
-        )
-        pending = Title.objects.pending(self.home_body)
+        page_section = PageSectionFactory()
+        # block 1
+        block_1 = TitleBlockFactory(page_section=page_section)
+        TitleFactory(block=block_1, title='ABC', order=5)
+        # block 2 (publish)
+        block_2 = TitleBlockFactory(page_section=page_section)
+        TitleFactory(block=block_2, title='LMN', order=3)
+        block_2.publish(UserFactory())
+        # block 3 (publish)
+        block_3 = TitleBlockFactory(page_section=page_section)
+        TitleFactory(block=block_3, title='XYZ', order=1)
+        # check order
         self.assertListEqual(
-            [
-                'XYZ',
-                'LMN',
-                'ABC',
-            ],
-            [t.title for t in pending]
+            ['XYZ', 'LMN', 'ABC'],
+            [t.title for t in Title.objects.pending(page_section)]
         )
 
     def test_published_order(self):
-        """Published items should by in 'order' order."""
-        block_1 = make_title_block(self.home_body)
-        make_title(
-            block_1,
-            9,
-            'ABC'
-        )
-        block_1.publish(get_user_staff())
-        block_2 = make_title_block(self.home_body)
-        make_title(
-            block_2,
-            8,
-            'XYZ'
-        )
-        block_2.publish(get_user_staff())
-        published = Title.objects.published(self.home_body)
+        """Published items should be in 'order' order."""
+        page_section = PageSectionFactory()
+        # publish block 1
+        block_1 = TitleBlockFactory(page_section=page_section)
+        TitleFactory(block=block_1, title='ABC', order=9)
+        block_1.publish(UserFactory())
+        # publish block 2
+        block_2 = TitleBlockFactory(page_section=page_section)
+        TitleFactory(block=block_2, title='XYZ', order=8)
+        block_2.publish(UserFactory())
+        # check order
         self.assertListEqual(
             ['XYZ', 'ABC'],
-            [t.title for t in published]
+            [t.title for t in Title.objects.published(page_section)]
         )
