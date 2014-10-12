@@ -9,18 +9,9 @@ from block.tests.factories import (
     PageFactory,
     PageSectionFactory,
 )
-from block.tests.scenario import (
-    default_scenario_block,
-    get_page_home,
-    get_section_body,
-)
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
-)
-from login.tests.scenario import (
-    default_scenario_login,
-    get_user_staff,
 )
 
 from example.models import Title
