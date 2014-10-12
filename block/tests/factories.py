@@ -4,10 +4,24 @@ from __future__ import unicode_literals
 import factory
 
 from block.models import (
+    EditState,
+    ModerateState,
     Page,
     PageSection,
     Section,
 )
+
+
+class EditStateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = EditState
+
+
+class ModerateStateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = ModerateState
 
 
 class PageFactory(factory.django.DjangoModelFactory):

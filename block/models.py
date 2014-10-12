@@ -10,7 +10,6 @@ from django.db import (
 )
 from django.db.models import Max
 from django.utils import timezone
-from django.utils.text import slugify
 
 import reversion
 

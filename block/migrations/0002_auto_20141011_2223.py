@@ -24,7 +24,7 @@ def default_state(apps, schema_editor):
     _create_state(EditState, 'add')
     _create_state(EditState, 'edit')
     _create_state(EditState, 'push')
-    ModerateState = apps.get_model("block", "EditState")
+    ModerateState = apps.get_model("block", 'ModerateState')
     _create_state(ModerateState, 'pending')
     _create_state(ModerateState, 'published')
     _create_state(ModerateState, 'removed')

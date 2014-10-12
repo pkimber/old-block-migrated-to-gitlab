@@ -4,43 +4,21 @@ from __future__ import unicode_literals
 from django.db import IntegrityError
 from django.test import TestCase
 
-from base.tests.model_maker import clean_and_save
-from block.tests.scenario import get_page_section_home_body
-from login.tests.scenario import (
-    default_scenario_login,
-    get_user_staff,
-)
 from block.models import (
     BlockError,
     ModerateState,
 )
 from block.tests.factories import PageSectionFactory
-from block.tests.scenario import default_scenario_block
 from login.tests.factories import UserFactory
+
 from example.models import Title
 from example.tests.factories import (
     TitleBlockFactory,
     TitleFactory,
 )
 
-from example.tests.scenario import (
-    default_scenario_example,
-    get_block_hatherleigh_old,
-    get_block_hatherleigh_three,
-    get_block_hatherleigh_two,
-    get_hatherleigh_old,
-    get_hatherleigh_three,
-    get_hatherleigh_two,
-    get_jacobstowe_one_pending,
-)
-
 
 class TestModerate(TestCase):
-
-    def setUp(self):
-        default_scenario_login()
-        default_scenario_block()
-        default_scenario_example()
 
     def test_is_pending(self):
         block = TitleBlockFactory()
@@ -71,7 +49,7 @@ class TestModerate(TestCase):
 
     def test_two_pending_error(self):
         block = TitleBlockFactory()
-        content = TitleFactory(block=block)
+        TitleFactory(block=block)
         with self.assertRaises(IntegrityError):
             TitleFactory(
                 block=block,
