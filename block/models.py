@@ -23,29 +23,18 @@ def _default_edit_state():
     return EditState.objects._add()
 
 
-#def _default_edit_state_for_migrations_only():
-#    try:
-#        result = _default_edit_state()
-#    except EditState.DoesNotExist:
-#        edit_state = EditState(**dict(name=ADD, slug=slugify(ADD)))
-#        edit_state.save()
-#        edit_state.full_clean()
-#        result = _default_edit_state()
-#    return result.pk
+def _default_edit_state_pk():
+    """For 'migrations' in other apps."""
+    return _default_edit_state().pk
 
 
 def _default_moderate_state():
     return ModerateState.objects._pending()
 
 
-#def _default_moderate_state_for_migrations_only():
-#    try:
-#        result = _default_moderate_state()
-#    except ModerateState.DoesNotExist:
-#        edit_state = ModerateState(**dict(name=PENDING, slug=slugify(PENDING)))
-#        edit_state.save()
-#        edit_state.full_clean()
-#        result = _default_moderate_state()
+def _default_moderate_state_pk():
+    """For 'migrations' in other apps."""
+    return _default_moderate_state().pk
 
 
 class BlockError(Exception):
@@ -182,6 +171,7 @@ class Page(TimeStampedModel):
 
 
 reversion.register(Page)
+
 
 class PaginatedSection(models.Model):
     """Parameters for a Paginated Section"""
