@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import factory
 
-from block.models import PageSectionFactory
+from block.tests.factories import PageSectionFactory
 from example.models import (
     Title,
     TitleBlock,
@@ -12,7 +12,7 @@ from example.models import (
 
 class TitleBlockFactory(factory.django.DjangoModelFactory):
 
-    page_section = PageSectionFactory()
+    page_section = factory.SubFactory(PageSectionFactory)
 
     class Meta:
         model = TitleBlock
@@ -24,3 +24,7 @@ class TitleFactory(factory.django.DjangoModelFactory):
         model = Title
 
     block = factory.SubFactory(TitleBlockFactory)
+
+    @factory.sequence
+    def order(n):
+        return n
