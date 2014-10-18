@@ -19,6 +19,9 @@ from base.model_utils import (
 )
 
 
+PAGE_HOME = 'home'
+
+
 def _default_edit_state():
     return EditState.objects._add()
 
@@ -186,11 +189,20 @@ reversion.register(PaginatedSection)
 
 class Section(TimeStampedModel):
     """Section of the page e.g. content, header, footer."""
+
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100, unique=True)
-    block_app = models.CharField(max_length=100)
-    block_model = models.CharField(max_length=100)
-    create_url_name = models.CharField(max_length=100, blank=True)
+    slug = models.SlugField(
+        max_length=100, unique=True, help_text='What is this field used for?'
+    )
+    block_app = models.CharField(
+        max_length=100, help_text="app name e.g. 'compose'"
+    )
+    block_model = models.CharField(
+        max_length=100, help_text="model name e.g. 'Title'"
+    )
+    create_url_name = models.CharField(
+        max_length=100, blank=True, help_text='What is this field used for?'
+    )
     paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
 
     class Meta:

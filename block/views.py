@@ -10,7 +10,6 @@ from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
     DeleteView,
-    ListView,
     UpdateView,
     TemplateView,
 )
@@ -204,16 +203,6 @@ class ElementUpdateView(BaseMixin, UpdateView):
         return super(ElementUpdateView, self).form_valid(form)
 
 
-class PageListView(
-        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
-
-    model = Page
-    paginate_by = 15
-
-    def get_queryset(self):
-        return Page.objects.all().order_by('name')
-
-
 class PageTemplateMixin(object):
 
     def get_template_names(self) :
@@ -326,8 +315,6 @@ class PageMixin(object):
         return context
 
 
-class PageView(
-        PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
+class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
 
     pass
-

@@ -77,11 +77,6 @@ class TestView(TestCase):
         with self.assertRaises(Title.DoesNotExist):
             Title.objects.get(title='title_1')
 
-    def test_page_list(self):
-        url = reverse('block.page.list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
     def test_publish(self):
         """Create some content, and publish it."""
         self._create('title_1')

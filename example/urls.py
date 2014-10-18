@@ -34,9 +34,6 @@ urlpatterns = patterns(
     url(regex=r'^admin/',
         view=include(admin.site.urls)
         ),
-    url(regex=r'^block/',
-        view=include('block.urls')
-        ),
     url(regex=r'^',
         view=include('login.urls')
         ),
