@@ -11,6 +11,7 @@ class TestPage(TestCase):
 
     def setUp(self):
         PageFactory(slug='home')
+        PageFactory(slug='history', deleted=True)
         PageFactory(slug='info')
         PageFactory(slug='portfolio')
 
