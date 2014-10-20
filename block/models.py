@@ -202,11 +202,11 @@ class Section(TimeStampedModel):
         max_length=100, help_text="app name e.g. 'compose'"
     )
     block_model = models.CharField(
-        max_length=100, help_text="model name e.g. 'Title'"
+        max_length=100, help_text="model name e.g. 'Article'"
     )
     create_url_name = models.CharField(
         max_length=100, blank=True,
-        help_text="url name for creating the model e.g. 'compose.holding.create'"
+        help_text="url name for creating the model e.g. 'compose.article.create'"
     )
     paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
 
