@@ -3,7 +3,7 @@ from django.contrib.sitemaps import Sitemap
 from block.models import Page
 from django.utils import timezone
 
-class SiteMapName(Sitemap):
+class BlockSiteMap(Sitemap):
     changefreq = 'monthly'
     priority = 0.5
 

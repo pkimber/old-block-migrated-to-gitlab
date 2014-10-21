@@ -7,7 +7,11 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
-from block.sitemaps import SiteMapName
+#from block.sitemaps import BlockSiteMap
+from django.contrib.sitemaps import GenericSitemap
+
+from block.models import Page
+
 from block.views import (
     PageDesignView,
     PageView,
@@ -20,13 +24,18 @@ from .views import (
     TitleUpdateView,
 )
 
-
 admin.autodiscover()
 
-sitemaps = {
-    'default': SiteMapName,
+page_coll = {
+    'queryset': Page.objects.all(),
+    'date_field': 'modified',
 }
 
+
+sitemaps = {
+    #'default': BlockSiteMap,    
+    'cms': GenericSitemap(page_coll, priority=0.5, changefreq='monthly'),
+}
 
 urlpatterns = patterns(
     '',
@@ -81,7 +90,7 @@ urlpatterns = patterns(
     url(regex=r'^title/(?P<pk>\d+)/remove/$',
         view=TitleRemoveView.as_view(),
         name='example.title.remove'
-        ),              
+        ),
 )
 
 urlpatterns += staticfiles_urlpatterns()
