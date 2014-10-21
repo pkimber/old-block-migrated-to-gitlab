@@ -130,6 +130,8 @@ class PageManager(models.Manager):
         """Return page objects for a menu."""
         return self.model.objects.exclude(
             deleted=True,
+        ).exclude(
+            order=0,
         ).order_by(
             'order'
         )
