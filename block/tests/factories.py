@@ -30,6 +30,10 @@ class PageFactory(factory.django.DjangoModelFactory):
         model = Page
 
     @factory.sequence
+    def order(n):
+        return n
+
+    @factory.sequence
     def slug(n):
         return 'page_{:02d}'.format(n)
 
