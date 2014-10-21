@@ -1,0 +1,32 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+  Block
+{% endblock title %}
+
+{% block heading %}
+  Block
+{% endblock heading %}
+
+{% block sub_heading %}
+  Example App
+{% endblock sub_heading %}
+
+{% block menu %}
+  {% if user.is_staff %}
+    <li>
+      <a href="{% url 'block.page.list' %}">
+        <i class="fa fa-file-text-o"></i>
+        Pages
+      </a>
+    </li>
+    <li>
+      <a href="{% url "admin:index" %}">Admin</a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock menu %}
+
+{% block footer %}
+{% endblock footer %}

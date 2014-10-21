@@ -1,0 +1,13 @@
+{% if c.is_published %}
+  <i class="fa fa-thumbs-o-up"></i>
+  <small>{{ c.date_moderated|date:"d/m/y" }}</small>
+{% elif c.is_pending_added %}
+  <small>New</small>
+{% elif c.is_pending_edited %}
+  <small>Pending</small>
+{% elif c.is_pending_pushed %}
+  <small>Published</small>
+{% elif c.is_removed %}
+  <i class="fa fa-thumbs-o-down"></i>
+  <small>{{ c.date_moderated|date:"d/m/y" }}</small>
+{% endif %}
