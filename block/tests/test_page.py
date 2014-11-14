@@ -13,12 +13,20 @@ class TestPage(TestCase):
         self.page = make_page('Home', 'home', 0, 'test.html')
         self.page = make_page('Information', 'info', 1, 'test.html')
         self.page = make_page('Portfolio', 'portfolio', 2, 'test.html')
+        self.page = make_page('Delete', 'delete', 3, 'test.html', deleted=True)
 
     def test_menu(self):
         self.assertEqual(3, len(Page.objects.menu()))
 
     def test_menu_in(self):
         result = [p.slug for p in Page.objects.menu()]
+        self.assertListEqual(
+            ['home', 'info', 'portfolio'],
+            result
+        )
+
+    def test_pages(self):
+        result = [p.slug for p in Page.objects.pages()]
         self.assertListEqual(
             ['home', 'info', 'portfolio'],
             result
