@@ -197,9 +197,7 @@ class Section(TimeStampedModel):
     """Section of the page e.g. content, header, footer."""
 
     name = models.CharField(max_length=100)
-    slug = models.SlugField(
-        max_length=100, unique=True, help_text='What is this field used for?'
-    )
+    slug = models.SlugField(max_length=100, unique=True)
     block_app = models.CharField(
         max_length=100, help_text="app name e.g. 'compose'"
     )
