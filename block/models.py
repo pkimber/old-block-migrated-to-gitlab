@@ -128,10 +128,12 @@ class PageManager(models.Manager):
 
     def menu(self):
         """Return page objects for a menu."""
-        return self.model.objects.exclude(
-            deleted=True,
-        ).exclude(
-            order=0,
+        return self.pages().exclude(order=0)
+
+    def pages(self):
+        """Return all pages (excluding deleted)."""
+        return self.model.objects.all().exclude(
+            deleted=True
         ).order_by(
             'order'
         )

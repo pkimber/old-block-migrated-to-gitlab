@@ -24,3 +24,10 @@ class TestPage(TestCase):
             ['home', 'info', 'portfolio'],
             result
         )
+
+    def test_pages(self):
+        result = [p.slug for p in Page.objects.pages()]
+        self.assertListEqual(
+            ['home', 'info', 'portfolio'],
+            result
+        )
