@@ -23,21 +23,11 @@ PAGE_HOME = 'home'
 
 
 def _default_edit_state():
-    return EditState.objects._add()
-
-
-def _default_edit_state_pk():
-    """For 'migrations' in other apps."""
-    return _default_edit_state().pk
+    return EditState.objects._add().pk
 
 
 def _default_moderate_state():
-    return ModerateState.objects._pending()
-
-
-def _default_moderate_state_pk():
-    """For 'migrations' in other apps."""
-    return _default_moderate_state().pk
+    return ModerateState.objects._pending().pk
 
 
 class BlockError(Exception):
