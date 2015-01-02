@@ -49,7 +49,6 @@ class ContentPageMixin(BaseMixin):
         context = super(ContentPageMixin, self).get_context_data(**kwargs)
         context.update(dict(
             page=self.get_page(),
-            pages=Page.objects.menu(),
         ))
         return context
 
