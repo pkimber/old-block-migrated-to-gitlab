@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'block',
     'example',
     'login',
+    'mail',
 )
 
 # A sample logging configuration. The only tangible logging

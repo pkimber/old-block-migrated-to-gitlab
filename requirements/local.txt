@@ -2,6 +2,7 @@
 -e .
 -e ../base
 -e ../login
+-e ../mail
 beautifulsoup4
 devpi-client
 factory-boy
