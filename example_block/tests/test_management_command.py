@@ -1,12 +1,10 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.test import TestCase
 
 from block.management.commands import demo_data_block
 from login.management.commands import demo_data_login
 
-from example.management.commands import demo_data_example
+from example_block.management.commands import demo_data_example
 
 
 class TestCommand(TestCase):

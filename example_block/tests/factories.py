@@ -1,10 +1,8 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 import factory
 
 from block.tests.factories import PageSectionFactory
-from example.models import (
+from example_block.models import (
     Title,
     TitleBlock,
 )

@@ -1,17 +1,15 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.test import TestCase
 
 from block.tests.helper import check_content
 from block.tests.factories import PageSectionFactory
-from example.tests.factories import (
+from example_block.tests.factories import (
     TitleBlockFactory,
     TitleFactory,
 )
 from login.tests.factories import UserFactory
 
-from example.models import Title
+from example_block.models import Title
 
 
 class TestTitle(TestCase):

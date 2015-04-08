@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -14,7 +12,7 @@ from login.tests.factories import (
     UserFactory,
 )
 
-from example.models import Title
+from example_block.models import Title
 
 
 class TestView(TestCase):

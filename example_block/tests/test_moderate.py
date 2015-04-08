@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import IntegrityError
 from django.test import TestCase
 
@@ -11,8 +9,8 @@ from block.models import (
 from block.tests.factories import PageSectionFactory
 from login.tests.factories import UserFactory
 
-from example.models import Title
-from example.tests.factories import (
+from example_block.models import Title
+from example_block.tests.factories import (
     TitleBlockFactory,
     TitleFactory,
 )

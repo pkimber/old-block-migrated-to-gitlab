@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from block.tests.scenario import (
     get_page_section_home_body,
     get_page_section_information_body,
@@ -8,8 +6,8 @@ from block.tests.scenario import (
 from login.tests.scenario import get_user_staff
 
 from block.models import ModerateState
-from example.models import Title
-from example.tests.model_maker import (
+from example_block.models import Title
+from example_block.tests.model_maker import (
     make_title,
     make_title_block,
 )

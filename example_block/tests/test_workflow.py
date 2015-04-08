@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.test import TestCase
 
 from block.models import ModerateState
@@ -8,7 +6,7 @@ from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
 )
-from example.tests.factories import TitleFactory
+from example_block.tests.factories import TitleFactory
 
 
 class TestWorkflow(TestCase):

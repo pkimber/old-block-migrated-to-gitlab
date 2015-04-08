@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -169,7 +167,6 @@ class Page(TimeStampedModel):
         if self.slug_menu:
             result.update(dict(menu=self.slug_menu,))
         return result
-
 
 reversion.register(Page)
 
