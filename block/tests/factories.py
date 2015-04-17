@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 import factory
 
 from block.models import (
@@ -31,7 +29,8 @@ class PageFactory(factory.django.DjangoModelFactory):
 
     @factory.sequence
     def order(n):
-        return n
+        """Order '0' excludes from the menu - so include by default."""
+        return n + 1
 
     @factory.sequence
     def slug(n):
