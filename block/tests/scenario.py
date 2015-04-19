@@ -77,7 +77,7 @@ def default_scenario_block():
     # body section
     body = init_section(
         'Body',
-        'example',
+        'example_block',
         'Title',
         'example.title.create'
     )

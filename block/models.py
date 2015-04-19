@@ -130,13 +130,23 @@ class PageManager(models.Manager):
 class Page(TimeStampedModel):
     """Which page on the web site.
 
-    The 'slug_menu' is an optional field that can be used to add a page to a
-    sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
-    set to 'faq'.
+    slug_menu
 
-    An order of zero (0) indicates that the page should be excluded from a
-    menu - see 'PageManager', 'menu' (although it doesn't look like it
-    excludes items with an order of zero!).
+      The 'slug_menu' is an optional field that can be used to add a page to a
+      sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
+      set to 'faq'.
+
+    order
+
+      An order of zero (0) indicates that the page should be excluded from a
+      menu - see 'PageManager', 'menu' (although it doesn't look like it
+      excludes items with an order of zero!).
+
+    custom
+
+      A custom page is one where the URL and view have been overridden.  This
+      is commonly used to add a form to the page, or add extra context.
+
     """
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
@@ -145,6 +155,7 @@ class Page(TimeStampedModel):
     is_home = models.BooleanField(default=False)
     template_name = models.CharField(max_length=150)
     deleted = models.BooleanField(default=False)
+    custom = models.BooleanField(default=False)
     objects = PageManager()
 
     class Meta:

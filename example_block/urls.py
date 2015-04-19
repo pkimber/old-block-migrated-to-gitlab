@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -13,11 +11,14 @@ from block.views import (
 )
 
 from .views import (
+    ExampleView,
+    PageListView,
     TitleCreateView,
     TitlePublishView,
     TitleRemoveView,
     TitleUpdateView,
 )
+
 
 admin.autodiscover()
 
@@ -41,6 +42,17 @@ urlpatterns = patterns(
     url(r'^home/user/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
         name='project.dash'
+        ),
+    # custom page - see https://www.pkimber.net/open/app-block.html
+    url(regex=r'^example/info/$',
+        view=ExampleView.as_view(),
+        kwargs=dict(page='example', menu='info'),
+        name='web.example.info'
+        ),
+    # list of pages
+    url(regex=r'^block/page/list/$',
+        view=PageListView.as_view(),
+        name='block.page.list'
         ),
     # block page design
     url(regex=r'^(?P<page>[-\w\d]+)/design/$',
