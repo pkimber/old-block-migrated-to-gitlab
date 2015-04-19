@@ -6,11 +6,15 @@ from block.models import (
 )
 
 
+def get_page_custom_calendar():
+    return Page.objects.get(slug=Page.CUSTOM, slug_menu='calendar-information')
+
+
 def get_page_home():
     return Page.objects.get(slug=Page.HOME)
 
 
-def get_page_information():
+def get_page_info():
     return Page.objects.get(slug='info')
 
 
@@ -58,6 +62,7 @@ def default_scenario_block():
         'calendar-information',
         'Calendar',
         3,
-        'example/calendar-information.html'
+        'example/calendar-information.html',
+        custom=True
     )
     PageSection.objects.init_page_section(calendar, body)

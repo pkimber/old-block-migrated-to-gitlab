@@ -278,7 +278,7 @@ class SectionManager(models.Manager):
             obj.paginated = kwargs.get('paginated', None)
             obj.save()
         except self.model.DoesNotExist:
-            result = Section.objects.create_section(
+            obj = Section.objects.create_section(
                 slug,
                 name,
                 block_app,
@@ -286,7 +286,7 @@ class SectionManager(models.Manager):
                 create_url_name,
                 **kwargs
             )
-        return result
+        return obj
 
 
 class Section(TimeStampedModel):
