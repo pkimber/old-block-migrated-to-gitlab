@@ -78,6 +78,10 @@ urlpatterns = patterns(
         view=TitleCreateView.as_view(),
         name='example.title.create'
         ),
+    url(regex=r'^title/create/(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/(?P<section>[-\w\d]+)/$',
+        view=TitleCreateView.as_view(),
+        name='example.title.create'
+        ),
     url(regex=r'^title/(?P<pk>\d+)/publish/$',
         view=TitlePublishView.as_view(),
         name='example.title.publish'

@@ -7,5 +7,4 @@ class Command(BaseCommand):
     help = "Initialise block application"
 
     def handle(self, *args, **options):
-        pass
         print("Initialised 'block' app...")

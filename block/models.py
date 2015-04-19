@@ -122,7 +122,7 @@ reversion.register(ModerateState)
 class PageManager(models.Manager):
 
     def create_page(
-            self, name, slug_page, slug_menu, order, template_name, **kwargs):
+            self, slug_page, slug_menu, name, order, template_name, **kwargs):
         obj = self.model(
             name=name,
             slug=slug_page,
@@ -136,7 +136,7 @@ class PageManager(models.Manager):
         return obj
 
     def init_page(
-            self, name, slug_page, slug_menu, order, template_name, **kwargs):
+            self, slug_page, slug_menu, name, order, template_name, **kwargs):
         if not slug_menu:
             slug_menu = ''
         try:
@@ -151,9 +151,9 @@ class PageManager(models.Manager):
             obj.save()
         except self.model.DoesNotExist:
             obj = self.create_page(
-                name,
                 slug_page,
                 slug_menu,
+                name,
                 order,
                 template_name,
                 **kwargs

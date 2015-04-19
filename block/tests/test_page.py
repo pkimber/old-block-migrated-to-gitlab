@@ -19,7 +19,7 @@ def test_init_not():
 
 @pytest.mark.django_db
 def test_init():
-    Page.objects.init_page('Home', Page.HOME, '', 0, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html')
     try:
         Page.objects.get(slug=Page.HOME)
     except Page.DoesNotExist:
@@ -29,11 +29,11 @@ def test_init():
 @pytest.mark.django_db
 def test_init_change_order():
     # create page (order 1)
-    Page.objects.init_page('Home', Page.HOME, '', 1, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 1, 'home.html')
     page = Page.objects.get(slug=Page.HOME)
     assert 1 == page.order
     # update page (order 3)
-    Page.objects.init_page('Home', Page.HOME, '', 3, 'my.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 3, 'my.html')
     page = Page.objects.get(slug=Page.HOME)
     assert 3 == page.order
     assert 'my.html' == page.template_name
@@ -41,14 +41,14 @@ def test_init_change_order():
 
 @pytest.mark.django_db
 def test_init_is_home():
-    Page.objects.init_page('Home', Page.HOME, '', 0, 'home.html', is_home=True)
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html', is_home=True)
     page = Page.objects.get(slug=Page.HOME)
     assert True == page.is_home
 
 
 @pytest.mark.django_db
 def test_init_is_not_home():
-    Page.objects.init_page('Home', Page.HOME, '' , 0, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home' , 0, 'home.html')
     page = Page.objects.get(slug=Page.HOME)
     assert False == page.is_home
 
@@ -56,11 +56,11 @@ def test_init_is_not_home():
 @pytest.mark.django_db
 def test_init_set_home():
     # create page (is not a home page)
-    Page.objects.init_page('Home', Page.HOME, '', 0, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html')
     page = Page.objects.get(slug=Page.HOME)
     assert False == page.is_home
     # update page (is now a home page)
-    Page.objects.init_page('Home', Page.HOME, '', 0, 'home.html', is_home=True)
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html', is_home=True)
     page = Page.objects.get(slug=Page.HOME)
     assert True == page.is_home
 
