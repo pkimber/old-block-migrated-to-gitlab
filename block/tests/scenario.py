@@ -63,6 +63,6 @@ def default_scenario_block():
         'Calendar',
         3,
         'example/calendar-information.html',
-        custom=True
+        is_custom=True
     )
     PageSection.objects.init_page_section(calendar, body)

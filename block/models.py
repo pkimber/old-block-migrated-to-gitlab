@@ -129,7 +129,7 @@ class PageManager(models.Manager):
             slug_menu=slug_menu,
             order=order,
             template_name=template_name,
-            custom=kwargs.get('custom', False),
+            is_custom=kwargs.get('is_custom', False),
             is_home=kwargs.get('is_home', False),
         )
         obj.save()
@@ -146,7 +146,7 @@ class PageManager(models.Manager):
             obj.slug_menu = slug_menu
             obj.order = order
             obj.template_name = template_name
-            obj.custom = kwargs.get('custom', False)
+            obj.is_custom = kwargs.get('is_custom', False)
             obj.is_home = kwargs.get('is_home', False)
             obj.save()
         except self.model.DoesNotExist:
@@ -169,7 +169,7 @@ class PageManager(models.Manager):
         return self.model.objects.all().exclude(
             deleted=True,
         ).exclude(
-            custom=True,
+            is_custom=True,
         ).order_by(
             'order'
         )
@@ -207,7 +207,7 @@ class Page(TimeStampedModel):
     is_home = models.BooleanField(default=False)
     template_name = models.CharField(max_length=150)
     deleted = models.BooleanField(default=False)
-    custom = models.BooleanField(default=False)
+    is_custom = models.BooleanField(default=False)
     objects = PageManager()
 
     class Meta:
@@ -610,3 +610,55 @@ class ContentModel(TimeStampedModel):
             raise BlockError(
                 "Sorry, only pending content can be edited."
             )
+
+
+class ViewUrlManager(models.Manager):
+
+    def create_view_url(self, user, page, url):
+        obj = self.model(user=user, page=page, url=url)
+        obj.save()
+        return obj
+
+    def view_url(self, user, page, url):
+        """Get the view URL for a user and page.
+
+        The view URL is the URL we return to when leaving design mode.
+
+        If we don't pass in a URL, but a URL has already been saved for this
+        page, then return it.
+
+        """
+        url = url or ''
+        if page.is_custom:
+            try:
+                obj = self.model.objects.get(user=user, page=page)
+                if url:
+                    obj.url = url
+                    obj.save()
+                else:
+                    url = obj.url
+            except self.model.DoesNotExist:
+                self.create_view_url(user, page, url)
+        else:
+            url = page.get_absolute_url()
+        return url
+
+
+class ViewUrl(models.Model):
+    """Store the view URL for a custom page."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
+    page = models.ForeignKey(Page)
+    url = models.CharField(max_length=200, blank=True)
+    objects = ViewUrlManager()
+
+    class Meta:
+        ordering = ('user__username', 'page__slug', 'page__slug_menu')
+        unique_together = ('user', 'page')
+        verbose_name = 'View URL'
+        verbose_name_plural = 'View URLs'
+
+    def __str__(self):
+        return '{} {}'.format(self.user.username, self.page.name, self.url)
+
+reversion.register(ViewUrl)

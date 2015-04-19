@@ -69,7 +69,7 @@ def test_init_set_home():
 def test_menu():
     PageFactory(slug='home', order=0)
     PageFactory(slug='history', deleted=True)
-    PageFactory(slug='custom', custom=True)
+    PageFactory(slug=Page.CUSTOM, is_custom=True)
     PageFactory(slug='info')
     PageFactory(slug='portfolio')
     assert 2 == len(Page.objects.menu())
@@ -79,7 +79,7 @@ def test_menu():
 def test_menu_in():
     PageFactory(slug='home', order=0)
     PageFactory(slug='history', deleted=True)
-    PageFactory(slug='custom', custom=True)
+    PageFactory(slug=Page.CUSTOM, is_custom=True)
     PageFactory(slug='info')
     PageFactory(slug='portfolio')
     result = [p.slug for p in Page.objects.menu()]
@@ -90,7 +90,7 @@ def test_menu_in():
 def test_pages():
     PageFactory(slug='home', order=0)
     PageFactory(slug='history', deleted=True)
-    PageFactory(slug='custom', custom=True)
+    PageFactory(slug=Page.CUSTOM, is_custom=True)
     PageFactory(slug='info')
     PageFactory(slug='portfolio')
     result = [p.slug for p in Page.objects.pages()]

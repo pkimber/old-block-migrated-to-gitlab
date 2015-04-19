@@ -28,6 +28,7 @@ from .models import (
     Page,
     PageSection,
     Section,
+    ViewUrl,
 )
 
 
@@ -223,38 +224,38 @@ class PageDesignMixin(object):
     def get_context_data(self, **kwargs):
         context = super(PageDesignMixin, self).get_context_data(**kwargs)
         page = self.get_page()
+        view_url = ViewUrl.objects.view_url(
+            self.request.user, page, self.request.GET.get('view')
+        )
         context.update(dict(
             design=True,
             is_block_page=True,
+            view_url=view_url,
         ))
         for e in PageSection.objects.filter(page=page) :
             block_create_url = '{}_create_url'.format(e.section.slug)
             block_list_name = '{}_list'.format(e.section.slug)
             block_model = get_block_model(e)
             block_list = block_model.objects.pending(e)
-            try:
-                if (e.section.paginated):
-                    # this is the block that requires pagination
-                    if (e.section.paginated.order_by_field != None):
-                        all_objects = block_list.order_by(e.section.paginated.order_by_field)
-                    else:
-                        all_objects = block_list
-
-                    if (e.section.paginated.items_per_page):
-                        paginator = Paginator(all_objects,
-                            e.section.paginated.items_per_page)
-                    pageNo = self.request.GET.get('page')
-                    try:
-                        block_list = paginator.page(pageNo)
-                    except PageNotAnInteger:
-                        # If page is not an integer, deliver first page.
-                        block_list = paginator.page(1)
-                    except EmptyPage:
-                        # If page is out of range (e.g. 9999), deliver last page of results.
-                        block_list = paginator.page(paginator.num_pages)
-            except:
-                pass
-
+            # PJK TODO I think this section is duplicated in this module.
+            if e.section.paginated:
+                # this is the block that requires pagination
+                if e.section.paginated.order_by_field:
+                    all_objects = block_list.order_by(e.section.paginated.order_by_field)
+                else:
+                    all_objects = block_list
+                if e.section.paginated.items_per_page:
+                    paginator = Paginator(all_objects,
+                        e.section.paginated.items_per_page)
+                pageNo = self.request.GET.get('page')
+                try:
+                    block_list = paginator.page(pageNo)
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+                    block_list = paginator.page(1)
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    block_list = paginator.page(paginator.num_pages)
             kwargs = dict(section=e.section.slug)
             kwargs.update(page.get_url_kwargs())
             context.update({
@@ -280,7 +281,7 @@ class PageMixin(object):
     def _check_url(self, page):
         """Check the page is being accessed using the correct URL."""
         if self.request.path == page.get_absolute_url():
-            if page.custom:
+            if page.is_custom:
                 raise BlockError(
                     "This is a custom page, so the request path "
                     "should NOT match the absolute url: '{}'".format(
@@ -288,7 +289,7 @@ class PageMixin(object):
                     )
                 )
         else:
-            if page.custom:
+            if page.is_custom:
                 pass
             else:
                 raise BlockError(
@@ -308,6 +309,7 @@ class PageMixin(object):
             block_list_name = '{}_list'.format(e.section.slug)
             block_model = get_block_model(e)
             block_list = block_model.objects.published(e)
+            # PJK TODO I think this section is duplicated in this module.
             if e.section.paginated:
                 # this is the block that requires pagination
                 if e.section.paginated.order_by_field:

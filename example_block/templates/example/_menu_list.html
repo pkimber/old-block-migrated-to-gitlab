@@ -4,7 +4,7 @@
       {{ p.name }}
     </a>
   </li>
-  {% if p.slug == page.slug and p.slug_menu == page.slug_menu %}
+  {% if p.pk == page.pk %}
     {% include 'example/_design_menu.html' %}
   {% endif %}
 {% endfor %}
