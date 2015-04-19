@@ -17,9 +17,6 @@ from base.model_utils import (
 )
 
 
-PAGE_HOME = 'home'
-
-
 def _default_edit_state():
     return EditState.objects._add().pk
 
@@ -114,6 +111,45 @@ reversion.register(ModerateState)
 
 class PageManager(models.Manager):
 
+    def create_page(
+            self, name, slug_page, slug_menu, order, template_name, **kwargs):
+        obj = self.model(
+            name=name,
+            slug=slug_page,
+            slug_menu=slug_menu,
+            order=order,
+            template_name=template_name,
+            custom=kwargs.get('custom', False),
+            is_home=kwargs.get('is_home', False),
+        )
+        obj.save()
+        return obj
+
+    def init_page(
+            self, name, slug_page, slug_menu, order, template_name, **kwargs):
+        if not slug_menu:
+            slug_menu = ''
+        try:
+            obj = Page.objects.get(slug=slug_page, slug_menu=slug_menu)
+            obj.name = name
+            obj.slug = slug_page
+            obj.slug_menu = slug_menu
+            obj.order = order
+            obj.template_name = template_name
+            obj.custom = kwargs.get('custom', False)
+            obj.is_home = kwargs.get('is_home', False)
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_page(
+                name,
+                slug_page,
+                slug_menu,
+                order,
+                template_name,
+                **kwargs
+            )
+        return obj
+
     def menu(self):
         """Return page objects for a menu."""
         return self.pages().exclude(order=0)
@@ -121,7 +157,9 @@ class PageManager(models.Manager):
     def pages(self):
         """Return all pages (excluding deleted)."""
         return self.model.objects.all().exclude(
-            deleted=True
+            deleted=True,
+        ).exclude(
+            custom=True,
         ).order_by(
             'order'
         )
@@ -148,6 +186,9 @@ class Page(TimeStampedModel):
       is commonly used to add a form to the page, or add extra context.
 
     """
+    CUSTOM = 'custom'
+    HOME = 'home'
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     slug_menu = models.SlugField(max_length=100, blank=True)

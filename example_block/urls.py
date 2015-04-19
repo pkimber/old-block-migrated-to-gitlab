@@ -5,6 +5,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
+from block.models import Page
 from block.views import (
     PageDesignView,
     PageView,
@@ -28,7 +29,7 @@ urlpatterns = patterns(
     # '/' send to home
     url(regex=r'^$',
         view=PageView.as_view(),
-        kwargs=dict(page='home'),
+        kwargs=dict(page=Page.HOME),
         name='project.home'
         ),
     # admin, login
@@ -44,10 +45,10 @@ urlpatterns = patterns(
         name='project.dash'
         ),
     # custom page - see https://www.pkimber.net/open/app-block.html
-    url(regex=r'^example/info/$',
+    url(regex=r'^calendar/information/$',
         view=ExampleView.as_view(),
-        kwargs=dict(page='example', menu='info'),
-        name='web.example.info'
+        kwargs=dict(page=Page.CUSTOM, menu='calendar-information'),
+        name='calendar.information'
         ),
     # list of pages
     url(regex=r'^block/page/list/$',

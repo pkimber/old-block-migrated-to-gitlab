@@ -7,7 +7,6 @@ from block.models import (
     Section,
 )
 from block.service import (
-    init_page,
     init_page_section,
     init_section,
 )
@@ -76,32 +75,25 @@ def default_scenario_block():
     init_app_block()
     # body section
     body = init_section(
-        'Body',
-        'example_block',
-        'Title',
-        'example.title.create'
+        'Body', 'example_block', 'Title', 'example.title.create'
     )
     # home
-    home = init_page(
-        'Home',
-        'home',
-        0,
-        'example/page.html'
+    calendar = Page.objects.init_page(
+        'Calendar', 'home', '', 1, 'example/calendar-information.html'
+    )
+    init_page_section(calendar, body)
+    # home
+    home = Page.objects.init_page(
+        'Home', 'home', '', 0, 'example/page.html', **(dict(is_home=True))
     )
     init_page_section(home, body)
     # information
-    information = init_page(
-        'Information',
-        'info',
-        1,
-        'example/page.html'
+    information = Page.objects.init_page(
+        'Information', 'info', '', 1, 'example/page.html'
     )
     init_page_section(information, body)
     # contact
-    contact = init_page(
-        'Contact',
-        'contact',
-        2,
-        'example/page.html'
+    contact = Page.objects.init_page(
+        'Contact', 'contact', '', 2, 'example/page.html'
     )
     init_page_section(contact, body)

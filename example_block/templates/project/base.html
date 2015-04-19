@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends 'base/base.html' %}
 {% load staticfiles %}
 
 {% block title %}
@@ -22,7 +22,10 @@
       </a>
     </li>
     <li>
-      <a href="{% url "admin:index" %}">Admin</a>
+      <a href="{% url 'admin:index' %}">Admin</a>
+    </li>
+    <li>
+      <a href="{% url 'calendar.information' %}">Calendar</a>
     </li>
   {% endif %}
   {{ block.super }}
