@@ -49,6 +49,11 @@ class EditStateManager(models.Manager):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.PUSH)
 
+    def create_edit_state(self, slug, name):
+        obj = self.model(slug=slug, name=name)
+        obj.save()
+        return obj
+
 
 class EditState(models.Model):
     """Add, pushed or editing."""
@@ -85,6 +90,11 @@ class ModerateStateManager(models.Manager):
     def _removed(self):
         """Internal use only."""
         return self.model.objects.get(slug=ModerateState.REMOVED)
+
+    def create_moderate_state(self, slug, name):
+        obj = self.model(slug=slug, name=name)
+        obj.save()
+        return obj
 
 
 class ModerateState(models.Model):
@@ -166,11 +176,11 @@ class PageManager(models.Manager):
 
 
 class Page(TimeStampedModel):
-    """Which page on the web site.
+    """A page on the web site.
 
     slug_menu
 
-      The 'slug_menu' is an optional field that can be used to add a page to a
+      The 'slug_menu' is a extra field that can be used to add a page to a
       sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
       set to 'faq'.
 
@@ -183,7 +193,8 @@ class Page(TimeStampedModel):
     custom
 
       A custom page is one where the URL and view have been overridden.  This
-      is commonly used to add a form to the page, or add extra context.
+      is commonly used to add a form to the page, or add extra context.  Our
+      convention is to set the 'slug' to 'Page.CUSTOM' for custom pages.
 
     """
     CUSTOM = 'custom'
@@ -224,7 +235,8 @@ reversion.register(Page)
 
 
 class PaginatedSection(models.Model):
-    """Parameters for a Paginated Section"""
+    """Parameters for a Paginated Section."""
+
     items_per_page = models.IntegerField(default=10)
     order_by_field = models.CharField(max_length=100)
 
@@ -232,6 +244,49 @@ class PaginatedSection(models.Model):
       return '{} - {}'.format(self.items_per_page, self.order_by_field)
 
 reversion.register(PaginatedSection)
+
+
+class SectionManager(models.Manager):
+
+    def create_section(
+            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+        obj = self.model(
+            slug=slug,
+            name=name,
+            block_app=block_app,
+            block_model=block_model,
+            create_url_name=create_url_name,
+        )
+        paginated = kwargs.get('paginated', None)
+        if paginated:
+            obj.paginated = paginated
+        obj.save()
+        return obj
+
+    def init_section(
+            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+        """Create a section if it doesn't already exist."""
+        if not create_url_name:
+            create_url_name = ''
+        try:
+            obj = Section.objects.get(slug=slug)
+            obj.slug = slug
+            obj.name = name
+            obj.block_app = block_app
+            obj.block_model = block_model
+            obj.create_url_name = create_url_name
+            obj.paginated = kwargs.get('paginated', None)
+            obj.save()
+        except self.model.DoesNotExist:
+            result = Section.objects.create_section(
+                slug,
+                name,
+                block_app,
+                block_model,
+                create_url_name,
+                **kwargs
+            )
+        return result
 
 
 class Section(TimeStampedModel):
@@ -250,6 +305,7 @@ class Section(TimeStampedModel):
         help_text="url name for creating the model e.g. 'compose.article.create'"
     )
     paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
+    objects = SectionManager()
 
     class Meta:
         ordering = ('name',)
@@ -262,11 +318,27 @@ class Section(TimeStampedModel):
 reversion.register(Section)
 
 
+class PageSectionManager(models.Manager):
+
+    def create_page_section(self, page, section):
+        obj = self.model(page=page, section=section)
+        obj.save()
+        return obj
+
+    def init_page_section(self, page, section):
+        try:
+            obj = PageSection.objects.get(page=page, section=section)
+        except self.model.DoesNotExist:
+            obj = self.create_page_section(page, section)
+        return obj
+
+
 class PageSection(models.Model):
     """Section of a page."""
 
     page = models.ForeignKey(Page)
     section = models.ForeignKey(Section)
+    objects = PageSectionManager()
 
     class Meta:
         ordering = ('page__slug', 'section__slug')

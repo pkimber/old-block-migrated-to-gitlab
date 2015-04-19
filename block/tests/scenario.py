@@ -6,14 +6,6 @@ from block.models import (
     PageSection,
     Section,
 )
-from block.service import (
-    init_page_section,
-    init_section,
-)
-from block.tests.model_maker import (
-    make_edit_state,
-    make_moderate_state,
-)
 
 
 def get_page_home():
@@ -42,58 +34,28 @@ def get_section_body():
     return Section.objects.get(slug='body')
 
 
-def init_app_block():
-    """Edit and moderate state."""
-    try:
-        EditState.objects._add()
-    except EditState.DoesNotExist:
-        make_edit_state(EditState.ADD)
-    try:
-        EditState.objects._edit()
-    except EditState.DoesNotExist:
-        make_edit_state(EditState.EDIT)
-    try:
-        EditState.objects._push()
-    except EditState.DoesNotExist:
-        make_edit_state(EditState.PUSH)
-    # moderate state
-    try:
-        ModerateState.objects._pending()
-    except ModerateState.DoesNotExist:
-        make_moderate_state(ModerateState.PENDING)
-    try:
-        ModerateState.objects._published()
-    except ModerateState.DoesNotExist:
-        make_moderate_state(ModerateState.PUBLISHED)
-    try:
-        ModerateState.objects._removed()
-    except ModerateState.DoesNotExist:
-        make_moderate_state(ModerateState.REMOVED)
-
-
 def default_scenario_block():
-    init_app_block()
     # body section
-    body = init_section(
-        'Body', 'example_block', 'Title', 'example.title.create'
+    body = Section.objects.init_section(
+        'body', 'Body', 'example_block', 'Title', 'example.title.create'
     )
     # home
     calendar = Page.objects.init_page(
         'Calendar', 'home', '', 1, 'example/calendar-information.html'
     )
-    init_page_section(calendar, body)
+    PageSection.objects.init_page_section(calendar, body)
     # home
     home = Page.objects.init_page(
-        'Home', 'home', '', 0, 'example/page.html', **(dict(is_home=True))
+        'Home', 'home', '', 0, 'example/page.html', is_home=True
     )
-    init_page_section(home, body)
+    PageSection.objects.init_page_section(home, body)
     # information
     information = Page.objects.init_page(
         'Information', 'info', '', 1, 'example/page.html'
     )
-    init_page_section(information, body)
+    PageSection.objects.init_page_section(information, body)
     # contact
     contact = Page.objects.init_page(
         'Contact', 'contact', '', 2, 'example/page.html'
     )
-    init_page_section(contact, body)
+    PageSection.objects.init_page_section(contact, body)
