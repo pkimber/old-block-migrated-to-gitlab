@@ -1,20 +1,21 @@
-{% extends "project/base.html" %}
+{% extends 'project/base.html' %}
 {% load block_tags %}
 
 {% block menu %}
   {% for p in pages %}
     {% if p.order %}
-      <li>
-        <a href="{{ p.get_absolute_url }}">
+      <li class="pure-menu-item">
+        <a href="{{ p.get_absolute_url }}" class="pure-menu-link">
           {{ p.name }}
         </a>
       </li>
     {% endif %}
   {% endfor %}
   {% if user.is_staff %}
-    <li>
+    <li class="pure-menu-item">
       <a href="{% if design %}..{% else %}{{ page.get_design_url }}{% endif %}"
-        title="{% if design %}View{% else %}Design{% endif %}" >
+        title="{% if design %}View{% else %}Design{% endif %}"
+        class="pure-menu-link">
         {% if design %}
           <i class="fa fa-square-o"></i>
           View

@@ -11,21 +11,26 @@
 
 {% block sub_heading %}
   Example App
+  -
+  {{ page.name }}
 {% endblock sub_heading %}
 
 {% block menu %}
   {% if user.is_staff %}
-    <li>
-      <a href="{% url 'block.page.list' %}">
+    <li class="pure-menu-item">
+      <a href="{% url 'block.page.list' %}" class="pure-menu-link">
         <i class="fa fa-file-text-o"></i>
         Pages
       </a>
     </li>
-    <li>
-      <a href="{% url 'admin:index' %}">Admin</a>
+    <li class="pure-menu-item">
+      <a href="{% url 'calendar.information' %}" class="pure-menu-link">
+        <i class="fa fa-calendar"></i>
+        Calendar
+      </a>
     </li>
-    <li>
-      <a href="{% url 'calendar.information' %}">Calendar</a>
+    <li class="pure-menu-item">
+      <a href="{% url 'admin:index' %}" class="pure-menu-link">Admin</a>
     </li>
   {% endif %}
   {{ block.super }}

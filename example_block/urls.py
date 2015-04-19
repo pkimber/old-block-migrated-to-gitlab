@@ -48,7 +48,7 @@ urlpatterns = patterns(
     url(regex=r'^calendar/information/$',
         view=ExampleView.as_view(),
         kwargs=dict(page=Page.CUSTOM, menu='calendar-information'),
-        name='calendar.information'
+        name='project.page'
         ),
     # list of pages
     url(regex=r'^block/page/list/$',
