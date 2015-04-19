@@ -318,6 +318,14 @@ class Section(TimeStampedModel):
     def __str__(self):
         return '{}'.format(self.name)
 
+    def create_url(self, page):
+        url = None
+        if self.create_url_name:
+            kwargs = dict(section=self.slug)
+            kwargs.update(page.get_url_kwargs())
+            url = reverse(self.create_url_name, kwargs=kwargs)
+        return url
+
 reversion.register(Section)
 
 

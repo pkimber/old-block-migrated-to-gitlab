@@ -32,30 +32,7 @@ from .models import (
 )
 
 
-def _paginate_section(block_list, e):
-    """Paginate the 'block_list' queryset, using page section properties."""
-    if e.section.paginated:
-        # this is the block that requires pagination
-        if e.section.paginated.order_by_field:
-            all_objects = block_list.order_by(e.section.paginated.order_by_field)
-        else:
-            all_objects = block_list
-        if e.section.paginated.items_per_page:
-            paginator = Paginator(all_objects,
-                e.section.paginated.items_per_page)
-        pageNo = self.request.GET.get('page')
-        try:
-            block_list = paginator.page(pageNo)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            block_list = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            block_list = paginator.page(paginator.num_pages)
-    return block_list
-
-
-def get_block_model(page_section):
+def _get_block_model(page_section):
     block_model = get_model(
         page_section.section.block_app,
         page_section.section.block_model,
@@ -66,6 +43,26 @@ def get_block_model(page_section):
             page_section.section.block_model,
         ))
     return block_model
+
+
+def _paginate_section(qs, section):
+    """Paginate the 'block_list' queryset, using page section properties."""
+    if section.paginated:
+        # this is the block that requires pagination
+        if section.paginated.order_by_field:
+            qs = qs.order_by(section.paginated.order_by_field)
+        if section.paginated.items_per_page:
+            paginator = Paginator(qs, section.paginated.items_per_page)
+        page_no = self.request.GET.get('page')
+        try:
+            qs = paginator.page(page_no)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            qs = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            qs = paginator.page(paginator.num_pages)
+    return qs
 
 
 class ContentPageMixin(BaseMixin):
@@ -256,20 +253,15 @@ class PageDesignMixin(object):
             view_url=view_url,
         ))
         for e in PageSection.objects.filter(page=page) :
-            block_create_url = '{}_create_url'.format(e.section.slug)
-            block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_block_model(e)
-            block_list = _paginate_section(block_model.objects.pending(e), e)
+            block_model = _get_block_model(e)
+            qs = _paginate_section(block_model.objects.pending(e), e.section)
             context.update({
-                block_list_name: block_list,
+                '{}_list'.format(e.section.slug): qs,
             })
-            kwargs = dict(section=e.section.slug)
-            kwargs.update(page.get_url_kwargs())
-            if e.section.create_url_name:
+            create_url = e.section.create_url(page)
+            if create_url:
                 context.update({
-                    block_create_url: reverse(
-                        e.section.create_url_name, kwargs=kwargs
-                    ),
+                    '{}_create_url'.format(e.section.slug): create_url,
                 })
         return context
 
@@ -310,11 +302,10 @@ class PageMixin(object):
             is_block_page=True,
         ))
         for e in PageSection.objects.filter(page=page):
-            block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_block_model(e)
-            block_list = _paginate_section(block_model.objects.published(e), e)
+            block_model = _get_block_model(e)
+            qs = _paginate_section(block_model.objects.published(e), e.section)
             context.update({
-                block_list_name: block_list,
+                '{}_list'.format(e.section.slug): qs,
             })
         return context
 
