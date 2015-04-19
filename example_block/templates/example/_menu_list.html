@@ -1,0 +1,10 @@
+{% for p in menu_list %}
+  <li class="pure-menu-item{% if p.slug == page.slug and p.slug_menu == page.slug_menu %} pure-menu-selected{% endif %}">
+    <a href="{{ p.get_absolute_url }}" class="pure-menu-link">
+      {{ p.name }}
+    </a>
+  </li>
+  {% if p.slug == page.slug and p.slug_menu == page.slug_menu %}
+    {% include 'example/_design_menu.html' %}
+  {% endif %}
+{% endfor %}

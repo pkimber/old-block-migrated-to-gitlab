@@ -220,7 +220,10 @@ class Page(TimeStampedModel):
         return '{}'.format(self.name)
 
     def get_absolute_url(self):
-        return reverse('project.page', kwargs=self.get_url_kwargs())
+        if self.is_home:
+            return reverse('project.home')
+        else:
+            return reverse('project.page', kwargs=self.get_url_kwargs())
 
     def get_design_url(self):
         return reverse('project.page.design', kwargs=self.get_url_kwargs())

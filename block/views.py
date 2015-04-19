@@ -51,6 +51,7 @@ class ContentPageMixin(BaseMixin):
         context = super(ContentPageMixin, self).get_context_data(**kwargs)
         context.update(dict(
             page=self.get_page(),
+            menu_list=Page.objects.menu(),
         ))
         return context
 
@@ -277,12 +278,13 @@ class PageDesignView(
 class PageMixin(object):
 
     def _check_url(self, page):
+        """Check the page is being accessed using the correct URL."""
         if self.request.path == page.get_absolute_url():
             if page.custom:
                 raise BlockError(
-                    "custom page - the 'request.path' ('{}') should not match "
-                    "the absolute url: ('{}')".format(
-                        self.request.path, page.get_absolute_url()
+                    "This is a custom page, so the request path "
+                    "should NOT match the absolute url: '{}'".format(
+                        self.request.path
                     )
                 )
         else:
@@ -331,5 +333,4 @@ class PageMixin(object):
 
 
 class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
-
     pass

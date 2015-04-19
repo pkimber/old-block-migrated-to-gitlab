@@ -16,24 +16,28 @@
 {% endblock sub_heading %}
 
 {% block menu %}
+  {{ block.super }}
+  {% if page.is_home %}
+    {% include 'example/_design_menu.html' %}
+  {% endif %}
+  {% include 'example/_menu_list.html' %}
+  <li class="pure-menu-item">
+    <a href="{% url 'calendar.information' %}" class="pure-menu-link">
+      <i class="fa fa-calendar"></i>
+      Calendar
+    </a>
+  </li>
+  {% if page.slug_menu == 'calendar-information' %}
+    {% include 'example/_design_menu.html' %}
+  {% endif %}
   {% if user.is_staff %}
-    <li class="pure-menu-item">
-      <a href="{% url 'block.page.list' %}" class="pure-menu-link">
-        <i class="fa fa-file-text-o"></i>
-        Pages
+    <li class="pure-menu-item{% if 'settings' in path %} pure-menu-selected{% endif %}">
+      <a href="{% url 'project.settings' %}" class="pure-menu-link">
+        <i class="fa fa-cog"></i>
+        Settings
       </a>
-    </li>
-    <li class="pure-menu-item">
-      <a href="{% url 'calendar.information' %}" class="pure-menu-link">
-        <i class="fa fa-calendar"></i>
-        Calendar
-      </a>
-    </li>
-    <li class="pure-menu-item">
-      <a href="{% url 'admin:index' %}" class="pure-menu-link">Admin</a>
     </li>
   {% endif %}
-  {{ block.super }}
 {% endblock menu %}
 
 {% block footer %}

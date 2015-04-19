@@ -14,6 +14,7 @@ from block.views import (
 from .views import (
     ExampleView,
     PageListView,
+    SettingsView,
     TitleCreateView,
     TitlePublishView,
     TitleRemoveView,
@@ -35,6 +36,10 @@ urlpatterns = patterns(
     # admin, login
     url(regex=r'^admin/',
         view=include(admin.site.urls)
+        ),
+    url(regex=r'^settings/$',
+        view=SettingsView.as_view(),
+        name='project.settings'
         ),
     url(regex=r'^',
         view=include('login.urls')

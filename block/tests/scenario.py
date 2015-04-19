@@ -27,7 +27,7 @@ def get_page_section_home_body():
 
 def get_page_section_information_body():
     return PageSection.objects.get(
-        page=get_page_information(),
+        page=get_page_info(),
         section=get_section_body()
     )
 

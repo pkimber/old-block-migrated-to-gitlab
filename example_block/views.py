@@ -1,11 +1,15 @@
 # -*- encoding: utf-8 -*-
-from django.views.generic import ListView
+from django.views.generic import (
+    ListView,
+    TemplateView,
+)
 
 from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
 )
 
+from base.view_utils import BaseMixin
 from block.forms import ContentEmptyForm
 from block.models import Page
 from block.views import (
@@ -36,6 +40,11 @@ class ExampleView(PageView):
 class PageListView(ListView):
 
     model = Page
+
+
+class SettingsView(BaseMixin, TemplateView):
+
+    template_name = 'example/settings.html'
 
 
 class TitleCreateView(
