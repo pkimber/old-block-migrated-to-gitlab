@@ -45,7 +45,7 @@ def _get_block_model(page_section):
     return block_model
 
 
-def _paginate_section(qs, section):
+def _paginate_section(qs, page_no, section):
     """Paginate the 'block_list' queryset, using page section properties."""
     if section.paginated:
         # this is the block that requires pagination
@@ -53,7 +53,6 @@ def _paginate_section(qs, section):
             qs = qs.order_by(section.paginated.order_by_field)
         if section.paginated.items_per_page:
             paginator = Paginator(qs, section.paginated.items_per_page)
-        page_no = self.request.GET.get('page')
         try:
             qs = paginator.page(page_no)
         except PageNotAnInteger:
@@ -254,7 +253,11 @@ class PageDesignMixin(object):
         ))
         for e in PageSection.objects.filter(page=page) :
             block_model = _get_block_model(e)
-            qs = _paginate_section(block_model.objects.pending(e), e.section)
+            qs = _paginate_section(
+                block_model.objects.pending(e),
+                self.request.GET.get('page'),
+                e.section
+            )
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
@@ -303,7 +306,11 @@ class PageMixin(object):
         ))
         for e in PageSection.objects.filter(page=page):
             block_model = _get_block_model(e)
-            qs = _paginate_section(block_model.objects.published(e), e.section)
+            qs = _paginate_section(
+                block_model.objects.published(e),
+                self.request.GET.get('page'),
+                e.section
+            )
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
