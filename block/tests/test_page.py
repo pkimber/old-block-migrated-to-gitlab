@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from django.test import TestCase
-
 from block.models import Page
 from block.tests.factories import PageFactory
 

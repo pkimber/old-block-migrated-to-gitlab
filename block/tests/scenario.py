@@ -1,7 +1,5 @@
 # -*- encoding: utf-8 -*-
 from block.models import (
-    EditState,
-    ModerateState,
     Page,
     PageSection,
     Section,
@@ -9,7 +7,7 @@ from block.models import (
 
 
 def get_page_home():
-    return Page.objects.get(slug='home')
+    return Page.objects.get(slug=Page.HOME)
 
 
 def get_page_information():
@@ -46,7 +44,7 @@ def default_scenario_block():
     PageSection.objects.init_page_section(calendar, body)
     # home
     home = Page.objects.init_page(
-        'Home', 'home', '', 0, 'example/page.html', is_home=True
+        'Home', Page.HOME, '', 0, 'example/page.html', is_home=True
     )
     PageSection.objects.init_page_section(home, body)
     # information
