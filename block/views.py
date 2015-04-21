@@ -317,5 +317,9 @@ class PageMixin(object):
         return context
 
 
+class PageFormMixin(PageMixin, PageTemplateMixin, ContentPageMixin):
+    pass
+
+
 class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
     pass
