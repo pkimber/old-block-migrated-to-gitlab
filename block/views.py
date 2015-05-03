@@ -5,7 +5,6 @@ from django.core.paginator import (
     PageNotAnInteger,
     Paginator,
 )
-from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import get_model
 from django.http import HttpResponseRedirect

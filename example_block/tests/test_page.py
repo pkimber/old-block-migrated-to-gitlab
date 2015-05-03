@@ -20,7 +20,7 @@ from login.tests.factories import (
 def test_custom_url(client):
     """Custom page, on it's own URL, so should display correctly."""
     default_scenario_block()
-    page = get_page_custom_calendar()
+    get_page_custom_calendar()
     response = client.get(reverse('calendar.information'))
     assert 200 == response.status_code
     assert 'Jan' in str(response.content)

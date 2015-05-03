@@ -21,6 +21,7 @@ class Title(ContentModel):
     block = models.ForeignKey(TitleBlock, related_name='content')
     order = models.IntegerField()
     title = models.TextField()
+    picture = models.ImageField(upload_to='block', blank=True)
 
     class Meta:
         # cannot put 'unique_together' on abstract base class

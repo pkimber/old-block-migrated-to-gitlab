@@ -24,6 +24,10 @@
                 </td>
                 <td>
                   {{ c.title }}
+                  <br />
+                  {% if c.picture %}
+                    <img src="{{ MEDIA_URL }}{{ c.picture }}">
+                  {% endif %}
                 </td>
                 <td>
                   {% block_status c %}
