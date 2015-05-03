@@ -68,6 +68,15 @@ def test_standard_url_home(client):
 
 
 @pytest.mark.django_db
+def test_standard_url_home_root(client):
+    """A standard block page ('/' url) should display without errors."""
+    default_scenario_block()
+    url = reverse('project.home')
+    response = client.get(url)
+    assert 200 == response.status_code
+
+
+@pytest.mark.django_db
 def test_standard_url_reverse(client):
     """A standard block page (reverse url) should display without errors."""
     default_scenario_block()
