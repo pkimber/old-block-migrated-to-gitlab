@@ -1,23 +1,27 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
+from django.conf import settings
 from django.conf.urls import patterns, include, url
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
+from block.models import Page
 from block.views import (
     PageDesignView,
     PageView,
 )
 
 from .views import (
+    ExampleView,
+    PageListView,
+    SettingsView,
     TitleCreateView,
     TitlePublishView,
     TitleRemoveView,
     TitleUpdateView,
 )
+
 
 admin.autodiscover()
 
@@ -27,12 +31,16 @@ urlpatterns = patterns(
     # '/' send to home
     url(regex=r'^$',
         view=PageView.as_view(),
-        kwargs=dict(page='home'),
+        kwargs=dict(page=Page.HOME),
         name='project.home'
         ),
     # admin, login
     url(regex=r'^admin/',
         view=include(admin.site.urls)
+        ),
+    url(regex=r'^settings/$',
+        view=SettingsView.as_view(),
+        name='project.settings'
         ),
     url(regex=r'^',
         view=include('login.urls')
@@ -41,6 +49,17 @@ urlpatterns = patterns(
     url(r'^home/user/$',
         view=RedirectView.as_view(url=reverse_lazy('project.home')),
         name='project.dash'
+        ),
+    # custom page - see https://www.pkimber.net/open/app-block.html
+    url(regex=r'^calendar/information/$',
+        view=ExampleView.as_view(),
+        kwargs=dict(page=Page.CUSTOM, menu='calendar-information'),
+        name='calendar.information'
+        ),
+    # list of pages
+    url(regex=r'^block/page/list/$',
+        view=PageListView.as_view(),
+        name='block.page.list'
         ),
     # block page design
     url(regex=r'^(?P<page>[-\w\d]+)/design/$',
@@ -65,6 +84,10 @@ urlpatterns = patterns(
         view=TitleCreateView.as_view(),
         name='example.title.create'
         ),
+    url(regex=r'^title/create/(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/(?P<section>[-\w\d]+)/$',
+        view=TitleCreateView.as_view(),
+        name='example.title.create'
+        ),
     url(regex=r'^title/(?P<pk>\d+)/publish/$',
         view=TitlePublishView.as_view(),
         name='example.title.publish'
@@ -79,4 +102,7 @@ urlpatterns = patterns(
         ),
 )
 
-urlpatterns += staticfiles_urlpatterns()
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#   ^ helper function to return a URL pattern for serving files in debug mode.
+# https://docs.djangoproject.com/en/1.5/howto/static-files/#serving-files-uploaded-by-a-user

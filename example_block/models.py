@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -23,6 +21,7 @@ class Title(ContentModel):
     block = models.ForeignKey(TitleBlock, related_name='content')
     order = models.IntegerField()
     title = models.TextField()
+    picture = models.ImageField(upload_to='block', blank=True)
 
     class Meta:
         # cannot put 'unique_together' on abstract base class

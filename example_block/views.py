@@ -1,17 +1,23 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
+from django.views.generic import (
+    ListView,
+    TemplateView,
+)
 
 from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
 )
 
+from base.view_utils import BaseMixin
 from block.forms import ContentEmptyForm
+from block.models import Page
 from block.views import (
     ContentCreateView,
     ContentPublishView,
     ContentRemoveView,
     ContentUpdateView,
+    PageView,
 )
 
 from .forms import TitleForm
@@ -19,6 +25,26 @@ from .models import (
     Title,
     TitleBlock,
 )
+
+
+class ExampleView(PageView):
+
+    def get_context_data(self, **kwargs):
+        context = super(ExampleView, self).get_context_data(**kwargs)
+        context.update(dict(
+            calendar=('Jan', 'Feb', 'Mar'),
+        ))
+        return context
+
+
+class PageListView(ListView):
+
+    model = Page
+
+
+class SettingsView(BaseMixin, TemplateView):
+
+    template_name = 'example/settings.html'
 
 
 class TitleCreateView(

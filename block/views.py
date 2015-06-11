@@ -1,9 +1,10 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import reverse
+from django.core.paginator import (
+    EmptyPage,
+    PageNotAnInteger,
+    Paginator,
+)
 from django.db import transaction
 from django.db.models import get_model
 from django.http import HttpResponseRedirect
@@ -26,10 +27,11 @@ from .models import (
     Page,
     PageSection,
     Section,
+    ViewUrl,
 )
 
 
-def get_block_model(page_section):
+def _get_block_model(page_section):
     block_model = get_model(
         page_section.section.block_app,
         page_section.section.block_model,
@@ -42,6 +44,25 @@ def get_block_model(page_section):
     return block_model
 
 
+def _paginate_section(qs, page_no, section):
+    """Paginate the 'block_list' queryset, using page section properties."""
+    if section.paginated:
+        # this is the block that requires pagination
+        if section.paginated.order_by_field:
+            qs = qs.order_by(section.paginated.order_by_field)
+        if section.paginated.items_per_page:
+            paginator = Paginator(qs, section.paginated.items_per_page)
+        try:
+            qs = paginator.page(page_no)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            qs = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            qs = paginator.page(paginator.num_pages)
+    return qs
+
+
 class ContentPageMixin(BaseMixin):
     """Page information."""
 
@@ -49,6 +70,7 @@ class ContentPageMixin(BaseMixin):
         context = super(ContentPageMixin, self).get_context_data(**kwargs)
         context.update(dict(
             page=self.get_page(),
+            menu_list=Page.objects.menu(),
         ))
         return context
 
@@ -220,48 +242,28 @@ class PageDesignMixin(object):
     def get_context_data(self, **kwargs):
         context = super(PageDesignMixin, self).get_context_data(**kwargs)
         page = self.get_page()
+        view_url = ViewUrl.objects.view_url(
+            self.request.user, page, self.request.GET.get('view')
+        )
         context.update(dict(
             design=True,
             is_block_page=True,
+            view_url=view_url,
         ))
         for e in PageSection.objects.filter(page=page) :
-            block_create_url = '{}_create_url'.format(e.section.slug)
-            block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_block_model(e)
-            block_list = block_model.objects.pending(e)
-            try:
-                if (e.section.paginated):
-                    # this is the block that requires pagination
-                    if (e.section.paginated.order_by_field != None):
-                        all_objects = block_list.order_by(e.section.paginated.order_by_field)
-                    else:
-                        all_objects = block_list
-
-                    if (e.section.paginated.items_per_page):
-                        paginator = Paginator(all_objects,
-                            e.section.paginated.items_per_page)
-                    pageNo = self.request.GET.get('page')
-                    try:
-                        block_list = paginator.page(pageNo)
-                    except PageNotAnInteger:
-                        # If page is not an integer, deliver first page.
-                        block_list = paginator.page(1)
-                    except EmptyPage:
-                        # If page is out of range (e.g. 9999), deliver last page of results.
-                        block_list = paginator.page(paginator.num_pages)
-            except:
-                pass
-
-            kwargs = dict(section=e.section.slug)
-            kwargs.update(page.get_url_kwargs())
+            block_model = _get_block_model(e)
+            qs = _paginate_section(
+                block_model.objects.pending(e),
+                self.request.GET.get('page'),
+                e.section
+            )
             context.update({
-                block_list_name: block_list,
+                '{}_list'.format(e.section.slug): qs,
             })
-            if e.section.create_url_name:
+            create_url = e.section.create_url(page)
+            if create_url:
                 context.update({
-                    block_create_url: reverse(
-                        e.section.create_url_name, kwargs=kwargs
-                    ),
+                    '{}_create_url'.format(e.section.slug): create_url,
                 })
         return context
 
@@ -269,51 +271,54 @@ class PageDesignMixin(object):
 class PageDesignView(
         LoginRequiredMixin, StaffuserRequiredMixin,
         PageDesignMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
-
     pass
 
 
 class PageMixin(object):
 
+    def _check_url(self, page):
+        """Check the page is being accessed using the correct URL."""
+        if self.request.path == page.get_absolute_url():
+            if page.is_custom:
+                raise BlockError(
+                    "This is a custom page, so the request path "
+                    "should NOT match the absolute url: '{}'".format(
+                        self.request.path
+                    )
+                )
+        else:
+            if page.is_custom:
+                pass
+            else:
+                raise BlockError(
+                    "'request.path' ('{}') does not match the absolute url: "
+                    "('{}')".format(self.request.path, page.get_absolute_url())
+                )
+
     def get_context_data(self, **kwargs):
         context = super(PageMixin, self).get_context_data(**kwargs)
         page = self.get_page()
+        self._check_url(page)
         context.update(dict(
             design=False,
             is_block_page=True,
         ))
         for e in PageSection.objects.filter(page=page):
-            block_list_name = '{}_list'.format(e.section.slug)
-            block_model = get_block_model(e)
-            block_list = block_model.objects.published(e)
-            try:
-                if e.section.paginated:
-                    # this is the block that requires pagination
-                    if e.section.paginated.order_by_field:
-                        all_objects = block_list.order_by(e.section.paginated.order_by_field)
-                    else:
-                        all_objects = block_list
-
-                    if e.section.paginated.items_per_page:
-                        paginator = Paginator(all_objects,
-                            e.section.paginated.items_per_page)
-                    pageNo = self.request.GET.get('page')
-                    try:
-                        block_list = paginator.page(pageNo)
-                    except PageNotAnInteger:
-                        # If page is not an integer, deliver first page.
-                        block_list = paginator.page(1)
-                    except EmptyPage:
-                        # If page is out of range (e.g. 9999), deliver last page of results.
-                        block_list = paginator.page(paginator.num_pages)
-            except:
-                pass
+            block_model = _get_block_model(e)
+            qs = _paginate_section(
+                block_model.objects.published(e),
+                self.request.GET.get('page'),
+                e.section
+            )
             context.update({
-                block_list_name: block_list,
+                '{}_list'.format(e.section.slug): qs,
             })
         return context
 
 
-class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
+class PageFormMixin(PageMixin, PageTemplateMixin, ContentPageMixin):
+    pass
 
+
+class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
     pass

@@ -1,5 +1,7 @@
-{% extends "project/base.html" %}
+{% extends 'project/base.html' %}
 {% load block_tags %}
+
+{% include 'example/_page_menu.html' %}
 
 {% block content %}
   <div class="pure-g">
@@ -24,10 +26,6 @@
                 </td>
                 <td>
                   {{ c.title }}
-                  <br />
-                  {% if c.picture %}
-                    <img src="{{ MEDIA_URL }}{{ c.picture }}">
-                  {% endif %}
                 </td>
                 <td>
                   {% block_status c %}
@@ -42,6 +40,20 @@
           </tbody>
         </table>
         {% if design %}{% block_add body_create_url %}{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <div class="l-box">
+        <h3>Calendar (Custom View)</h3>
+        <ul>
+          {% for item in calendar %}
+            <li>{{ item }}</li>
+          {% empty %}
+            <strong>No calendar found for the custom view.</strong>
+          {% endfor %}
+        </ul>
       </div>
     </div>
   </div>

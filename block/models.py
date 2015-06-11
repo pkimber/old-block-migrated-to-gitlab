@@ -17,9 +17,6 @@ from base.model_utils import (
 )
 
 
-PAGE_HOME = 'home'
-
-
 def _default_edit_state():
     return EditState.objects._add().pk
 
@@ -51,6 +48,11 @@ class EditStateManager(models.Manager):
     def _push(self):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.PUSH)
+
+    def create_edit_state(self, slug, name):
+        obj = self.model(slug=slug, name=name)
+        obj.save()
+        return obj
 
 
 class EditState(models.Model):
@@ -89,6 +91,11 @@ class ModerateStateManager(models.Manager):
         """Internal use only."""
         return self.model.objects.get(slug=ModerateState.REMOVED)
 
+    def create_moderate_state(self, slug, name):
+        obj = self.model(slug=slug, name=name)
+        obj.save()
+        return obj
+
 
 class ModerateState(models.Model):
     """Accept, remove or pending."""
@@ -114,6 +121,45 @@ reversion.register(ModerateState)
 
 class PageManager(models.Manager):
 
+    def create_page(
+            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+        obj = self.model(
+            name=name,
+            slug=slug_page,
+            slug_menu=slug_menu,
+            order=order,
+            template_name=template_name,
+            is_custom=kwargs.get('is_custom', False),
+            is_home=kwargs.get('is_home', False),
+        )
+        obj.save()
+        return obj
+
+    def init_page(
+            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+        if not slug_menu:
+            slug_menu = ''
+        try:
+            obj = Page.objects.get(slug=slug_page, slug_menu=slug_menu)
+            obj.name = name
+            obj.slug = slug_page
+            obj.slug_menu = slug_menu
+            obj.order = order
+            obj.template_name = template_name
+            obj.is_custom = kwargs.get('is_custom', False)
+            obj.is_home = kwargs.get('is_home', False)
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_page(
+                slug_page,
+                slug_menu,
+                name,
+                order,
+                template_name,
+                **kwargs
+            )
+        return obj
+
     def menu(self):
         """Return page objects for a menu."""
         return self.pages().exclude(order=0)
@@ -121,23 +167,39 @@ class PageManager(models.Manager):
     def pages(self):
         """Return all pages (excluding deleted)."""
         return self.model.objects.all().exclude(
-            deleted=True
+            deleted=True,
+        ).exclude(
+            is_custom=True,
         ).order_by(
             'order'
         )
 
 
 class Page(TimeStampedModel):
-    """Which page on the web site.
+    """A page on the web site.
 
-    The 'slug_menu' is an optional field that can be used to add a page to a
-    sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
-    set to 'faq'.
+    slug_menu
 
-    An order of zero (0) indicates that the page should be excluded from a
-    menu - see 'PageManager', 'menu' (although it doesn't look like it
-    excludes items with an order of zero!).
+      The 'slug_menu' is a extra field that can be used to add a page to a
+      sub-menu e.g. 'training/faq'.  In this example, the 'slug_menu' would be
+      set to 'faq'.
+
+    order
+
+      An order of zero (0) indicates that the page should be excluded from a
+      menu - see 'PageManager', 'menu' (although it doesn't look like it
+      excludes items with an order of zero!).
+
+    custom
+
+      A custom page is one where the URL and view have been overridden.  This
+      is commonly used to add a form to the page, or add extra context.  Our
+      convention is to set the 'slug' to 'Page.CUSTOM' for custom pages.
+
     """
+    CUSTOM = 'custom'
+    HOME = 'home'
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     slug_menu = models.SlugField(max_length=100, blank=True)
@@ -145,6 +207,7 @@ class Page(TimeStampedModel):
     is_home = models.BooleanField(default=False)
     template_name = models.CharField(max_length=150)
     deleted = models.BooleanField(default=False)
+    is_custom = models.BooleanField(default=False)
     objects = PageManager()
 
     class Meta:
@@ -157,7 +220,10 @@ class Page(TimeStampedModel):
         return '{}'.format(self.name)
 
     def get_absolute_url(self):
-        return reverse('project.page', kwargs=self.get_url_kwargs())
+        if self.is_home:
+            return reverse('project.home')
+        else:
+            return reverse('project.page', kwargs=self.get_url_kwargs())
 
     def get_design_url(self):
         return reverse('project.page.design', kwargs=self.get_url_kwargs())
@@ -172,7 +238,8 @@ reversion.register(Page)
 
 
 class PaginatedSection(models.Model):
-    """Parameters for a Paginated Section"""
+    """Parameters for a Paginated Section."""
+
     items_per_page = models.IntegerField(default=10)
     order_by_field = models.CharField(max_length=100)
 
@@ -180,6 +247,49 @@ class PaginatedSection(models.Model):
       return '{} - {}'.format(self.items_per_page, self.order_by_field)
 
 reversion.register(PaginatedSection)
+
+
+class SectionManager(models.Manager):
+
+    def create_section(
+            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+        obj = self.model(
+            slug=slug,
+            name=name,
+            block_app=block_app,
+            block_model=block_model,
+            create_url_name=create_url_name,
+        )
+        paginated = kwargs.get('paginated', None)
+        if paginated:
+            obj.paginated = paginated
+        obj.save()
+        return obj
+
+    def init_section(
+            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+        """Create a section if it doesn't already exist."""
+        if not create_url_name:
+            create_url_name = ''
+        try:
+            obj = Section.objects.get(slug=slug)
+            obj.slug = slug
+            obj.name = name
+            obj.block_app = block_app
+            obj.block_model = block_model
+            obj.create_url_name = create_url_name
+            obj.paginated = kwargs.get('paginated', None)
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = Section.objects.create_section(
+                slug,
+                name,
+                block_app,
+                block_model,
+                create_url_name,
+                **kwargs
+            )
+        return obj
 
 
 class Section(TimeStampedModel):
@@ -198,6 +308,7 @@ class Section(TimeStampedModel):
         help_text="url name for creating the model e.g. 'compose.article.create'"
     )
     paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
+    objects = SectionManager()
 
     class Meta:
         ordering = ('name',)
@@ -207,7 +318,30 @@ class Section(TimeStampedModel):
     def __str__(self):
         return '{}'.format(self.name)
 
+    def create_url(self, page):
+        url = None
+        if self.create_url_name:
+            kwargs = dict(section=self.slug)
+            kwargs.update(page.get_url_kwargs())
+            url = reverse(self.create_url_name, kwargs=kwargs)
+        return url
+
 reversion.register(Section)
+
+
+class PageSectionManager(models.Manager):
+
+    def create_page_section(self, page, section):
+        obj = self.model(page=page, section=section)
+        obj.save()
+        return obj
+
+    def init_page_section(self, page, section):
+        try:
+            obj = PageSection.objects.get(page=page, section=section)
+        except self.model.DoesNotExist:
+            obj = self.create_page_section(page, section)
+        return obj
 
 
 class PageSection(models.Model):
@@ -215,6 +349,7 @@ class PageSection(models.Model):
 
     page = models.ForeignKey(Page)
     section = models.ForeignKey(Section)
+    objects = PageSectionManager()
 
     class Meta:
         ordering = ('page__slug', 'section__slug')
@@ -483,3 +618,55 @@ class ContentModel(TimeStampedModel):
             raise BlockError(
                 "Sorry, only pending content can be edited."
             )
+
+
+class ViewUrlManager(models.Manager):
+
+    def create_view_url(self, user, page, url):
+        obj = self.model(user=user, page=page, url=url)
+        obj.save()
+        return obj
+
+    def view_url(self, user, page, url):
+        """Get the view URL for a user and page.
+
+        The view URL is the URL we return to when leaving design mode.
+
+        If we don't pass in a URL, but a URL has already been saved for this
+        page, then return it.
+
+        """
+        url = url or ''
+        if page.is_custom:
+            try:
+                obj = self.model.objects.get(user=user, page=page)
+                if url:
+                    obj.url = url
+                    obj.save()
+                else:
+                    url = obj.url
+            except self.model.DoesNotExist:
+                self.create_view_url(user, page, url)
+        else:
+            url = page.get_absolute_url()
+        return url
+
+
+class ViewUrl(models.Model):
+    """Store the view URL for a custom page."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='+')
+    page = models.ForeignKey(Page)
+    url = models.CharField(max_length=200, blank=True)
+    objects = ViewUrlManager()
+
+    class Meta:
+        ordering = ('user__username', 'page__slug', 'page__slug_menu')
+        unique_together = ('user', 'page')
+        verbose_name = 'View URL'
+        verbose_name_plural = 'View URLs'
+
+    def __str__(self):
+        return '{} {}'.format(self.user.username, self.page.name, self.url)
+
+reversion.register(ViewUrl)

@@ -56,6 +56,7 @@ def get_monkokehampton():
 
 
 def default_scenario_example():
+    """Pages are created in 'block/tests/scenario.py'."""
     # page sections
     home_body = get_page_section_home_body()
     information_body = get_page_section_information_body()
