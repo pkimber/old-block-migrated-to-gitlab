@@ -19,9 +19,16 @@ from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
 )
+from formtools.wizard.views import SessionWizardView
 
 from base.view_utils import BaseMixin
-
+from .forms import (
+    URLExternalLinkForm,
+    URLExistingForm,
+    URLInternalPageForm,
+    URLTypeForm,
+    URLUploadForm,
+)
 from .models import (
     BlockError,
     Page,
@@ -322,3 +329,157 @@ class PageFormMixin(PageMixin, PageTemplateMixin, ContentPageMixin):
 
 class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
     pass
+
+
+# -----------------------------------------------------------------------------
+# support methods for the 'LinkWizard'
+import os
+
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+
+
+def url_existing(wizard):
+    """Return true if user opts for existing document link"""
+    return url_select_form(wizard, 'e')
+
+
+def url_external_link(wizard):
+    """Return true if user opts for external link """
+    return url_select_form(wizard, 'l')
+
+
+def url_internal_page(wizard):
+    """Return true if user opts for an internal page """
+    return url_select_form(wizard, 'p')
+
+
+def url_select_form(wizard, url_type) :
+    """Return true if user opts for url_type """
+    # Get cleaned data from url_type step
+    cleaned_data = wizard.get_cleaned_data_for_step('url_type') or {'url_type': 'none'}
+    return cleaned_data['url_type'] == url_type
+
+
+def url_upload(wizard):
+    """Return true if user opts for upload a document """
+    return url_select_form(wizard, 'u')
+# end of - support methods for the 'LinkWizard'
+
+
+class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
+
+    condition_dict = {
+        'l': url_external_link,
+        'p': url_internal_page,
+        'u': url_upload,
+        'e': url_existing,
+    }
+
+    temp_dir = 'temp'
+    doc_dir = 'document'
+    file_storage = FileSystemStorage(
+        location=os.path.join(settings.MEDIA_ROOT, temp_dir)
+    )
+    form_list = [('url_type', URLTypeForm),
+        ("l", URLExternalLinkForm),
+        ("p", URLInternalPageForm),
+        ("u", URLUploadForm),
+        ("e", URLExistingForm),
+    ]
+
+    template_name = 'block/wizard.html'
+
+    def get_form_initial(self, step):
+        init_dict = {}
+        #get current block to populate forms
+        for b in self.get_current_block():
+            url = b.get_url_link
+            if (url != None and
+                (url.startswith("http://") or url.startswith("https://"))):
+                url_type = 'l'
+            elif (url != None and url.startswith("/" + self.doc_dir + "/")):
+                url_type = 'e'
+            else:
+                url_type = 'p'
+            title =  b.get_url_text
+            #set flag for whether title field is displayed
+            if (title == None):
+                use_title = False
+            else:
+                use_title = True
+            perm_type = 'x'
+            init_dict = {
+                'url_type': url_type,
+                'title': title,
+                'url': url,
+                'perm_type': perm_type,
+                'use_title': use_title
+            }
+        return init_dict
+
+    def done(self, form_list, **kwargs):
+        url_info = {'type': '', 'url': '', 'content_type': '', 'title': ''}
+        doc_path = os.path.join(settings.MEDIA_URL, self.doc_dir)
+        perform_document_save = False
+
+        for form in form_list:
+            data = form.cleaned_data
+
+            if ('url_type' in data):
+                url_info['type'] = data['url_type']
+
+            if ('title' in data):
+                url_info['title'] = data['title']
+
+            if ('level' in data) :
+                url_info['level'] = data['level']
+
+            if 'course' in data:
+                url_info['course'] = data['course']
+
+            if ('url' in data and data['url'] != None) :
+                url_raw = data['url']
+
+                # make sure a file has been chosen
+                if (type(url_raw).__name__ == 'UploadedFile' 
+                    and 'type' in url_info and url_info['type'] == 'u'):
+
+                    url_info['content_type'] = url_raw.content_type
+                    # save the uploaded file name as the short file name
+                    url_info['short_file_name'] = str(url_raw)
+
+                    perform_document_save = True
+                else :
+                    url_info['url'] = url_raw
+
+        if perform_document_save:
+            url_info = save_document (self, url_raw, url_info)
+
+        # update the block
+        return_url = "/"
+
+        for b in self.get_current_block():
+            b.set_url(url_info['url'], url_info['title'])
+            b.set_pending_edit()
+            b.save()
+            return_url=b.block.page_section.page.get_design_url()
+
+        return HttpResponseRedirect(return_url)
+
+    def get_current_block(self):
+        try:
+            from django.contrib.contenttypes.models import ContentType
+            content_pk = self.kwargs.get('content', None)
+            pk = self.kwargs.get('pk', None)
+            content_type = ContentType.objects.get(pk=content_pk)
+            block_model = content_type.model_class()
+            #block = self.kwargs.get('block', None)
+            #app = self.kwargs.get('app', 'compose')
+            #block_model = get_model(app, block)
+            current_block = block_model.objects.filter(pk=pk)
+        except :
+            current_block = None
+        return current_block
+
+# -----------------------------------------------------------------------------

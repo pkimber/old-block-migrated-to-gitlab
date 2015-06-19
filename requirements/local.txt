@@ -5,6 +5,7 @@
 -e ../mail
 beautifulsoup4
 devpi-client
+django-debug-toolbar
 factory-boy
 gitpython
 hgapi

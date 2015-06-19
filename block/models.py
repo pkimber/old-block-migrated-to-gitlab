@@ -619,6 +619,50 @@ class ContentModel(TimeStampedModel):
                 "Sorry, only pending content can be edited."
             )
 
+    # -------------------------------------------------------------------------
+    @property
+    def get_url_link(self):
+        """TODO PJK Temp"""
+        #return self.url
+        return ''
+
+    @property
+    def get_url_text(self):
+        """TODO PJK Temp"""
+        return None
+
+    @property
+    def url_link_wizard(self):
+        """Return the URL for the link wizard.
+
+        If this method returns 'True' the content model can use the
+        'LinkWizard' (see the 'cms' app).
+
+        """
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(self)
+        return reverse(
+            'block.link.wizard',
+            kwargs={
+                'content': content_type.pk,
+                'pk': self.pk,
+                #'app': content_type.app_label,
+                #'block': content_type.name,
+            }
+        )
+        return False
+
+    def set_url(self, url_link, url_text):
+        """TODO PJK Temp"""
+        self.url = url_link
+
+    #def url_link_wizard(self):
+    #    return reverse(
+    #        'compose.article.link.wizard',
+    #        kwargs={'pk': self.pk, 'block': 'Article'}
+    #    )
+    # -------------------------------------------------------------------------
+
 
 class ViewUrlManager(models.Manager):
 
