@@ -87,6 +87,17 @@ def test_menu_in():
 
 
 @pytest.mark.django_db
+def test_page_list():
+    PageFactory(slug='home', order=0)
+    PageFactory(slug='history', deleted=True)
+    PageFactory(slug=Page.CUSTOM, is_custom=True)
+    PageFactory(slug='info')
+    PageFactory(slug='portfolio')
+    result = [p.slug for p in Page.objects.page_list()]
+    assert ['home', 'custom', 'info', 'portfolio'] == result
+
+
+@pytest.mark.django_db
 def test_pages():
     PageFactory(slug='home', order=0)
     PageFactory(slug='history', deleted=True)
