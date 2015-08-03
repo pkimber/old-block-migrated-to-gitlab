@@ -20,18 +20,18 @@ def get_readme():
 
 setup(
     name='kb-block',
-    packages=['block', 'block.templatetags', 'block.management', 'block.management.commands', 'block.migrations', 'block.tests'],
+    packages=['block', 'block.templatetags', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
     package_data={
         'block': [
             'templates/*.*',
             'templates/block/*.*',
         ],
     },
-    version='0.1.30',
+    version='0.1.31',
     description='block',
-    author='Malcolm Dinsmore',
-    author_email='m.dinsmore@talk21.com',
-    url='https://github.com/pkimber/block.git',
+    author='Patrick Kimber',
+    author_email='code@pkimber.net',
+    url='git@github.com:pkimber/block.git',
     classifiers=[
         'Development Status :: 1 - Planning',
         'Environment :: Console',
@@ -41,6 +41,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Framework :: Django :: 1.8',
         'Topic :: Office/Business :: Scheduling',
     ],
     long_description=get_readme(),
