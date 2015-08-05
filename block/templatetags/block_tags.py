@@ -6,8 +6,8 @@ register = template.Library()
 
 
 @register.inclusion_tag('block/_add.html')
-def block_add(url):
-    return dict(url=url)
+def block_add(url, caption=None):
+    return dict(url=url, caption=caption)
 
 
 @register.inclusion_tag('block/_moderate.html')

@@ -1,12 +1,12 @@
 {% if c.is_pending_added or c.is_pending_edited %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_publish }}">
     <i class="fa fa-check"></i>
-    publish
+    Publish
   </a>
 {% endif %}
 <a class="pure-button pure-button-xsmall" href="{{ c.url_update }}">
   <i class="fa fa-edit"></i>
-  edit
+  Edit
 </a>
 {% if c.url_link_wizard %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
@@ -17,7 +17,7 @@
 {% if can_remove %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
     <i class="fa fa-times"></i>
-    remove
+    Remove
   </a>
 {% endif %}
 </p>

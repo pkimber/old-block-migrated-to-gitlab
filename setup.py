@@ -23,12 +23,11 @@ setup(
     packages=['block', 'block.templatetags', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
     package_data={
         'block': [
-            'static/*.*',
             'templates/*.*',
             'templates/block/*.*',
         ],
     },
-    version='0.1.29',
+    version='0.1.31',
     description='block',
     author='Patrick Kimber',
     author_email='code@pkimber.net',
@@ -42,6 +41,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Framework :: Django :: 1.8',
         'Topic :: Office/Business :: Scheduling',
     ],
     long_description=get_readme(),
