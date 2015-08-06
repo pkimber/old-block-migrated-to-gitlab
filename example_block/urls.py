@@ -47,7 +47,7 @@ urlpatterns = patterns(
         ),
     # home page when logged in
     url(r'^home/user/$',
-        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        view=RedirectView.as_view(url=reverse_lazy('project.home'), permanent=False),
         name='project.dash'
         ),
     # custom page - see https://www.pkimber.net/open/app-block.html

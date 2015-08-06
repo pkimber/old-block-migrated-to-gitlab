@@ -5,4 +5,5 @@ django-compressor==1.4
 django-formtools==1.0
 django-reversion==1.8.7
 Django==1.8.3
+pillow==2.9.0
 pytz==2014.10

@@ -339,40 +339,50 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
 
+def select_link_form(wizard, link_type) :
+    """Return true if user has selected 'link_type'."""
+    data =  wizard.get_cleaned_data_for_step(LinkWizard.FORM_LINK_TYPE)
+    selected_link_type = data['link_type'] if data else None
+    return selected_link_type == link_type
+
+
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
-    return url_select_form(wizard, 'e')
+    return select_link_form(wizard, 'e')
 
 
 def url_external_link(wizard):
     """Return true if user opts for external link """
-    return url_select_form(wizard, 'l')
+    return select_link_form(wizard, 'l')
 
 
 def url_internal_page(wizard):
     """Return true if user opts for an internal page """
-    return url_select_form(wizard, 'p')
-
-
-def url_select_form(wizard, url_type) :
-    """Return true if user opts for url_type """
-    # Get cleaned data from url_type step
-    cleaned_data = wizard.get_cleaned_data_for_step('url_type') or {'url_type': 'none'}
-    return cleaned_data['url_type'] == url_type
+    return select_link_form(wizard, 'p')
 
 
 def url_upload(wizard):
     """Return true if user opts for upload a document """
-    return url_select_form(wizard, 'u')
+    return select_link_form(wizard, LinkWizard.FORM_UPLOAD_DOCUMENT)
 # end of - support methods for the 'LinkWizard'
 
 
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
+    """Link Wizard.
+
+    Documentation for the SessionWizardView in
+    http://django-formtools.readthedocs.org/en/latest/
+
+    """
+
+    FORM_EXTERNAL_URL = 'l'
+    FORM_LINK_TYPE = 'link_type'
+    FORM_UPLOAD_DOCUMENT = 'u'
 
     condition_dict = {
-        'l': url_external_link,
+        FORM_EXTERNAL_URL: url_external_link,
         'p': url_internal_page,
-        'u': url_upload,
+        FORM_UPLOAD_DOCUMENT: url_upload,
         'e': url_existing,
     }
 
@@ -381,10 +391,11 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     file_storage = FileSystemStorage(
         location=os.path.join(settings.MEDIA_ROOT, temp_dir)
     )
-    form_list = [('url_type', URLTypeForm),
-        ("l", URLExternalLinkForm),
+    form_list = [
+        (FORM_LINK_TYPE, URLTypeForm),
+        (FORM_EXTERNAL_URL, URLExternalLinkForm),
         ("p", URLInternalPageForm),
-        ("u", URLUploadForm),
+        (FORM_UPLOAD_DOCUMENT, URLUploadForm),
         ("e", URLExistingForm),
     ]
 
@@ -393,9 +404,9 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     def get_form_initial(self, step):
         init_dict = {}
         #get current block to populate forms
-        b = self.get_current_block()
+        content_obj = self.get_current_content_instance()
         # PJK in the original 'compose' models, this returns the 'url' field.
-        url = b.get_url_link
+        url = content_obj.get_url_link
         if (url != None and
             (url.startswith("http://") or url.startswith("https://"))):
             url_type = 'l'
@@ -404,7 +415,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         else:
             url_type = 'p'
         # PJK in the original 'compose' models, this returns 'url_description'
-        title =  b.get_url_text
+        title = content_obj.get_url_text
         #set flag for whether title field is displayed
         if (title == None):
             use_title = False
@@ -420,7 +431,18 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         }
         return init_dict
 
-    def done(self, form_list, **kwargs):
+    def done(self, form_list, form_dict, **kwargs):
+        form_link_type = form_dict[self.FORM_LINK_TYPE]
+        link_type = form_link_type.cleaned_data['link_type']
+        if link_type == URLTypeForm.UPLOAD:
+            form = form_dict[self.FORM_UPLOAD_DOCUMENT]
+            link = form.save()
+
+        #data = {}
+        #for form in form_list:
+        #    for k, v in form.cleaned_data.items():
+        #        data[k] = v
+
         url_info = {'type': '', 'url': '', 'content_type': '', 'title': ''}
         doc_path = os.path.join(settings.MEDIA_URL, self.doc_dir)
         perform_document_save = False
@@ -445,7 +467,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
 
                 # make sure a file has been chosen
                 if (type(url_raw).__name__ == 'UploadedFile' 
-                    and 'type' in url_info and url_info['type'] == 'u'):
+                    and 'type' in url_info and url_info['type'] == LINK_UPLOAD):
 
                     url_info['content_type'] = url_raw.content_type
                     # save the uploaded file name as the short file name
@@ -461,23 +483,27 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         # update the block
         return_url = "/"
 
-        b = self.get_current_block()
-        b.set_url(url_info['url'], url_info['title'])
-        b.set_pending_edit()
-        b.save()
-        return_url = b.block.page_section.page.get_design_url()
+        content_obj = self.get_current_content_instance()
+
+        import ipdb
+        ipdb.set_trace()
+
+        content_obj.set_url(url_info['url'], url_info['title'])
+        content_obj.set_pending_edit()
+        content_obj.save()
+        return_url = content_obj.block.page_section.page.get_design_url()
 
         return HttpResponseRedirect(return_url)
 
-    def get_current_block(self):
+    def get_current_content_instance(self):
         from django.contrib.contenttypes.models import ContentType
         content_pk = self.kwargs.get('content', None)
         pk = self.kwargs.get('pk', None)
         content_type = ContentType.objects.get(pk=content_pk)
-        block_model = content_type.model_class()
+        content_model = content_type.model_class()
         #block = self.kwargs.get('block', None)
         #app = self.kwargs.get('app', 'compose')
         #block_model = get_model(app, block)
-        return block_model.objects.get(pk=pk)
+        return content_model.objects.get(pk=pk)
 
 # -----------------------------------------------------------------------------

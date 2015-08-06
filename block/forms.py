@@ -3,6 +3,7 @@ from django import forms
 
 from block.models import (
     ContentModel,
+    LinkDocument,
     Page,
 )
 
@@ -15,17 +16,17 @@ class ContentEmptyForm(forms.ModelForm):
 
 
 class URLExistingForm(forms.Form):
+
     title = forms.CharField(max_length=512, label="Link Text")
 
     def __init__(self, *args, **kwargs):
-        super(URLExistingForm, self).__init__(*args, **kwargs)
-        self.fields['url'] = forms.ChoiceField( 
+        super().__init__(*args, **kwargs)
+        self.fields['url'] = forms.ChoiceField(
             choices=[
-                (o.get_url(), str(o)) for o in Document.objects.all().order_by('title')
+                (o.get_url(), str(o)) for o in LinkDocument.objects.all().order_by('description')
             ],
             label="Choose a Document"
         )
-
         if ('use_title' in self.initial and self.initial['use_title'] == False):
             self.fields.pop('title')
 
@@ -77,11 +78,13 @@ class URLInternalPageForm(forms.Form):
 
 class URLTypeForm(forms.Form):
 
-    url_type = forms.ChoiceField(
+    UPLOAD = 'u'
+
+    link_type = forms.ChoiceField(
         choices=(
             ('l', 'Link to another site'),
             ('p', 'Page on this site'),
-            ('u', 'Upload a document and link to it'),
+            (UPLOAD, 'Upload a document and link to it'),
             ('e', 'Use an existing document'),
             ('n', 'Remove Link'),
         ),
@@ -94,57 +97,45 @@ class URLTypeForm(forms.Form):
         )
 
 
-class URLUploadForm(forms.Form):
+class URLUploadForm(forms.ModelForm):
 
-    title = forms.CharField(max_length=512, label="Link Text")
+    #title = forms.CharField(max_length=512, label="Link Text")
+    #short_file_name = forms.CharField(
+    #    label="Existing Document",
+    #    required=False,
+    #)
+    #document = forms.FileField(
+    #    label="Choose a document to upload",
+    #    required=True,
+    #)
 
-    short_file_name = forms.CharField(
-        label="Existing Document",
-        required=False,
-    )
-
-    url = forms.FileField(
-        label="Choose a document to upload",
-        required=True,
-    )
-
-    perm_type = forms.ChoiceField(
-        choices=(
-            ('x', 'Public'),
-            ('m', 'Restrict by Membership'),
-            ('c', 'Restrict by Course'),
-        ),
-        label="Choose who has access to this document",
-    )
-
-
-    def __init__(self, *args, **kwargs):
-        super(URLUploadForm, self).__init__(*args, **kwargs)
-
-        if 'doc_id' in self.initial:
-            # called form DocumentWizard
-            self.fields['doc_id'] = forms.CharField(
-                widget=forms.HiddenInput(),
-                initial=self.initial['doc_id'],
-                required=False,
-                label='',
-            )
-            self.fields['short_file_name'].widget.attrs.update({'readonly': True})
-            self.fields['url'].required = False
-            self.fields['url'].label="Upload a new document to replace the existing one"
-        else:
-            # called from URLChoiceWizard
-            self.fields.pop('short_file_name')
-            self.fields['url'].widget.attrs.update({'required': True})
+    #def __init__(self, *args, **kwargs):
+    #    super().__init__(*args, **kwargs)
+    #    if 'doc_id' in self.initial:
+    #        # called from DocumentWizard
+    #        self.fields['doc_id'] = forms.CharField(
+    #            widget=forms.HiddenInput(),
+    #            initial=self.initial['doc_id'],
+    #            required=False,
+    #            label='',
+    #        )
+    #        self.fields['short_file_name'].widget.attrs.update({'readonly': True})
+    #        self.fields['document'].required = False
+    #        self.fields['document'].label="Upload a new document to replace the existing one"
+    #    else:
+    #        # called from URLChoiceWizard
+    #        self.fields.pop('short_file_name')
+    #        self.fields['document'].widget.attrs.update({'required': True})
 
 
     class Meta:
+        model = LinkDocument
         fields = (
-            'url',
             'title',
-            'perm_type',
+            'document',
+            'description',
         )
         widgets = {
-            'url': forms.FileInput,
-            'doc_id': forms.HiddenInput(),
+            'document': forms.FileInput,
+            #'doc_id': forms.HiddenInput(),
         }

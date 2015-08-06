@@ -1,4 +1,4 @@
-{% extends "project/base.html" %}
+{% extends 'project/base.html' %}
 {% load staticfiles %}
 {% load thumbnail %}
 {# load web_tags #}
@@ -39,83 +39,59 @@
 {% block content %}
   <div class="pure-g">
     <div class="pure-u-1">
-      <style>
-        #urlchoice label {
-          display: block;
-          margin-top: 30px;
-          text-align: left;
-        }
-        #urlchoice th, #urlchoice td {
-          display: block;
-        }
-        #urlchoice select,
-        #urlchoice input { 
-          padding: 3px;
-          margin: 10px 0px;
-          width: 400px;
-        }
-        #urlchoice input[type="checkbox"] { 
-          min-width: auto;
-          width: auto;
-          margin: 0px;
-        }
-        #urlchoice li {
-          list-style-type: none;
-          padding: 0px;
-          margin: 0px;
-        }
-        #urlchoice li label {
-          display: inline-block;
-          margin: 0px;
-          padding: 0px;
-          width: auto;
-        }
-
-        #urlchoice button[type="submit"],
-        #urlchoice input[type="submit"] { 
-          width: 100px;
-          margin-right: 50px;
-        }
-        #buttonBar {
-          margin-top: 30px;
-        }
-      </style>
-       <form id="urlchoice" action="" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} class="pure-form {% if aligned %}pure-form-aligned{% else %}pure-form-stacked{% endif %}">
+       <form id="urlchoice" action="" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} class="pure-form pure-form-stacked">
         {% csrf_token %}
         {% if form.non_field_errors %}
           {{ form.non_field_errors }}
         {% endif %}
         <fieldset>
-        <table>
           {{ wizard.management_form }}
           {% if wizard.form.forms %}
             {{ wizard.form.management_form }}
             {% for form in wizard.form.forms %}
-              <div class="pure-g">
-                <div class="pure-u-1">
-                  <div class="l-box">
-                    {% include '_form.html' with legend='Content' multipart=True %}
-                  </div>
+
+
+              {% if legend %}
+                <legend>{{ legend }}</legend>
+              {% endif %}
+              {% for field in form.visible_fields %}
+                <div class="pure-control-group">
+                  {% if field.label %}
+                    <label for='{{ field.id_for_label }}'>{{ field.label }}{% if field.help_text %} - {{ field.help_text }}{% endif %}:</label>
+                  {% endif %}
+                  {% if aligned %}
+                    {{ field }}
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <span class="errorlist"><mark>{{ error }}</mark></span>
+                  {% endfor %}
+                  {% if not aligned %}
+                    {{ field }}
+                  {% endif %}
                 </div>
-              </div>
+              {% endfor %}
+
+
             {% endfor %}
           {% else %}
             {{ wizard.form }}
           {% endif %}
-        </table>
-        <div id="buttonBar">
-          {% if wizard.steps.prev %}
-            <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="pure-button pure-button-primary">< {% trans "Back" %}</button>
-          {% endif %}
-          <button type="submit" value="{% trans "submit" %}" class="pure-button pure-button-primary">
-            {% ifequal 1 wizard.steps.step1 %}
-              Next >
-            {% else %}
-              Submit
-            {% endifequal %}
-          </button>
-        </div>
-      </fieldset>
+
+          <div class="pure-controls">
+            <p>
+              {% if wizard.steps.prev %}
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="pure-button pure-button-primary">< {% trans "Back" %}</button>
+              {% endif %}
+              <button type="submit" value="{% trans "submit" %}" class="pure-button pure-button-primary">
+                {% ifequal 1 wizard.steps.step1 %}
+                  Next >
+                {% else %}
+                  Submit
+                {% endifequal %}
+              </button>
+            </p>
+          </div>
+        </fieldset>
       </form>
     </div>
   </div>

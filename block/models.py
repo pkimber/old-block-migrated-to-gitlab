@@ -666,66 +666,127 @@ class ContentModel(TimeStampedModel):
     #    )
     # -------------------------------------------------------------------------
 
-class LinkManager(models.Manager):
+# Discussion with Malcolm - 05/08/2015 - see '1011-generic-carousel/wip.rst'
+# class LinkManager(models.Manager):
+#
+#     def create_link(self, url, description):
+#         obj = self.model(url=url, description=description)
+#         obj.save()
+#         return obj
+#
+# class DocumentLinker(TimeStampedModel):
+#     # link to the object
+#     content_type = models.ForeignKey(ContentType)
+#     object_id = models.PositiveIntegerField()
+#     content_object = GenericForeignKey()
+#     document = models.ForeignKey(LinkDocument)
+#
+# class ImageLinker(TimeStampedModel):
+#     # link to the object
+#     content_type = models.ForeignKey(ContentType)
+#     object_id = models.PositiveIntegerField()
+#     content_object = GenericForeignKey()
+#     image = models.ForeignKey(LinkImage)
+#
+# class LinkDocument(TimeStampedModel):
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     document = models.FileField(upload_to='document', blank=True)
+#     original_file_name = 
+#
+# class LinkInternalURL(TimeStampedModel):
+#     """Just a thought - will not do for now."""
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     url = models.TextField(verbose_name='Link text', blank=True, help_text='cms.page.list')
+#
+# class LinkImage(TimeStampedModel):
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     image = models.ImageField(upload_to='image', blank=True)
+#     original_file_name = 
+#
+# class LinkPage(TimeStampedModel):
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     page = models.ForeignKey(Page, blank=True, null=True)
+#
+# class LinkStyle(TimeStampedModel):
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     style = models.ForeignKey(Style, blank=True, null=True)
+#
+# class LinkUrl(TimeStampedModel):
+#     """A link created by the link wizard to a piece of content."""
+#
+#
+#     # data
+#     description = models.TextField(verbose_name='Link text', blank=True)
+#     external_url = models.URLField(verbose_name='Link', blank=True, null=True)
+#
+#     class Meta:
+#         verbose_name = 'Link'
+#         verbose_name_plural = 'Link'
+#
+#     def __str__(self):
+#         return '{}'.format(self.title)
+#
+# reversion.register(Link)
 
-    def create_link(self, url, description):
-        obj = self.model(url=url, description=description)
-        obj.save()
-        return obj
-
-class DocumentLinker(TimeStampedModel):
-    # link to the object
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
-    document = models.ForeignKey(LinkDocument)
-
-class ImageLinker(TimeStampedModel):
-    # link to the object
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
-    image = models.ForeignKey(LinkImage)
 
 class LinkDocument(TimeStampedModel):
-    description = models.TextField(verbose_name='Link text', blank=True)
-    document = models.FileField(upload_to='document', blank=True)
-    original_file_name = 
+    """An document *library*, used with the 'LinkWizard'.
 
-class LinkInternalURL(TimeStampedModel):
-    """Just a thought - will not do for now."""
-    description = models.TextField(verbose_name='Link text', blank=True)
-    url = models.TextField(verbose_name='Link text', blank=True, help_text='cms.page.list')
+    For more information, see ``1011-generic-carousel/wip.rst``
 
-class LinkImage(TimeStampedModel):
-    description = models.TextField(verbose_name='Link text', blank=True)
-    image = models.ImageField(upload_to='image', blank=True)
-    original_file_name = 
+    TODO
 
-class LinkPage(TimeStampedModel):
-    description = models.TextField(verbose_name='Link text', blank=True)
-    page = models.ForeignKey(Page, blank=True, null=True)
+    - Do we want to add tags field in here so we can search/group images?
+      e.g. https://github.com/alex/django-taggit
 
-class LinkStyle(TimeStampedModel):
-    description = models.TextField(verbose_name='Link text', blank=True)
-    style = models.ForeignKey(Style, blank=True, null=True)
+    """
 
-class LinkUrl(TimeStampedModel):
-    """A link created by the link wizard to a piece of content."""
-
-
-    # data
-    description = models.TextField(verbose_name='Link text', blank=True)
-    external_url = models.URLField(verbose_name='Link', blank=True, null=True)
+    document = models.FileField(upload_to='link/document')
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    original_file_name = models.CharField(max_length=100)
 
     class Meta:
-        verbose_name = 'Link'
-        verbose_name_plural = 'Link'
+        verbose_name = 'Link Document'
+        verbose_name_plural = 'Link Documents'
 
     def __str__(self):
-        return '{}'.format(self.title)
+        return '{}'.format(self.description)
 
-reversion.register(Link)
+    def save(self, *args, **kwargs):
+        """Save the original file name."""
+        self.original_file_name = self.document.name
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+reversion.register(LinkDocument)
+
+
+class LinkImage(TimeStampedModel):
+    """An image *library*, used with the 'LinkWizard'.
+
+    For more information, see ``1011-generic-carousel/wip.rst``
+
+    TODO
+
+    - Do we want to add tags field in here so we can search/group images?
+      e.g. https://github.com/alex/django-taggit
+
+    """
+
+    image = models.ImageField(upload_to='link/image')
+    description = models.TextField()
+    alt_tag = models.CharField(max_length=100)
+    original_file_name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = 'Link Image'
+        verbose_name_plural = 'Link Images'
+
+    def __str__(self):
+        return '{} {}'.format(self.description)
+
+reversion.register(LinkImage)
 
 
 class ViewUrlManager(models.Manager):
