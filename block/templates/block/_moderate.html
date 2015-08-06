@@ -14,6 +14,28 @@
     Link
   </a>
 {% endif %}
+
+{% if c.link_wizard %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
+    <i class="fa fa-globe"></i>
+    References
+  </a>
+{% endif %}
+
+{% if c.link_wizard %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
+    <i class="fa fa-globe"></i>
+    Picture
+  </a>
+{% endif %}
+
+{% if c.link_wizard %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
+    <i class="fa fa-globe"></i>
+    Carousel
+  </a>
+{% endif %}
+
 {% if can_remove %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
     <i class="fa fa-times"></i>

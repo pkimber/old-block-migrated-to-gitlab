@@ -729,7 +729,7 @@ class ContentModel(TimeStampedModel):
 # reversion.register(Link)
 
 
-class LinkDocument(TimeStampedModel):
+class Link(TimeStampedModel):
     """An document *library*, used with the 'LinkWizard'.
 
     For more information, see ``1011-generic-carousel/wip.rst``
@@ -741,10 +741,24 @@ class LinkDocument(TimeStampedModel):
 
     """
 
-    document = models.FileField(upload_to='link/document')
+    DOCUMENT = 'd'
+    EXTERNAL_URL = 'e'
+
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    original_file_name = models.CharField(max_length=100)
+
+    link_type = models.ForeignKey(LinkType)
+
+    document = models.FileField(upload_to='link/document', blank=True, null=True)
+    document_file_name = models.CharField(max_length=100)
+
+    external_url = models.URLField(verbose_name='Link', blank=True, null=True)
+    internal_url = models.TextField(verbose_name='Link text', blank=True, help_text='cms.page.list')
+    page = models.ForeignKey(Page, blank=True, null=True)
+
+    def url(self):
+        
+        return 
 
     class Meta:
         verbose_name = 'Link Document'
