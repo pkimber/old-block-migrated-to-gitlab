@@ -666,6 +666,67 @@ class ContentModel(TimeStampedModel):
     #    )
     # -------------------------------------------------------------------------
 
+class LinkManager(models.Manager):
+
+    def create_link(self, url, description):
+        obj = self.model(url=url, description=description)
+        obj.save()
+        return obj
+
+class DocumentLinker(TimeStampedModel):
+    # link to the object
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+    document = models.ForeignKey(LinkDocument)
+
+class ImageLinker(TimeStampedModel):
+    # link to the object
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+    image = models.ForeignKey(LinkImage)
+
+class LinkDocument(TimeStampedModel):
+    description = models.TextField(verbose_name='Link text', blank=True)
+    document = models.FileField(upload_to='document', blank=True)
+    original_file_name = 
+
+class LinkInternalURL(TimeStampedModel):
+    """Just a thought - will not do for now."""
+    description = models.TextField(verbose_name='Link text', blank=True)
+    url = models.TextField(verbose_name='Link text', blank=True, help_text='cms.page.list')
+
+class LinkImage(TimeStampedModel):
+    description = models.TextField(verbose_name='Link text', blank=True)
+    image = models.ImageField(upload_to='image', blank=True)
+    original_file_name = 
+
+class LinkPage(TimeStampedModel):
+    description = models.TextField(verbose_name='Link text', blank=True)
+    page = models.ForeignKey(Page, blank=True, null=True)
+
+class LinkStyle(TimeStampedModel):
+    description = models.TextField(verbose_name='Link text', blank=True)
+    style = models.ForeignKey(Style, blank=True, null=True)
+
+class LinkUrl(TimeStampedModel):
+    """A link created by the link wizard to a piece of content."""
+
+
+    # data
+    description = models.TextField(verbose_name='Link text', blank=True)
+    external_url = models.URLField(verbose_name='Link', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Link'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+reversion.register(Link)
+
 
 class ViewUrlManager(models.Manager):
 

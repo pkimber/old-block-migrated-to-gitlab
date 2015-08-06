@@ -393,29 +393,31 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     def get_form_initial(self, step):
         init_dict = {}
         #get current block to populate forms
-        for b in self.get_current_block():
-            url = b.get_url_link
-            if (url != None and
-                (url.startswith("http://") or url.startswith("https://"))):
-                url_type = 'l'
-            elif (url != None and url.startswith("/" + self.doc_dir + "/")):
-                url_type = 'e'
-            else:
-                url_type = 'p'
-            title =  b.get_url_text
-            #set flag for whether title field is displayed
-            if (title == None):
-                use_title = False
-            else:
-                use_title = True
-            perm_type = 'x'
-            init_dict = {
-                'url_type': url_type,
-                'title': title,
-                'url': url,
-                'perm_type': perm_type,
-                'use_title': use_title
-            }
+        b = self.get_current_block()
+        # PJK in the original 'compose' models, this returns the 'url' field.
+        url = b.get_url_link
+        if (url != None and
+            (url.startswith("http://") or url.startswith("https://"))):
+            url_type = 'l'
+        elif (url != None and url.startswith("/" + self.doc_dir + "/")):
+            url_type = 'e'
+        else:
+            url_type = 'p'
+        # PJK in the original 'compose' models, this returns 'url_description'
+        title =  b.get_url_text
+        #set flag for whether title field is displayed
+        if (title == None):
+            use_title = False
+        else:
+            use_title = True
+        perm_type = 'x'
+        init_dict = {
+            'url_type': url_type,
+            'title': title,
+            'url': url,
+            'perm_type': perm_type,
+            'use_title': use_title
+        }
         return init_dict
 
     def done(self, form_list, **kwargs):
@@ -459,27 +461,23 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         # update the block
         return_url = "/"
 
-        for b in self.get_current_block():
-            b.set_url(url_info['url'], url_info['title'])
-            b.set_pending_edit()
-            b.save()
-            return_url=b.block.page_section.page.get_design_url()
+        b = self.get_current_block()
+        b.set_url(url_info['url'], url_info['title'])
+        b.set_pending_edit()
+        b.save()
+        return_url = b.block.page_section.page.get_design_url()
 
         return HttpResponseRedirect(return_url)
 
     def get_current_block(self):
-        try:
-            from django.contrib.contenttypes.models import ContentType
-            content_pk = self.kwargs.get('content', None)
-            pk = self.kwargs.get('pk', None)
-            content_type = ContentType.objects.get(pk=content_pk)
-            block_model = content_type.model_class()
-            #block = self.kwargs.get('block', None)
-            #app = self.kwargs.get('app', 'compose')
-            #block_model = get_model(app, block)
-            current_block = block_model.objects.filter(pk=pk)
-        except :
-            current_block = None
-        return current_block
+        from django.contrib.contenttypes.models import ContentType
+        content_pk = self.kwargs.get('content', None)
+        pk = self.kwargs.get('pk', None)
+        content_type = ContentType.objects.get(pk=content_pk)
+        block_model = content_type.model_class()
+        #block = self.kwargs.get('block', None)
+        #app = self.kwargs.get('app', 'compose')
+        #block_model = get_model(app, block)
+        return block_model.objects.get(pk=pk)
 
 # -----------------------------------------------------------------------------
