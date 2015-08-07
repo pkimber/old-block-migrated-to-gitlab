@@ -112,7 +112,7 @@ class LinkDocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for name in ('title', 'description'):
+        for name in ('title',):
             self.fields[name].widget.attrs.update(
                 {'class': 'pure-input-2-3'}
             )
@@ -136,9 +136,8 @@ class LinkDocumentForm(forms.ModelForm):
     class Meta:
         model = Link
         fields = (
-            'document',
             'title',
-            'description',
+            'document',
         )
         widgets = {
             'document': forms.FileInput,

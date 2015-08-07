@@ -372,6 +372,12 @@ def url_upload(wizard):
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     """Link Wizard.
 
+    The link wizard will allow the user to:
+
+    1) Enter or edit an external URL e.g. http://www.bbc.co.uk/news
+    2) Select an internal URL for a page on this web site.
+    3) Select a document, or create a new document.
+
     Documentation for the SessionWizardView in
     http://django-formtools.readthedocs.org/en/latest/
 

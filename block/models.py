@@ -815,9 +815,7 @@ class Url(models.Model):
         max_length=100,
         help_text="e.g. 'project.page' or 'web.training.application'"
     )
-    # ? arg1_name
     arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'")
-    # ? arg2_name
     arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'")
 
     @property
@@ -831,10 +829,10 @@ class Url(models.Model):
 
     class Meta:
         verbose_name = 'URL'
-        verbose_name_plural = 'URL'
+        verbose_name_plural = 'URLs'
 
     def __str__(self):
-        return '{}'.format(self.description)
+        return '{}'.format(self.name)
 
 reversion.register(Url)
 
@@ -845,7 +843,7 @@ class Link(TimeStampedModel):
     Either:
 
     - document
-    - url
+    - external url
     - internal url
 
     For more information, see ``1011-generic-carousel/wip.rst``
@@ -858,19 +856,16 @@ class Link(TimeStampedModel):
     """
 
     DOCUMENT = 'd'
-    PAGE = 'p'
     URL_INTERNAL = 'r'
     URL_EXTERNAL = 'u'
 
     LINK_TYPE_CHOICES = (
         (DOCUMENT, 'Document'),
-        (PAGE, 'Page'),
         (URL_EXTERNAL, 'External URL'),
         (URL_INTERNAL, 'Internal URL'),
     )
 
     title = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
     link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
 
     document = models.ForeignKey(
@@ -888,24 +883,8 @@ class Link(TimeStampedModel):
         Url,
         blank=True,
         null=True,
+        help_text='URL for page on this web site'
     )
-
-    #url_internal = models.TextField(
-    #    verbose_name='Link text',
-    #    blank=True,
-    #    help_text="URL name for use with 'reverse' e.g. 'cms.page.list'"
-    #)
-    #page = models.ForeignKey(
-    #    Page,
-    #    blank=True,
-    #    null=True,
-    #    help_text="Page on the site"
-    #)
-
-
-
-
-
 
     def url(self):
         return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
@@ -918,7 +897,6 @@ class Link(TimeStampedModel):
         return '{}'.format(self.title)
 
 reversion.register(Link)
-
 
 
 class ViewUrlManager(models.Manager):
