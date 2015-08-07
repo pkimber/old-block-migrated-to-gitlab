@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+import os
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -802,11 +804,11 @@ class Link(TimeStampedModel):
         verbose_name_plural = 'Links'
 
     def __str__(self):
-        return '{}'.format(self.description)
+        return '{}'.format(self.title)
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
-        self.document_file_name = self.document.name
+        self.document_file_name = os.path.basename(self.document.name)
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 

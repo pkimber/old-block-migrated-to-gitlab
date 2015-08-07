@@ -110,8 +110,12 @@ class LinkDocumentForm(forms.ModelForm):
     #    required=True,
     #)
 
-    #def __init__(self, *args, **kwargs):
-    #    super().__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('title', 'description'):
+            self.fields[name].widget.attrs.update(
+                {'class': 'pure-input-2-3'}
+            )
     #    if 'doc_id' in self.initial:
     #        # called from DocumentWizard
     #        self.fields['doc_id'] = forms.CharField(

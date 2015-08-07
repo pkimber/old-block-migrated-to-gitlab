@@ -49,34 +49,11 @@
           {% if wizard.form.forms %}
             {{ wizard.form.management_form }}
             {% for form in wizard.form.forms %}
-
-
-              {% if legend %}
-                <legend>{{ legend }}</legend>
-              {% endif %}
-              {% for field in form.visible_fields %}
-                <div class="pure-control-group">
-                  {% if field.label %}
-                    <label for='{{ field.id_for_label }}'>{{ field.label }}{% if field.help_text %} - {{ field.help_text }}{% endif %}:</label>
-                  {% endif %}
-                  {% if aligned %}
-                    {{ field }}
-                  {% endif %}
-                  {% for error in field.errors %}
-                    <span class="errorlist"><mark>{{ error }}</mark></span>
-                  {% endfor %}
-                  {% if not aligned %}
-                    {{ field }}
-                  {% endif %}
-                </div>
-              {% endfor %}
-
-
+              {% include 'block/_wizard_form.html' %}
             {% endfor %}
           {% else %}
-            {{ wizard.form }}
+            {% include 'block/_wizard_form.html' with form=wizard.form %}
           {% endif %}
-
           <div class="pure-controls">
             <p>
               {% if wizard.steps.prev %}

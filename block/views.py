@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from django.apps import apps
 from django.contrib import messages
 from django.core.paginator import (
     EmptyPage,
@@ -32,6 +33,7 @@ from .forms import (
 )
 from .models import (
     BlockError,
+    Link,
     Page,
     PageSection,
     Section,
@@ -40,7 +42,7 @@ from .models import (
 
 
 def _get_block_model(page_section):
-    block_model = get_model(
+    block_model = apps.get_model(
         page_section.section.block_app,
         page_section.section.block_model,
     )
@@ -406,46 +408,75 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
 
     def get_form_initial(self, step):
         init_dict = {}
-        #get current block to populate forms
-        content_obj = self.get_current_content_instance()
-        # PJK in the original 'compose' models, this returns the 'url' field.
-        url = content_obj.get_url_link
-        if (url != None and
-            (url.startswith("http://") or url.startswith("https://"))):
-            url_type = 'l'
-        elif (url != None and url.startswith("/" + 'self.doc_dir' + "/")):
-            url_type = 'e'
+        if step == self.FORM_DOCUMENT:
+            pass
         else:
-            url_type = 'p'
-        # PJK in the original 'compose' models, this returns 'url_description'
-        title = content_obj.get_url_text
-        #set flag for whether title field is displayed
-        if (title == None):
-            use_title = False
-        else:
-            use_title = True
-        perm_type = 'x'
-        init_dict = {
-            'url_type': url_type,
-            'title': title,
-            'url': url,
-            'perm_type': perm_type,
-            'use_title': use_title
-        }
+            #get current block to populate forms
+            content_obj = self.get_current_content_instance()
+            # PJK in the original 'compose' models, this returns the 'url' field.
+            url = content_obj.get_url_link
+            if (url != None and
+                (url.startswith("http://") or url.startswith("https://"))):
+                url_type = 'l'
+            elif (url != None and url.startswith("/" + 'self.doc_dir' + "/")):
+                url_type = 'e'
+            else:
+                url_type = 'p'
+            # PJK in the original 'compose' models, this returns 'url_description'
+            title = content_obj.get_url_text
+            #set flag for whether title field is displayed
+            if (title == None):
+                use_title = False
+            else:
+                use_title = True
+            perm_type = 'x'
+            init_dict = {
+                'url_type': url_type,
+                'title': title,
+                'url': url,
+                'perm_type': perm_type,
+                'use_title': use_title
+            }
         return init_dict
 
+    def get_form_instance(self, step):
+        """Return the object for model forms.
+
+        .. note:: If this method doesn't work as expected, make sure
+                  ``get_form_initial`` is not overriding the values you are
+                  returning here.
+
+        """
+        #import ipdb
+        #ipdb.set_trace()
+        #return self.get_current_content_instance()
+        result = None
+        #print('[1[{}]]'.format(self.instance))
+        if step == self.FORM_DOCUMENT:
+            obj = self.get_current_content_instance()
+            #import ipdb
+            #ipdb.set_trace()
+            # TODO PJK Why do I need to do this.  Why not just 'obj.link'?
+            #result = Link.objects.get(pk=obj.link.pk)
+            result = obj.link
+            #self.instance = result
+        #print('[2[{}]]'.format(result.title))
+        #print('[3[{}]]'.format(self.instance))
+        return result
+
     def done(self, form_list, form_dict, **kwargs):
-        content_obj = self.get_current_content_instance()
+        obj = self.get_current_content_instance()
         form_link_type = form_dict[self.FORM_LINK_TYPE]
         link_type = form_link_type.cleaned_data['link_type']
         update = False
         if link_type == URLTypeForm.UPLOAD:
             form = form_dict[self.FORM_DOCUMENT]
-            content_obj.link = form.save()
+            obj.link = form.save()
             update = True
-        content_obj.set_pending_edit()
-        content_obj.save()
-        url = content_obj.block.page_section.page.get_design_url()
+        if update:
+            obj.set_pending_edit()
+            obj.save()
+        url = obj.block.page_section.page.get_design_url()
         return HttpResponseRedirect(url)
 
 
@@ -497,10 +528,6 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         return_url = "/"
 
         content_obj = self.get_current_content_instance()
-
-        import ipdb
-        ipdb.set_trace()
-
         content_obj.set_url(url_info['url'], url_info['title'])
         content_obj.set_pending_edit()
         content_obj.save()
