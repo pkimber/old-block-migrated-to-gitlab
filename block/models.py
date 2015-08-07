@@ -765,12 +765,14 @@ class Link(TimeStampedModel):
     description = models.TextField(blank=True)
     link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
 
+    document = models.ForeignKey(Document,
+
+
     document = models.FileField(
         upload_to='link/document',
         blank=True,
         null=True,
         help_text='Uploaded document e.g. PDF'
-
     )
     document_file_name = models.CharField(
         max_length=100,
@@ -784,6 +786,9 @@ class Link(TimeStampedModel):
         null=True,
         help_text='URL for a web site e.g. http://www.bbc.co.uk/news'
     )
+
+
+
     url_internal = models.TextField(
         verbose_name='Link text',
         blank=True,
@@ -795,6 +800,12 @@ class Link(TimeStampedModel):
         null=True,
         help_text="Page on the site"
     )
+
+
+    url_internal = models.ForeignKey(InternalUrl)
+
+
+
 
     def url(self):
         return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
@@ -815,10 +826,38 @@ class Link(TimeStampedModel):
 reversion.register(Link)
 
 
-class LinkImage(TimeStampedModel):
-    """An image *library*, used with the 'LinkWizard'.
+class Url(models.Model)
+    """
+    In future, we could add the class name of a view to this table and remove
+    ``slug`` and ``slug_menu`` from the ``Page`` model.  Malcolm has some ideas
+    for this.
+
+    """
+
+    name = models.CharField(
+        max_length=100,
+        help_text="e.g. 'project.page' or 'web.training.application'"
+    )
+    # ? arg1_name
+    arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'"
+    # ? arg2_name
+    arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'"
+
+    def url(self):
+        return reverse(self.name, args=[self.arg1, self.arg2])
+
+
+class Image(TimeStampedModel):
+    """An image *library*, used with the 'ImageWizard'.
 
     For more information, see ``1011-generic-carousel/wip.rst``
+
+    .. note:: Images are NOT links... so we don't use the ``LinkWizard``.
+              We need a new wizard for images.
+
+    .. note:: Image wizard...  For now... display all the images as little
+              thumbnails with tick boxes for multi-selection and radio buttons
+              for single selection.
 
     TODO
 
