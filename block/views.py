@@ -23,11 +23,12 @@ from formtools.wizard.views import SessionWizardView
 
 from base.view_utils import BaseMixin
 from .forms import (
+    LinkDocumentForm,
+    LinkDocumentForm,
     URLExternalLinkForm,
     URLExistingForm,
     URLInternalPageForm,
     URLTypeForm,
-    URLUploadForm,
 )
 from .models import (
     BlockError,
@@ -363,7 +364,7 @@ def url_internal_page(wizard):
 
 def url_upload(wizard):
     """Return true if user opts for upload a document """
-    return select_link_form(wizard, LinkWizard.FORM_UPLOAD_DOCUMENT)
+    return select_link_form(wizard, LinkWizard.FORM_DOCUMENT)
 # end of - support methods for the 'LinkWizard'
 
 
@@ -375,28 +376,30 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
 
     """
 
+    FORM_DOCUMENT = 'u'
+    FORM_EXISTING = 'e'
     FORM_EXTERNAL_URL = 'l'
     FORM_LINK_TYPE = 'link_type'
-    FORM_UPLOAD_DOCUMENT = 'u'
+    FORM_PAGE = 'p'
 
     condition_dict = {
         FORM_EXTERNAL_URL: url_external_link,
-        'p': url_internal_page,
-        FORM_UPLOAD_DOCUMENT: url_upload,
-        'e': url_existing,
+        FORM_PAGE: url_internal_page,
+        FORM_DOCUMENT: url_upload,
+        FORM_EXISTING: url_existing,
     }
 
     temp_dir = 'temp'
-    doc_dir = 'document'
+    #doc_dir = 'document'
     file_storage = FileSystemStorage(
-        location=os.path.join(settings.MEDIA_ROOT, temp_dir)
+        location=os.path.join(settings.MEDIA_ROOT, 'temp/wizard')
     )
     form_list = [
-        (FORM_LINK_TYPE, URLTypeForm),
+        (FORM_DOCUMENT, LinkDocumentForm),
+        (FORM_EXISTING, URLExistingForm),
         (FORM_EXTERNAL_URL, URLExternalLinkForm),
-        ("p", URLInternalPageForm),
-        (FORM_UPLOAD_DOCUMENT, URLUploadForm),
-        ("e", URLExistingForm),
+        (FORM_LINK_TYPE, URLTypeForm),
+        (FORM_PAGE, URLInternalPageForm),
     ]
 
     template_name = 'block/wizard.html'
@@ -410,7 +413,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         if (url != None and
             (url.startswith("http://") or url.startswith("https://"))):
             url_type = 'l'
-        elif (url != None and url.startswith("/" + self.doc_dir + "/")):
+        elif (url != None and url.startswith("/" + 'self.doc_dir' + "/")):
             url_type = 'e'
         else:
             url_type = 'p'
@@ -437,7 +440,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         link_type = form_link_type.cleaned_data['link_type']
         update = False
         if link_type == URLTypeForm.UPLOAD:
-            form = form_dict[self.FORM_UPLOAD_DOCUMENT]
+            form = form_dict[self.FORM_DOCUMENT]
             content_obj.link_document = form.save()
             update = True
         content_obj.set_pending_edit()

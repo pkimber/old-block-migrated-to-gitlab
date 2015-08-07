@@ -12,25 +12,29 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='LinkDocument',
+            name='Link',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('document', models.FileField(upload_to='link/document')),
                 ('title', models.CharField(max_length=100)),
                 ('description', models.TextField(blank=True)),
-                ('original_file_name', models.CharField(max_length=100)),
+                ('link_type', models.CharField(max_length=1, choices=[('d', 'Document'), ('p', 'Page'), ('u', 'External URL'), ('r', 'Internal URL')])),
+                ('document', models.FileField(null=True, upload_to='link/document', help_text='Uploaded document e.g. PDF', blank=True)),
+                ('document_file_name', models.CharField(null=True, max_length=100, help_text='Original file name of the document', blank=True)),
+                ('url_external', models.URLField(verbose_name='Link', null=True, help_text='URL for a web site e.g. http://www.bbc.co.uk/news', blank=True)),
+                ('url_internal', models.TextField(verbose_name='Link text', help_text="URL name for use with 'reverse' e.g. 'cms.page.list'", blank=True)),
+                ('page', models.ForeignKey(help_text='Page on the site', null=True, blank=True, to='block.Page')),
             ],
             options={
-                'verbose_name': 'Link Document',
-                'verbose_name_plural': 'Link Documents',
+                'verbose_name': 'Link',
+                'verbose_name_plural': 'Links',
             },
         ),
         migrations.CreateModel(
             name='LinkImage',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
+                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('image', models.ImageField(upload_to='link/image')),

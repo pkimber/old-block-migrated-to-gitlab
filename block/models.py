@@ -730,7 +730,13 @@ class ContentModel(TimeStampedModel):
 
 
 class Link(TimeStampedModel):
-    """An document *library*, used with the 'LinkWizard'.
+    """A link to something.
+
+    Either:
+
+    - document
+    - url
+    - page (from the ``block`` app)
 
     For more information, see ``1011-generic-carousel/wip.rst``
 
@@ -742,38 +748,69 @@ class Link(TimeStampedModel):
     """
 
     DOCUMENT = 'd'
-    EXTERNAL_URL = 'e'
+    PAGE = 'p'
+    URL_INTERNAL = 'r'
+    URL_EXTERNAL = 'u'
+
+    LINK_TYPE_CHOICES = (
+        (DOCUMENT, 'Document'),
+        (PAGE, 'Page'),
+        (URL_EXTERNAL, 'External URL'),
+        (URL_INTERNAL, 'Internal URL'),
+    )
 
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
 
-    link_type = models.ForeignKey(LinkType)
+    document = models.FileField(
+        upload_to='link/document',
+        blank=True,
+        null=True,
+        help_text='Uploaded document e.g. PDF'
 
-    document = models.FileField(upload_to='link/document', blank=True, null=True)
-    document_file_name = models.CharField(max_length=100)
-
-    external_url = models.URLField(verbose_name='Link', blank=True, null=True)
-    internal_url = models.TextField(verbose_name='Link text', blank=True, help_text='cms.page.list')
-    page = models.ForeignKey(Page, blank=True, null=True)
+    )
+    document_file_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Original file name of the document'
+    )
+    url_external = models.URLField(
+        verbose_name='Link',
+        blank=True,
+        null=True,
+        help_text='URL for a web site e.g. http://www.bbc.co.uk/news'
+    )
+    url_internal = models.TextField(
+        verbose_name='Link text',
+        blank=True,
+        help_text="URL name for use with 'reverse' e.g. 'cms.page.list'"
+    )
+    page = models.ForeignKey(
+        Page,
+        blank=True,
+        null=True,
+        help_text="Page on the site"
+    )
 
     def url(self):
-        
-        return 
+        return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
 
     class Meta:
-        verbose_name = 'Link Document'
-        verbose_name_plural = 'Link Documents'
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
 
     def __str__(self):
         return '{}'.format(self.description)
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
-        self.original_file_name = self.document.name
+        self.document_file_name = self.document.name
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
-reversion.register(LinkDocument)
+reversion.register(Link)
 
 
 class LinkImage(TimeStampedModel):
@@ -798,7 +835,7 @@ class LinkImage(TimeStampedModel):
         verbose_name_plural = 'Link Images'
 
     def __str__(self):
-        return '{} {}'.format(self.description)
+        return '{}'.format(self.description)
 
 reversion.register(LinkImage)
 

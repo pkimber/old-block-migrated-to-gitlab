@@ -3,7 +3,7 @@ from django import forms
 
 from block.models import (
     ContentModel,
-    LinkDocument,
+    Link,
     Page,
 )
 
@@ -97,7 +97,8 @@ class URLTypeForm(forms.Form):
         )
 
 
-class URLUploadForm(forms.ModelForm):
+class LinkDocumentForm(forms.ModelForm):
+    """Was ``URLUploadForm``."""
 
     #title = forms.CharField(max_length=512, label="Link Text")
     #short_file_name = forms.CharField(
@@ -129,10 +130,10 @@ class URLUploadForm(forms.ModelForm):
 
 
     class Meta:
-        model = LinkDocument
+        model = Link
         fields = (
-            'title',
             'document',
+            'title',
             'description',
         )
         widgets = {
