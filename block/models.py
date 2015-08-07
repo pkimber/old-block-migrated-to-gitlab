@@ -225,10 +225,11 @@ class Page(TimeStampedModel):
         return '{}'.format(self.name)
 
     def get_absolute_url(self):
+        name = self.url_name
         if self.is_home:
-            return reverse('project.home')
+            return reverse(name)
         else:
-            return reverse('project.page', kwargs=self.get_url_kwargs())
+            return reverse(name, kwargs=self.get_url_kwargs())
 
     def get_design_url(self):
         return reverse('project.page.design', kwargs=self.get_url_kwargs())
@@ -238,6 +239,14 @@ class Page(TimeStampedModel):
         if self.slug_menu:
             result.update(dict(menu=self.slug_menu,))
         return result
+
+    @property
+    def url_name(self):
+        """Use by this class and the ``Url`` class (see below)."""
+        if self.is_home:
+            return 'project.home'
+        else:
+            return 'project.page'
 
 reversion.register(Page)
 
@@ -803,6 +812,45 @@ class Image(TimeStampedModel):
 reversion.register(Image)
 
 
+class UrlManager(models.Manager):
+
+    def _create_url(self, url_type, name, arg1, arg2):
+        obj = self.model(url_type=url_type, name=name, arg1=arg1, arg2=arg2)
+        # check this is a valid url
+        obj.url
+        obj.save()
+        return obj
+
+    def create_page_url(self, page):
+        if page.is_custom or page.slug == Page.CUSTOM:
+            raise BlockError(
+                "Cannot create a URL for a custom "
+                "page: '{}'".format(page.name)
+            )
+        if page.deleted:
+            raise BlockError(
+                "Cannot create a URL for a deleted "
+                "page: '{}'".format(page.name)
+            )
+        if page.is_home:
+            slug = ''
+            slug_menu = ''
+        else:
+            slug = page.slug
+            slug_menu = page.slug_menu
+        return self._create_url(
+            self.model.PAGE, page.url_name, slug, slug_menu
+        )
+
+    def create_reverse_url(self, name, arg1=None, arg2=None):
+        return self._create_url(
+            self.model.REVERSE, name, arg1 or '', arg2 or ''
+        )
+
+    def init_pages_not_custom(self):
+        pass
+
+
 class Url(models.Model):
     """List of URLs in this project.
 
@@ -815,12 +863,22 @@ class Url(models.Model):
 
     """
 
+    PAGE = 'p'
+    REVERSE = 'r'
+
+    URL_TYPE_CHOICES = (
+        (PAGE, 'Page'),
+        (REVERSE, 'Reverse'),
+    )
+
+    url_type = models.CharField(max_length=1, choices=URL_TYPE_CHOICES)
     name = models.CharField(
         max_length=100,
         help_text="e.g. 'project.page' or 'web.training.application'"
     )
     arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'")
     arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'")
+    objects = UrlManager()
 
     @property
     def url(self):
@@ -832,11 +890,12 @@ class Url(models.Model):
         return reverse(self.name, args=params)
 
     class Meta:
+        unique_together = ('name', 'arg1', 'arg2')
         verbose_name = 'URL'
         verbose_name_plural = 'URLs'
 
     def __str__(self):
-        return '{}'.format(self.name)
+        return '{}: {}'.format(self.name, self.url)
 
 reversion.register(Url)
 
