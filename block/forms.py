@@ -3,6 +3,7 @@ from django import forms
 
 from block.models import (
     ContentModel,
+    Document,
     Link,
     Page,
 )
@@ -38,6 +39,7 @@ class URLExistingForm(forms.Form):
 
 
 class URLExternalLinkForm(forms.Form):
+
     title = forms.CharField(max_length=512, label="Link Text")
     url = forms.URLField(label="External Link")
 
@@ -97,7 +99,7 @@ class URLTypeForm(forms.Form):
         )
 
 
-class LinkDocumentForm(forms.ModelForm):
+class DocumentForm(forms.ModelForm):
     """Was ``URLUploadForm``."""
 
     #title = forms.CharField(max_length=512, label="Link Text")
@@ -134,7 +136,7 @@ class LinkDocumentForm(forms.ModelForm):
 
 
     class Meta:
-        model = Link
+        model = Document
         fields = (
             'title',
             'document',

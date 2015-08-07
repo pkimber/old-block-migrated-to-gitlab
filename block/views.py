@@ -24,10 +24,9 @@ from formtools.wizard.views import SessionWizardView
 
 from base.view_utils import BaseMixin
 from .forms import (
-    LinkDocumentForm,
-    LinkDocumentForm,
-    URLExternalLinkForm,
+    DocumentForm,
     URLExistingForm,
+    URLExternalLinkForm,
     URLInternalPageForm,
     URLTypeForm,
 )
@@ -406,7 +405,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         (FORM_LINK_TYPE, URLTypeForm),
         (FORM_EXTERNAL_URL, URLExternalLinkForm),
         (FORM_PAGE, URLInternalPageForm),
-        (FORM_DOCUMENT, LinkDocumentForm),
+        (FORM_DOCUMENT, DocumentForm),
         (FORM_EXISTING, URLExistingForm),
     ]
 
@@ -445,30 +444,29 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
             }
         return init_dict
 
-    def get_form_instance(self, step):
-        """Return the object for model forms.
+    #def get_form_instance(self, step):
+    #    """Return the object for model forms.
 
-        .. note:: If this method doesn't work as expected, make sure
-                  ``get_form_initial`` is not overriding the values you are
-                  returning here.
-
-        """
-        #import ipdb
-        #ipdb.set_trace()
-        #return self.get_current_content_instance()
-        result = None
-        #print('[1[{}]]'.format(self.instance))
-        if step == self.FORM_DOCUMENT:
-            obj = self.get_current_content_instance()
-            #import ipdb
-            #ipdb.set_trace()
-            # TODO PJK Why do I need to do this.  Why not just 'obj.link'?
-            #result = Link.objects.get(pk=obj.link.pk)
-            result = obj.link
-            #self.instance = result
-        #print('[2[{}]]'.format(result.title))
-        #print('[3[{}]]'.format(self.instance))
-        return result
+    #    .. note:: If this method doesn't work as expected, make sure
+    #              ``get_form_initial`` is not overriding the values you are
+    #              returning here.
+    #    """
+    #    #import ipdb
+    #    #ipdb.set_trace()
+    #    #return self.get_current_content_instance()
+    #    result = None
+    #    #print('[1[{}]]'.format(self.instance))
+    #    if step == self.FORM_DOCUMENT:
+    #        obj = self.get_current_content_instance()
+    #        #import ipdb
+    #        #ipdb.set_trace()
+    #        # TODO PJK Why do I need to do this.  Why not just 'obj.link'?
+    #        #result = Link.objects.get(pk=obj.link.pk)
+    #        result = obj.link
+    #        #self.instance = result
+    #    #print('[2[{}]]'.format(result.title))
+    #    #print('[3[{}]]'.format(self.instance))
+    #    return result
 
     def done(self, form_list, form_dict, **kwargs):
         obj = self.get_current_content_instance()
@@ -477,8 +475,10 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         update = False
         if link_type == URLTypeForm.UPLOAD:
             form = form_dict[self.FORM_DOCUMENT]
-            obj.link = form.save()
-            update = True
+            with transaction.atomic():
+                document = form.save()
+                obj.link = Link.objects.create_document_link(document)
+                update = True
         if update:
             obj.set_pending_edit()
             obj.save()

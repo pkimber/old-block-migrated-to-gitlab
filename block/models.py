@@ -733,7 +733,7 @@ class ContentModel(TimeStampedModel):
 
 class Document(models.Model) :
 
-    title = models.TextField()
+    title = models.CharField(max_length=200)
     document = models.FileField(
         upload_to='link/document',
         blank=True,
@@ -837,6 +837,18 @@ class Url(models.Model):
 reversion.register(Url)
 
 
+class LinkManager(models.Manager):
+
+    def create_document_link(self, document):
+        obj = self.model(
+            document=document,
+            link_type=self.model.DOCUMENT,
+            title=document.title,
+        )
+        obj.save()
+        return obj
+
+
 class Link(TimeStampedModel):
     """A link to something.
 
@@ -885,9 +897,25 @@ class Link(TimeStampedModel):
         null=True,
         help_text='URL for page on this web site'
     )
+    objects = LinkManager()
 
+    @property
+    def file_name(self):
+        result = None
+        if self.link_type == self.DOCUMENT:
+            return self.document.original_file_name
+        return result
+
+    @property
     def url(self):
-        return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
+        result = None
+        if self.link_type == self.DOCUMENT:
+            return self.document.document
+        else:
+            raise BlockError(
+                "'Link' {} does not have a 'link_type'".format(self.pk)
+            )
+        return result
 
     class Meta:
         verbose_name = 'Link'
