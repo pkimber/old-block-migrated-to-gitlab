@@ -7,16 +7,7 @@
     {% if field.label %}
       <label for='{{ field.id_for_label }}'>
         {{ field.label }}
-        {% if field|is_file_input %}
-          <small>
-            <br />
-            Current: {{ form.instance.document_file_name }}
-            <br />
-          </small>
-          To update:
-        {% else %}
-          {% if field.help_text %} - {{ field.help_text }}{% endif %}:
-        {% endif %}
+        {% if field.help_text %} - {{ field.help_text }}{% endif %}:
       </label>
     {% endif %}
     {% if aligned %}
