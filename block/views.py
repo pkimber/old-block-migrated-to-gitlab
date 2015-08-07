@@ -333,7 +333,7 @@ class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
 
 
 # -----------------------------------------------------------------------------
-# support methods for the 'LinkWizard'
+# 'LinkWizard'
 import os
 
 from django.conf import settings
@@ -349,23 +349,22 @@ def select_link_form(wizard, link_type) :
 
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
-    return select_link_form(wizard, 'e')
+    return select_link_form(wizard, LinkWizard.FORM_EXISTING)
 
 
 def url_external_link(wizard):
     """Return true if user opts for external link """
-    return select_link_form(wizard, 'l')
+    return select_link_form(wizard, LinkWizard.FORM_EXTERNAL_URL)
 
 
 def url_internal_page(wizard):
     """Return true if user opts for an internal page """
-    return select_link_form(wizard, 'p')
+    return select_link_form(wizard, LinkWizard.FORM_PAGE)
 
 
 def url_upload(wizard):
     """Return true if user opts for upload a document """
     return select_link_form(wizard, LinkWizard.FORM_DOCUMENT)
-# end of - support methods for the 'LinkWizard'
 
 
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
@@ -394,12 +393,13 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     file_storage = FileSystemStorage(
         location=os.path.join(settings.MEDIA_ROOT, 'temp/wizard')
     )
+    # this list of forms must stay in this order!
     form_list = [
+        (FORM_LINK_TYPE, URLTypeForm),
+        (FORM_EXTERNAL_URL, URLExternalLinkForm),
+        (FORM_PAGE, URLInternalPageForm),
         (FORM_DOCUMENT, LinkDocumentForm),
         (FORM_EXISTING, URLExistingForm),
-        (FORM_EXTERNAL_URL, URLExternalLinkForm),
-        (FORM_LINK_TYPE, URLTypeForm),
-        (FORM_PAGE, URLInternalPageForm),
     ]
 
     template_name = 'block/wizard.html'
@@ -441,7 +441,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         update = False
         if link_type == URLTypeForm.UPLOAD:
             form = form_dict[self.FORM_DOCUMENT]
-            content_obj.link_document = form.save()
+            content_obj.link = form.save()
             update = True
         content_obj.set_pending_edit()
         content_obj.save()
