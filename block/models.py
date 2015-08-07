@@ -762,6 +762,10 @@ class Document(models.Model) :
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
+    @property
+    def url(self):
+        return settings.MEDIA_URL + self.document.name
+
 reversion.register(Document)
 
 
@@ -914,7 +918,7 @@ class Link(TimeStampedModel):
     def url(self):
         result = None
         if self.link_type == self.DOCUMENT:
-            return settings.MEDIA_URL + self.document.document.name
+            return self.document.url
         elif self.link_type == self.URL_EXTERNAL:
             return self.url_external
         else:

@@ -25,7 +25,7 @@ from formtools.wizard.views import SessionWizardView
 from base.view_utils import BaseMixin
 from .forms import (
     DocumentForm,
-    URLExistingForm,
+    DocumentListForm,
     URLExternalLinkForm,
     URLInternalPageForm,
     URLTypeForm,
@@ -406,7 +406,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         (FORM_EXTERNAL_URL, URLExternalLinkForm),
         (FORM_PAGE, URLInternalPageForm),
         (FORM_DOCUMENT, DocumentForm),
-        (FORM_EXISTING, URLExistingForm),
+        (FORM_EXISTING, DocumentListForm),
     ]
 
     template_name = 'block/wizard.html'
@@ -414,6 +414,8 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     def get_form_initial(self, step):
         init_dict = {}
         if step == self.FORM_DOCUMENT:
+            pass
+        elif step == self.FORM_EXISTING:
             pass
         else:
             #get current block to populate forms
@@ -486,6 +488,15 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
                 #link.save()
                 obj.link = form.save()
                 update = True
+            elif link_type == URLTypeForm.EXISTING_DOCUMENT:
+                form = form_dict[self.FORM_EXISTING]
+                link = form.save(commit=False)
+                link.link_type = Link.DOCUMENT
+                #link.save()
+                obj.link = form.save()
+                update = True
+
+
             if update:
                 obj.set_pending_edit()
                 obj.save()

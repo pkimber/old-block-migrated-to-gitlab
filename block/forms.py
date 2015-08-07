@@ -16,25 +16,18 @@ class ContentEmptyForm(forms.ModelForm):
         fields = ()
 
 
-class URLExistingForm(forms.Form):
-
-    title = forms.CharField(max_length=512, label="Link Text")
+class DocumentListForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['url'] = forms.ChoiceField(
-            choices=[
-                (o.get_url(), str(o)) for o in LinkDocument.objects.all().order_by('description')
-            ],
-            label="Choose a Document"
-        )
-        if ('use_title' in self.initial and self.initial['use_title'] == False):
-            self.fields.pop('title')
+        super ().__init__(*args,**kwargs)
+        for name in ('title', 'document'):
+            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
+        model = Link
         fields = (
             'title',
-            'url',
+            'document',
         )
 
 
@@ -84,13 +77,14 @@ class URLTypeForm(forms.Form):
 
     UPLOAD = 'u'
     URL_EXTERNAL = 'l'
+    EXISTING_DOCUMENT = 'e'
 
     link_type = forms.ChoiceField(
         choices=(
             (URL_EXTERNAL, 'Link to another site'),
             ('p', 'Page on this site'),
             (UPLOAD, 'Upload a document and link to it'),
-            ('e', 'Use an existing document'),
+            (EXISTING_DOCUMENT, 'Use an existing document'),
             ('n', 'Remove Link'),
         ),
         label="Choose the type of link",
