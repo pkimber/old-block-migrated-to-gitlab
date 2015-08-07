@@ -7,6 +7,7 @@ from block.models import (
     Page,
     PageSection,
     Section,
+    Url,
 )
 
 
@@ -62,3 +63,9 @@ class PageSectionFactory(factory.django.DjangoModelFactory):
 
     page = factory.SubFactory(PageFactory)
     section = factory.SubFactory(SectionFactory)
+
+
+class UrlFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Url

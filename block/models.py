@@ -731,120 +731,38 @@ class ContentModel(TimeStampedModel):
 # reversion.register(Link)
 
 
-class Link(TimeStampedModel):
-    """A link to something.
+class Document(models.Model) :
 
-    Either:
-
-    - document
-    - url
-    - page (from the ``block`` app)
-
-    For more information, see ``1011-generic-carousel/wip.rst``
-
-    TODO
-
-    - Do we want to add tags field in here so we can search/group images?
-      e.g. https://github.com/alex/django-taggit
-
-    """
-
-    DOCUMENT = 'd'
-    PAGE = 'p'
-    URL_INTERNAL = 'r'
-    URL_EXTERNAL = 'u'
-
-    LINK_TYPE_CHOICES = (
-        (DOCUMENT, 'Document'),
-        (PAGE, 'Page'),
-        (URL_EXTERNAL, 'External URL'),
-        (URL_INTERNAL, 'Internal URL'),
-    )
-
-    title = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
-
-    document = models.ForeignKey(Document,
-
-
+    title = models.TextField()
     document = models.FileField(
         upload_to='link/document',
         blank=True,
         null=True,
         help_text='Uploaded document e.g. PDF'
     )
-    document_file_name = models.CharField(
+    original_file_name = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         help_text='Original file name of the document'
     )
-    url_external = models.URLField(
-        verbose_name='Link',
-        blank=True,
-        null=True,
-        help_text='URL for a web site e.g. http://www.bbc.co.uk/news'
-    )
-
-
-
-    url_internal = models.TextField(
-        verbose_name='Link text',
-        blank=True,
-        help_text="URL name for use with 'reverse' e.g. 'cms.page.list'"
-    )
-    page = models.ForeignKey(
-        Page,
-        blank=True,
-        null=True,
-        help_text="Page on the site"
-    )
-
-
-    url_internal = models.ForeignKey(InternalUrl)
-
-
-
-
-    def url(self):
-        return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
-
-    class Meta:
-        verbose_name = 'Link'
-        verbose_name_plural = 'Links'
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}'.format(self.title)
 
+    class Meta:
+        # unique_together = ('page', 'course')
+        verbose_name = 'Document'
+        verbose_name_plural = 'Documents'
+
     def save(self, *args, **kwargs):
         """Save the original file name."""
-        self.document_file_name = os.path.basename(self.document.name)
+        self.original_file_name = os.path.basename(self.document.name)
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
-reversion.register(Link)
-
-
-class Url(models.Model)
-    """
-    In future, we could add the class name of a view to this table and remove
-    ``slug`` and ``slug_menu`` from the ``Page`` model.  Malcolm has some ideas
-    for this.
-
-    """
-
-    name = models.CharField(
-        max_length=100,
-        help_text="e.g. 'project.page' or 'web.training.application'"
-    )
-    # ? arg1_name
-    arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'"
-    # ? arg2_name
-    arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'"
-
-    def url(self):
-        return reverse(self.name, args=[self.arg1, self.arg2])
+reversion.register(Document)
 
 
 class Image(TimeStampedModel):
@@ -878,7 +796,129 @@ class Image(TimeStampedModel):
     def __str__(self):
         return '{}'.format(self.description)
 
-reversion.register(LinkImage)
+reversion.register(Image)
+
+
+class Url(models.Model):
+    """List of URLs in this project.
+
+    This is a combination of ``Page`` URLs and view URLs e.g.
+    ``cms.page.list``.
+
+    In future, we could add the class name of a view to this table and remove
+    ``slug`` and ``slug_menu`` from the ``Page`` model.  Malcolm has some ideas
+    for this.
+
+    """
+
+    name = models.CharField(
+        max_length=100,
+        help_text="e.g. 'project.page' or 'web.training.application'"
+    )
+    # ? arg1_name
+    arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'")
+    # ? arg2_name
+    arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'")
+
+    @property
+    def url(self):
+        params = []
+        if self.arg1:
+            params.append(self.arg1)
+        if self.arg2:
+            params.append(self.arg2)
+        return reverse(self.name, args=params)
+
+    class Meta:
+        verbose_name = 'URL'
+        verbose_name_plural = 'URL'
+
+    def __str__(self):
+        return '{}'.format(self.description)
+
+reversion.register(Url)
+
+
+class Link(TimeStampedModel):
+    """A link to something.
+
+    Either:
+
+    - document
+    - url
+    - internal url
+
+    For more information, see ``1011-generic-carousel/wip.rst``
+
+    TODO
+
+    - Do we want to add tags field in here so we can search/group images?
+      e.g. https://github.com/alex/django-taggit
+
+    """
+
+    DOCUMENT = 'd'
+    PAGE = 'p'
+    URL_INTERNAL = 'r'
+    URL_EXTERNAL = 'u'
+
+    LINK_TYPE_CHOICES = (
+        (DOCUMENT, 'Document'),
+        (PAGE, 'Page'),
+        (URL_EXTERNAL, 'External URL'),
+        (URL_INTERNAL, 'Internal URL'),
+    )
+
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
+
+    document = models.ForeignKey(
+        Document,
+        blank=True,
+        null=True,
+    )
+    url_external = models.URLField(
+        verbose_name='Link',
+        blank=True,
+        null=True,
+        help_text='URL for a web site e.g. http://www.bbc.co.uk/news'
+    )
+    url_internal = models.ForeignKey(
+        Url,
+        blank=True,
+        null=True,
+    )
+
+    #url_internal = models.TextField(
+    #    verbose_name='Link text',
+    #    blank=True,
+    #    help_text="URL name for use with 'reverse' e.g. 'cms.page.list'"
+    #)
+    #page = models.ForeignKey(
+    #    Page,
+    #    blank=True,
+    #    null=True,
+    #    help_text="Page on the site"
+    #)
+
+
+
+
+
+
+    def url(self):
+        return 'http://www.bbc.co.uk/sport/0/cricket/33723587'
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+reversion.register(Link)
+
 
 
 class ViewUrlManager(models.Manager):
