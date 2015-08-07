@@ -38,21 +38,23 @@ class URLExistingForm(forms.Form):
         )
 
 
-class URLExternalLinkForm(forms.Form):
+class URLExternalLinkForm(forms.ModelForm):
 
-    title = forms.CharField(max_length=512, label="Link Text")
-    url = forms.URLField(label="External Link")
+    #title = forms.CharField(max_length=512, label="Link Text")
+    #url_external = forms.URLField(label="External Link")
 
     def __init__(self, *args, **kwargs):
-        super (URLExternalLinkForm, self).__init__(*args,**kwargs)
-
-        if ('use_title' in self.initial and self.initial['use_title'] == False):
-            self.fields.pop('title')
+        super ().__init__(*args,**kwargs)
+        for name in ('title', 'url_external'):
+            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+        #if ('use_title' in self.initial and self.initial['use_title'] == False):
+        #    self.fields.pop('title')
 
     class Meta:
+        model = Link
         fields = (
             'title',
-            'url',
+            'url_external',
         )
 
 
@@ -81,10 +83,11 @@ class URLInternalPageForm(forms.Form):
 class URLTypeForm(forms.Form):
 
     UPLOAD = 'u'
+    URL_EXTERNAL = 'l'
 
     link_type = forms.ChoiceField(
         choices=(
-            ('l', 'Link to another site'),
+            (URL_EXTERNAL, 'Link to another site'),
             ('p', 'Page on this site'),
             (UPLOAD, 'Upload a document and link to it'),
             ('e', 'Use an existing document'),
@@ -114,10 +117,7 @@ class DocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for name in ('title',):
-            self.fields[name].widget.attrs.update(
-                {'class': 'pure-input-2-3'}
-            )
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
     #    if 'doc_id' in self.initial:
     #        # called from DocumentWizard
     #        self.fields['doc_id'] = forms.CharField(
@@ -143,5 +143,4 @@ class DocumentForm(forms.ModelForm):
         )
         widgets = {
             'document': forms.FileInput,
-            #'doc_id': forms.HiddenInput(),
         }

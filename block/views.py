@@ -472,16 +472,23 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         obj = self.get_current_content_instance()
         form_link_type = form_dict[self.FORM_LINK_TYPE]
         link_type = form_link_type.cleaned_data['link_type']
-        update = False
-        if link_type == URLTypeForm.UPLOAD:
-            form = form_dict[self.FORM_DOCUMENT]
-            with transaction.atomic():
+        with transaction.atomic():
+            update = False
+            if link_type == URLTypeForm.UPLOAD:
+                form = form_dict[self.FORM_DOCUMENT]
                 document = form.save()
                 obj.link = Link.objects.create_document_link(document)
                 update = True
-        if update:
-            obj.set_pending_edit()
-            obj.save()
+            elif link_type == URLTypeForm.URL_EXTERNAL:
+                form = form_dict[self.FORM_EXTERNAL_URL]
+                link = form.save(commit=False)
+                link.link_type = Link.URL_EXTERNAL
+                #link.save()
+                obj.link = form.save()
+                update = True
+            if update:
+                obj.set_pending_edit()
+                obj.save()
         url = obj.block.page_section.page.get_design_url()
         return HttpResponseRedirect(url)
 

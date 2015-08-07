@@ -877,7 +877,7 @@ class Link(TimeStampedModel):
         (URL_INTERNAL, 'Internal URL'),
     )
 
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=250)
     link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
 
     document = models.ForeignKey(
@@ -907,10 +907,16 @@ class Link(TimeStampedModel):
         return result
 
     @property
+    def is_document(self):
+        return bool(self.link_type == self.DOCUMENT)
+
+    @property
     def url(self):
         result = None
         if self.link_type == self.DOCUMENT:
-            return self.document.document
+            return settings.MEDIA_URL + self.document.document.name
+        elif self.link_type == self.URL_EXTERNAL:
+            return self.url_external
         else:
             raise BlockError(
                 "'Link' {} does not have a 'link_type'".format(self.pk)
