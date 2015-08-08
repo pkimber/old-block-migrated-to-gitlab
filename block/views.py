@@ -32,7 +32,7 @@ from .forms import (
     DocumentForm,
     DocumentListForm,
     LinkTypeForm,
-    URLExternalLinkForm,
+    ExternalLinkForm,
     PageListForm,
 )
 from .models import (
@@ -351,7 +351,7 @@ def select_link_form(wizard, link_type) :
 
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
-    return select_link_form(wizard, LinkTypeForm.FORM_EXISTING)
+    return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT_LIST)
 
 
 def url_external_link(wizard):
@@ -361,7 +361,7 @@ def url_external_link(wizard):
 
 def url_internal_page(wizard):
     """Return true if user opts for an internal page """
-    return select_link_form(wizard, LinkTypeForm.FORM_PAGE)
+    return select_link_form(wizard, LinkTypeForm.FORM_PAGE_URL)
 
 
 def url_upload(wizard):
@@ -385,9 +385,9 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
 
     condition_dict = {
         LinkTypeForm.FORM_EXTERNAL_URL: url_external_link,
-        LinkTypeForm.FORM_PAGE: url_internal_page,
+        LinkTypeForm.FORM_PAGE_URL: url_internal_page,
         LinkTypeForm.FORM_DOCUMENT: url_upload,
-        LinkTypeForm.FORM_EXISTING: url_existing,
+        LinkTypeForm.FORM_DOCUMENT_LIST: url_existing,
     }
 
     temp_dir = 'temp'
@@ -397,17 +397,17 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     # this list of forms must stay in this order!
     form_list = [
         (LinkTypeForm.FORM_LINK_TYPE, LinkTypeForm),
-        (LinkTypeForm.FORM_EXTERNAL_URL, URLExternalLinkForm),
-        (LinkTypeForm.FORM_PAGE, PageListForm),
+        (LinkTypeForm.FORM_EXTERNAL_URL, ExternalLinkForm),
+        (LinkTypeForm.FORM_PAGE_URL, PageListForm),
         (LinkTypeForm.FORM_DOCUMENT, DocumentForm),
-        (LinkTypeForm.FORM_EXISTING, DocumentListForm),
+        (LinkTypeForm.FORM_DOCUMENT_LIST, DocumentListForm),
     ]
 
     form_link_type_map = {
         LinkTypeForm.FORM_DOCUMENT: Link.DOCUMENT,
-        LinkTypeForm.FORM_EXISTING: Link.DOCUMENT,
+        LinkTypeForm.FORM_DOCUMENT_LIST: Link.DOCUMENT,
         LinkTypeForm.FORM_EXTERNAL_URL: Link.URL_EXTERNAL,
-        LinkTypeForm.FORM_PAGE: Link.URL_INTERNAL,
+        LinkTypeForm.FORM_PAGE_URL: Link.URL_INTERNAL,
     }
     template_name = 'block/wizard.html'
 
