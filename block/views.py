@@ -33,7 +33,7 @@ from .forms import (
     DocumentListForm,
     LinkTypeForm,
     URLExternalLinkForm,
-    UrlListForm,
+    PageListForm,
 )
 from .models import (
     BlockError,
@@ -398,7 +398,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     form_list = [
         (LinkTypeForm.FORM_LINK_TYPE, LinkTypeForm),
         (LinkTypeForm.FORM_EXTERNAL_URL, URLExternalLinkForm),
-        (LinkTypeForm.FORM_PAGE, UrlListForm),
+        (LinkTypeForm.FORM_PAGE, PageListForm),
         (LinkTypeForm.FORM_DOCUMENT, DocumentForm),
         (LinkTypeForm.FORM_EXISTING, DocumentListForm),
     ]
@@ -432,16 +432,19 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     def done(self, form_list, form_dict, **kwargs):
         form_link_type = form_dict[LinkTypeForm.FORM_LINK_TYPE]
         form_id = form_link_type.cleaned_data['link_type']
-        form = form_dict[form_id]
         with transaction.atomic():
             obj = self._get_current_content_instance()
-            if form_id == LinkTypeForm.FORM_DOCUMENT:
-                form = form_dict[form_id]
-                document = form.save()
-                obj.link = Link.objects.create_document_link(document)
+            if form_id == LinkTypeForm.REMOVE:
+                obj.link = None
             else:
-                link_type = self.form_link_type_map[form_id]
-                self._save_link(form, obj, link_type)
+                form = form_dict[form_id]
+                if form_id == LinkTypeForm.FORM_DOCUMENT:
+                    form = form_dict[form_id]
+                    document = form.save()
+                    obj.link = Link.objects.create_document_link(document)
+                else:
+                    link_type = self.form_link_type_map[form_id]
+                    self._save_link(form, obj, link_type)
             obj.set_pending_edit()
             obj.save()
         url = obj.block.page_section.page.get_design_url()

@@ -17,6 +17,7 @@ class ContentEmptyForm(forms.ModelForm):
 
 
 class DocumentListForm(forms.ModelForm):
+    """List of documents (for the form wizard)."""
 
     def __init__(self, *args, **kwargs):
         super ().__init__(*args,**kwargs)
@@ -32,6 +33,7 @@ class DocumentListForm(forms.ModelForm):
 
 
 class URLExternalLinkForm(forms.ModelForm):
+    """Enter a URL (for the form wizard)."""
 
     def __init__(self, *args, **kwargs):
         super ().__init__(*args,**kwargs)
@@ -46,7 +48,8 @@ class URLExternalLinkForm(forms.ModelForm):
         )
 
 
-class UrlListForm(forms.ModelForm):
+class PageListForm(forms.ModelForm):
+    """Select a page from this web site (for the form wizard)."""
 
     def __init__(self, *args, **kwargs):
         super ().__init__(*args,**kwargs)
@@ -62,12 +65,15 @@ class UrlListForm(forms.ModelForm):
 
 
 class LinkTypeForm(forms.Form):
+    """Allow the user to select the link type (for the form wizard)."""
 
     FORM_DOCUMENT = 'u'
     FORM_EXISTING = 'e'
     FORM_EXTERNAL_URL = 'l'
     FORM_LINK_TYPE = 'link_type'
     FORM_PAGE = 'p'
+    # remove does not have a form
+    REMOVE = 'r'
 
     link_type = forms.ChoiceField(
         choices=(
@@ -75,7 +81,7 @@ class LinkTypeForm(forms.Form):
             (FORM_PAGE, 'Page on this site'),
             (FORM_DOCUMENT, 'Upload a document and link to it'),
             (FORM_EXISTING, 'Use an existing document'),
-            ('n', 'Remove Link'),
+            (REMOVE, 'Remove Link'),
         ),
         label="Choose the type of link",
     )
