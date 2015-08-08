@@ -2,6 +2,7 @@
 import os
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import (
@@ -653,13 +654,13 @@ class ContentModel(TimeStampedModel):
         'LinkWizard' (see the 'cms' app).
 
         """
-        from django.contrib.contenttypes.models import ContentType
         content_type = ContentType.objects.get_for_model(self)
         return reverse(
             'block.link.wizard',
             kwargs={
                 'content': content_type.pk,
                 'pk': self.pk,
+                'field': 'link',
                 #'app': content_type.app_label,
                 #'block': content_type.name,
             }
@@ -1008,8 +1009,8 @@ class Link(TimeStampedModel):
             return self.url_internal.url
         else:
             raise BlockError(
-                "'Link' {} does not have a 'link_type' "
-                "(or is an unknown link type)".format(self.pk)
+                "'Link' {} does not have a 'link_type' (or is an "
+                "unknown link type: '{}')".format(self.pk, self.link_type)
             )
         return result
 

@@ -88,19 +88,25 @@ class UrlListForm(forms.ModelForm):
         )
 
 
-class URLTypeForm(forms.Form):
+class LinkTypeForm(forms.Form):
 
-    EXISTING_DOCUMENT = 'e'
-    PAGE = 'p'
-    UPLOAD = 'u'
-    URL_EXTERNAL = 'l'
+    #EXISTING_DOCUMENT = 'e'
+    #PAGE = 'p'
+    #UPLOAD = 'u'
+    #URL_EXTERNAL = 'l'
+
+    FORM_DOCUMENT = 'u'
+    FORM_EXISTING = 'e'
+    FORM_EXTERNAL_URL = 'l'
+    FORM_LINK_TYPE = 'link_type'
+    FORM_PAGE = 'p'
 
     link_type = forms.ChoiceField(
         choices=(
-            (URL_EXTERNAL, 'Link to another site'),
-            (PAGE, 'Page on this site'),
-            (UPLOAD, 'Upload a document and link to it'),
-            (EXISTING_DOCUMENT, 'Use an existing document'),
+            (FORM_EXTERNAL_URL, 'Link to another site'),
+            (FORM_PAGE, 'Page on this site'),
+            (FORM_DOCUMENT, 'Upload a document and link to it'),
+            (FORM_EXISTING, 'Use an existing document'),
             ('n', 'Remove Link'),
         ),
         label="Choose the type of link",
@@ -108,7 +114,7 @@ class URLTypeForm(forms.Form):
 
     class Meta:
         fields = (
-            'url_type',
+            'link_type',
         )
 
 

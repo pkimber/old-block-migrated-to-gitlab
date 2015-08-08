@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import (
     EmptyPage,
     PageNotAnInteger,
@@ -24,12 +25,12 @@ from formtools.wizard.views import SessionWizardView
 
 from base.view_utils import BaseMixin
 from .forms import (
+    #URLInternalPageForm,
     DocumentForm,
     DocumentListForm,
+    LinkTypeForm,
     URLExternalLinkForm,
-    #URLInternalPageForm,
     UrlListForm,
-    URLTypeForm,
 )
 from .models import (
     BlockError,
@@ -344,29 +345,29 @@ from django.core.files.storage import FileSystemStorage
 
 def select_link_form(wizard, link_type) :
     """Return true if user has selected 'link_type'."""
-    data =  wizard.get_cleaned_data_for_step(LinkWizard.FORM_LINK_TYPE)
+    data =  wizard.get_cleaned_data_for_step(LinkTypeForm.FORM_LINK_TYPE)
     selected_link_type = data['link_type'] if data else None
     return selected_link_type == link_type
 
 
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
-    return select_link_form(wizard, LinkWizard.FORM_EXISTING)
+    return select_link_form(wizard, LinkTypeForm.FORM_EXISTING)
 
 
 def url_external_link(wizard):
     """Return true if user opts for external link """
-    return select_link_form(wizard, LinkWizard.FORM_EXTERNAL_URL)
+    return select_link_form(wizard, LinkTypeForm.FORM_EXTERNAL_URL)
 
 
 def url_internal_page(wizard):
     """Return true if user opts for an internal page """
-    return select_link_form(wizard, LinkWizard.FORM_PAGE)
+    return select_link_form(wizard, LinkTypeForm.FORM_PAGE)
 
 
 def url_upload(wizard):
     """Return true if user opts for upload a document """
-    return select_link_form(wizard, LinkWizard.FORM_DOCUMENT)
+    return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT)
 
 
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
@@ -383,17 +384,17 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
 
     """
 
-    FORM_DOCUMENT = 'u'
-    FORM_EXISTING = 'e'
-    FORM_EXTERNAL_URL = 'l'
-    FORM_LINK_TYPE = 'link_type'
-    FORM_PAGE = 'p'
+    #FORM_DOCUMENT = 'u'
+    #FORM_EXISTING = 'e'
+    #FORM_EXTERNAL_URL = 'l'
+    #FORM_LINK_TYPE = 'link_type'
+    #FORM_PAGE = 'p'
 
     condition_dict = {
-        FORM_EXTERNAL_URL: url_external_link,
-        FORM_PAGE: url_internal_page,
-        FORM_DOCUMENT: url_upload,
-        FORM_EXISTING: url_existing,
+        LinkTypeForm.FORM_EXTERNAL_URL: url_external_link,
+        LinkTypeForm.FORM_PAGE: url_internal_page,
+        LinkTypeForm.FORM_DOCUMENT: url_upload,
+        LinkTypeForm.FORM_EXISTING: url_existing,
     }
 
     temp_dir = 'temp'
@@ -403,13 +404,26 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     )
     # this list of forms must stay in this order!
     form_list = [
-        (FORM_LINK_TYPE, URLTypeForm),
-        (FORM_EXTERNAL_URL, URLExternalLinkForm),
-        (FORM_PAGE, UrlListForm),
-        (FORM_DOCUMENT, DocumentForm),
-        (FORM_EXISTING, DocumentListForm),
+        (LinkTypeForm.FORM_LINK_TYPE, LinkTypeForm),
+        (LinkTypeForm.FORM_EXTERNAL_URL, URLExternalLinkForm),
+        (LinkTypeForm.FORM_PAGE, UrlListForm),
+        (LinkTypeForm.FORM_DOCUMENT, DocumentForm),
+        (LinkTypeForm.FORM_EXISTING, DocumentListForm),
     ]
 
+    #form_mapping = {
+    #    URLTypeForm.EXISTING_DOCUMENT: self.FORM_EXISTING,
+    #    URLTypeForm.PAGE: self.FORM_PAGE,
+    #    URLTypeForm.UPLOAD: self.FORM_DOCUMENT,
+    #    URLTypeForm.URL_EXTERNAL: self.FORM_EXTERNAL_URL,
+    #}
+
+    form_link_type_map = {
+        LinkTypeForm.FORM_DOCUMENT: Link.DOCUMENT,
+        LinkTypeForm.FORM_EXISTING: Link.DOCUMENT,
+        LinkTypeForm.FORM_EXTERNAL_URL: Link.URL_EXTERNAL,
+        LinkTypeForm.FORM_PAGE: Link.URL_INTERNAL,
+    }
     template_name = 'block/wizard.html'
 
     #def get_form_initial(self, step):
@@ -473,42 +487,66 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     #    #print('[3[{}]]'.format(self.instance))
     #    return result
 
+    def _get_current_content_instance(self):
+        content_pk = self.kwargs['content']
+        pk = self.kwargs['pk']
+        content_type = ContentType.objects.get(pk=content_pk)
+        content_model = content_type.model_class()
+        return content_model.objects.get(pk=pk)
+
+    def _get_link_field_name(self, content_obj):
+        """Assign the link to the field with this name."""
+        return self.kwargs['field']
+
+    def _save_link(self, form, content_obj, link_type):
+         link = form.save(commit=False)
+         link.link_type = link_type
+         link = form.save()
+         field_name = self._get_link_field_name(content_obj)
+         setattr(content_obj, field_name, link)
+         #link_field = link # obj.link = form.save()
+
     def done(self, form_list, form_dict, **kwargs):
-        obj = self.get_current_content_instance()
-        form_link_type = form_dict[self.FORM_LINK_TYPE]
-        link_type = form_link_type.cleaned_data['link_type']
+        form_link_type = form_dict[LinkTypeForm.FORM_LINK_TYPE]
+        form_id = form_link_type.cleaned_data['link_type']
+
+        #import ipdb
+        #ipdb.set_trace()
+        #form_id = self.form_mapping[link_type]
+        form = form_dict[form_id]
         with transaction.atomic():
-            update = False
-            if link_type == URLTypeForm.UPLOAD:
-                form = form_dict[self.FORM_DOCUMENT]
+            obj = self._get_current_content_instance()
+            if form_id == LinkTypeForm.FORM_DOCUMENT:
+                form = form_dict[form_id]
                 document = form.save()
                 obj.link = Link.objects.create_document_link(document)
-                update = True
-            elif link_type == URLTypeForm.URL_EXTERNAL:
-                form = form_dict[self.FORM_EXTERNAL_URL]
-                link = form.save(commit=False)
-                link.link_type = Link.URL_EXTERNAL
-                obj.link = form.save()
-                update = True
-            elif link_type == URLTypeForm.EXISTING_DOCUMENT:
-                form = form_dict[self.FORM_EXISTING]
-                link = form.save(commit=False)
-                link.link_type = Link.DOCUMENT
-                obj.link = form.save()
-                update = True
-            elif link_type == URLTypeForm.PAGE:
-                form = form_dict[self.FORM_PAGE]
-                link = form.save(commit=False)
-                link.link_type = Link.URL_INTERNAL
-                obj.link = form.save()
-                update = True
-            if update:
-                obj.set_pending_edit()
-                obj.save()
+            else:
+                link_type = self.form_link_type_map[form_id]
+                self._save_link(form, obj, link_type)
+            obj.set_pending_edit()
+            obj.save()
         url = obj.block.page_section.page.get_design_url()
         return HttpResponseRedirect(url)
 
 
+        #with transaction.atomic():
+        #    if link_type == URLTypeForm.UPLOAD:
+        #        form = form_dict[self.FORM_DOCUMENT]
+        #        document = form.save()
+        #        obj.link = Link.objects.create_document_link(document)
+        #    elif link_type == URLTypeForm.URL_EXTERNAL:
+        #        self._save_link(obj, self.FORM_EXTERNAL_URL, Link.URL_EXTERNAL)
+        #    elif link_type == URLTypeForm.EXISTING_DOCUMENT:
+        #        self._save_link(obj, self.FORM_EXISTING, Link.DOCUMENT)
+        #    elif link_type == URLTypeForm.PAGE:
+        #        self._save_link(obj, self.FORM_PAGE, Link.URL_INTERNAL)
+        #    else:
+        #        update = False
+        #    if update:
+        #        obj.set_pending_edit()
+        #        obj.save()
+        #url = obj.block.page_section.page.get_design_url()
+        #return HttpResponseRedirect(url)
 
 
         #data = {}
@@ -516,63 +554,53 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         #    for k, v in form.cleaned_data.items():
         #        data[k] = v
 
-        url_info = {'type': '', 'url': '', 'content_type': '', 'title': ''}
-        doc_path = os.path.join(settings.MEDIA_URL, self.doc_dir)
-        perform_document_save = False
+        #url_info = {'type': '', 'url': '', 'content_type': '', 'title': ''}
+        #doc_path = os.path.join(settings.MEDIA_URL, self.doc_dir)
+        #perform_document_save = False
 
-        for form in form_list:
-            data = form.cleaned_data
+        #for form in form_list:
+        #    data = form.cleaned_data
 
-            if ('url_type' in data):
-                url_info['type'] = data['url_type']
+        #    if ('url_type' in data):
+        #        url_info['type'] = data['url_type']
 
-            if ('title' in data):
-                url_info['title'] = data['title']
+        #    if ('title' in data):
+        #        url_info['title'] = data['title']
 
-            if ('level' in data) :
-                url_info['level'] = data['level']
+        #    if ('level' in data) :
+        #        url_info['level'] = data['level']
 
-            if 'course' in data:
-                url_info['course'] = data['course']
+        #    if 'course' in data:
+        #        url_info['course'] = data['course']
 
-            if ('url' in data and data['url'] != None) :
-                url_raw = data['url']
+        #    if ('url' in data and data['url'] != None) :
+        #        url_raw = data['url']
 
-                # make sure a file has been chosen
-                if (type(url_raw).__name__ == 'UploadedFile' 
-                    and 'type' in url_info and url_info['type'] == LINK_UPLOAD):
+        #        # make sure a file has been chosen
+        #        if (type(url_raw).__name__ == 'UploadedFile' 
+        #            and 'type' in url_info and url_info['type'] == LINK_UPLOAD):
 
-                    url_info['content_type'] = url_raw.content_type
-                    # save the uploaded file name as the short file name
-                    url_info['short_file_name'] = str(url_raw)
+        #            url_info['content_type'] = url_raw.content_type
+        #            # save the uploaded file name as the short file name
+        #            url_info['short_file_name'] = str(url_raw)
 
-                    perform_document_save = True
-                else :
-                    url_info['url'] = url_raw
+        #            perform_document_save = True
+        #        else :
+        #            url_info['url'] = url_raw
 
-        if perform_document_save:
-            url_info = save_document (self, url_raw, url_info)
+        #if perform_document_save:
+        #    url_info = save_document (self, url_raw, url_info)
 
-        # update the block
-        return_url = "/"
+        ## update the block
+        #return_url = "/"
 
-        content_obj = self.get_current_content_instance()
-        content_obj.set_url(url_info['url'], url_info['title'])
-        content_obj.set_pending_edit()
-        content_obj.save()
-        return_url = content_obj.block.page_section.page.get_design_url()
+        #content_obj = self.get_current_content_instance()
+        #content_obj.set_url(url_info['url'], url_info['title'])
+        #content_obj.set_pending_edit()
+        #content_obj.save()
+        #return_url = content_obj.block.page_section.page.get_design_url()
 
-        return HttpResponseRedirect(return_url)
+        #return HttpResponseRedirect(return_url)
 
-    def get_current_content_instance(self):
-        from django.contrib.contenttypes.models import ContentType
-        content_pk = self.kwargs.get('content', None)
-        pk = self.kwargs.get('pk', None)
-        content_type = ContentType.objects.get(pk=content_pk)
-        content_model = content_type.model_class()
-        #block = self.kwargs.get('block', None)
-        #app = self.kwargs.get('app', 'compose')
-        #block_model = get_model(app, block)
-        return content_model.objects.get(pk=pk)
 
 # -----------------------------------------------------------------------------
