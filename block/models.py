@@ -1008,7 +1008,8 @@ class Link(TimeStampedModel):
             return self.url_internal.url
         else:
             raise BlockError(
-                "'Link' {} does not have a 'link_type'".format(self.pk)
+                "'Link' {} does not have a 'link_type' "
+                "(or is an unknown link type)".format(self.pk)
             )
         return result
 

@@ -3,6 +3,7 @@ import factory
 
 from block.models import (
     EditState,
+    Link,
     ModerateState,
     Page,
     PageSection,
@@ -15,6 +16,12 @@ class EditStateFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = EditState
+
+
+class LinkFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Link
 
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):
