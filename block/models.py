@@ -919,7 +919,7 @@ class Url(models.Model):
         verbose_name_plural = 'URLs'
 
     def __str__(self):
-        return '{}: {}'.format(self.name, self.url)
+        return '{}'.format(self.title)
 
 reversion.register(Url)
 
@@ -982,7 +982,7 @@ class Link(TimeStampedModel):
         Url,
         blank=True,
         null=True,
-        help_text='URL for page on this web site'
+        help_text='A page on this web site'
     )
     objects = LinkManager()
 
@@ -1004,6 +1004,8 @@ class Link(TimeStampedModel):
             return self.document.url
         elif self.link_type == self.URL_EXTERNAL:
             return self.url_external
+        elif self.link_type == self.URL_INTERNAL:
+            return self.url_internal.url
         else:
             raise BlockError(
                 "'Link' {} does not have a 'link_type'".format(self.pk)

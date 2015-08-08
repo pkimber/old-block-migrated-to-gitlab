@@ -27,7 +27,8 @@ from .forms import (
     DocumentForm,
     DocumentListForm,
     URLExternalLinkForm,
-    URLInternalPageForm,
+    #URLInternalPageForm,
+    UrlListForm,
     URLTypeForm,
 )
 from .models import (
@@ -404,47 +405,49 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     form_list = [
         (FORM_LINK_TYPE, URLTypeForm),
         (FORM_EXTERNAL_URL, URLExternalLinkForm),
-        (FORM_PAGE, URLInternalPageForm),
+        (FORM_PAGE, UrlListForm),
         (FORM_DOCUMENT, DocumentForm),
         (FORM_EXISTING, DocumentListForm),
     ]
 
     template_name = 'block/wizard.html'
 
-    def get_form_initial(self, step):
-        init_dict = {}
-        if step == self.FORM_DOCUMENT:
-            pass
-        elif step == self.FORM_EXISTING:
-            pass
-        else:
-            #get current block to populate forms
-            content_obj = self.get_current_content_instance()
-            # PJK in the original 'compose' models, this returns the 'url' field.
-            url = content_obj.get_url_link
-            if (url != None and
-                (url.startswith("http://") or url.startswith("https://"))):
-                url_type = 'l'
-            elif (url != None and url.startswith("/" + 'self.doc_dir' + "/")):
-                url_type = 'e'
-            else:
-                url_type = 'p'
-            # PJK in the original 'compose' models, this returns 'url_description'
-            title = content_obj.get_url_text
-            #set flag for whether title field is displayed
-            if (title == None):
-                use_title = False
-            else:
-                use_title = True
-            perm_type = 'x'
-            init_dict = {
-                'url_type': url_type,
-                'title': title,
-                'url': url,
-                'perm_type': perm_type,
-                'use_title': use_title
-            }
-        return init_dict
+    #def get_form_initial(self, step):
+    #    init_dict = {}
+    #    if step == self.FORM_DOCUMENT:
+    #        pass
+    #    elif step == self.FORM_EXISTING:
+    #        pass
+    #    elif step == self.FORM_PAGE:
+    #        pass
+    #    else:
+    #        #get current block to populate forms
+    #        content_obj = self.get_current_content_instance()
+    #        # PJK in the original 'compose' models, this returns the 'url' field.
+    #        url = content_obj.get_url_link
+    #        if (url != None and
+    #            (url.startswith("http://") or url.startswith("https://"))):
+    #            url_type = 'l'
+    #        elif (url != None and url.startswith("/" + 'self.doc_dir' + "/")):
+    #            url_type = 'e'
+    #        else:
+    #            url_type = 'p'
+    #        # PJK in the original 'compose' models, this returns 'url_description'
+    #        title = content_obj.get_url_text
+    #        #set flag for whether title field is displayed
+    #        if (title == None):
+    #            use_title = False
+    #        else:
+    #            use_title = True
+    #        perm_type = 'x'
+    #        init_dict = {
+    #            'url_type': url_type,
+    #            'title': title,
+    #            'url': url,
+    #            'perm_type': perm_type,
+    #            'use_title': use_title
+    #        }
+    #    return init_dict
 
     #def get_form_instance(self, step):
     #    """Return the object for model forms.
@@ -485,18 +488,20 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
                 form = form_dict[self.FORM_EXTERNAL_URL]
                 link = form.save(commit=False)
                 link.link_type = Link.URL_EXTERNAL
-                #link.save()
                 obj.link = form.save()
                 update = True
             elif link_type == URLTypeForm.EXISTING_DOCUMENT:
                 form = form_dict[self.FORM_EXISTING]
                 link = form.save(commit=False)
                 link.link_type = Link.DOCUMENT
-                #link.save()
                 obj.link = form.save()
                 update = True
-
-
+            elif link_type == URLTypeForm.PAGE:
+                form = form_dict[self.FORM_PAGE]
+                link = form.save(commit=False)
+                link.link_type = Link.URL_INTERNAL
+                obj.link = form.save()
+                update = True
             if update:
                 obj.set_pending_edit()
                 obj.save()

@@ -51,38 +51,54 @@ class URLExternalLinkForm(forms.ModelForm):
         )
 
 
-class URLInternalPageForm(forms.Form):
-    title = forms.CharField(max_length=512, label="Link Text")
+#class URLInternalPageForm(forms.Form):
+#    title = forms.CharField(max_length=512, label="Link Text")
+#
+#    def __init__(self, *args, **kwargs):
+#        super(URLInternalPageForm, self).__init__(*args, **kwargs)
+#        self.fields['url'] = forms.ChoiceField( 
+#            choices=[
+#                (o.get_absolute_url(), str(o)) for o in Page.objects.all().order_by('name').exclude(deleted=True)
+#            ],
+#            label="Choose a page"
+#        )
+#
+#        if ('use_title' in self.initial and self.initial['use_title'] == False):
+#            self.fields.pop('title')
+#
+#    class Meta:
+#        fields = (
+#            'title',
+#            'url',
+#        )
+
+
+class UrlListForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(URLInternalPageForm, self).__init__(*args, **kwargs)
-        self.fields['url'] = forms.ChoiceField( 
-            choices=[
-                (o.get_absolute_url(), str(o)) for o in Page.objects.all().order_by('name').exclude(deleted=True)
-            ],
-            label="Choose a page"
-        )
-
-        if ('use_title' in self.initial and self.initial['use_title'] == False):
-            self.fields.pop('title')
+        super ().__init__(*args,**kwargs)
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+        self.fields['url_internal'].label = 'URL'
 
     class Meta:
+        model = Link
         fields = (
             'title',
-            'url',
+            'url_internal',
         )
 
 
 class URLTypeForm(forms.Form):
 
+    EXISTING_DOCUMENT = 'e'
+    PAGE = 'p'
     UPLOAD = 'u'
     URL_EXTERNAL = 'l'
-    EXISTING_DOCUMENT = 'e'
 
     link_type = forms.ChoiceField(
         choices=(
             (URL_EXTERNAL, 'Link to another site'),
-            ('p', 'Page on this site'),
+            (PAGE, 'Page on this site'),
             (UPLOAD, 'Upload a document and link to it'),
             (EXISTING_DOCUMENT, 'Use an existing document'),
             ('n', 'Remove Link'),
