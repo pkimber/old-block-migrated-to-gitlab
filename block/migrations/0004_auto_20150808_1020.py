@@ -14,10 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Document',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('title', models.CharField(max_length=200)),
-                ('document', models.FileField(blank=True, null=True, upload_to='link/document', help_text='Uploaded document e.g. PDF')),
-                ('original_file_name', models.CharField(blank=True, null=True, help_text='Original file name of the document', max_length=100)),
+                ('document', models.FileField(help_text='Uploaded document e.g. PDF', upload_to='link/document', blank=True, null=True)),
+                ('original_file_name', models.CharField(help_text='Original file name of the document', blank=True, null=True, max_length=100)),
                 ('deleted', models.BooleanField(default=False)),
             ],
             options={
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Image',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('image', models.ImageField(upload_to='link/image')),
@@ -44,13 +44,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Link',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('title', models.CharField(max_length=250)),
-                ('link_type', models.CharField(choices=[('d', 'Document'), ('u', 'External URL'), ('r', 'Internal URL')], max_length=1)),
-                ('url_external', models.URLField(verbose_name='Link', blank=True, help_text='URL for a web site e.g. http://www.bbc.co.uk/news', null=True)),
-                ('document', models.ForeignKey(null=True, to='block.Document', blank=True)),
+                ('link_type', models.CharField(max_length=1, choices=[('d', 'Document'), ('u', 'External URL'), ('r', 'Internal URL')])),
+                ('url_external', models.URLField(help_text='URL for a web site e.g. http://www.bbc.co.uk/news', verbose_name='Link', blank=True, null=True)),
+                ('document', models.ForeignKey(null=True, blank=True, to='block.Document')),
             ],
             options={
                 'verbose_name': 'Link',
@@ -60,11 +60,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Url',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
-                ('url_type', models.CharField(choices=[('p', 'Page'), ('r', 'Reverse')], max_length=1)),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('title', models.CharField(max_length=200)),
+                ('url_type', models.CharField(max_length=1, choices=[('p', 'Page'), ('r', 'Reverse')])),
                 ('name', models.CharField(help_text="e.g. 'project.page' or 'web.training.application'", max_length=100)),
-                ('arg1', models.SlugField(max_length=100, help_text="e.g. 'training'")),
-                ('arg2', models.SlugField(max_length=100, help_text="e.g. 'application'")),
+                ('arg1', models.SlugField(help_text="e.g. 'training'", max_length=100)),
+                ('arg2', models.SlugField(help_text="e.g. 'application'", max_length=100)),
+                ('deleted', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'URL',
@@ -78,6 +80,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='link',
             name='url_internal',
-            field=models.ForeignKey(null=True, to='block.Url', blank=True, help_text='URL for page on this web site'),
+            field=models.ForeignKey(null=True, help_text='URL for page on this web site', blank=True, to='block.Url'),
         ),
     ]

@@ -814,14 +814,27 @@ reversion.register(Image)
 
 class UrlManager(models.Manager):
 
-    def _create_url(self, url_type, name, arg1, arg2):
-        obj = self.model(url_type=url_type, name=name, arg1=arg1, arg2=arg2)
+    def _init_url(self, title, url_type, name, arg1, arg2):
+        try:
+            obj = self.model.objects.get(
+                name=name, arg1=arg1, arg2=arg2
+            )
+            obj.title = title
+            obj.url_type = url_type
+        except self.model.DoesNotExist:
+            obj = self.model(
+                title=title,
+                url_type=url_type,
+                name=name,
+                arg1=arg1,
+                arg2=arg2
+            )
         # check this is a valid url
         obj.url
         obj.save()
         return obj
 
-    def create_page_url(self, page):
+    def init_page_url(self, page):
         if page.is_custom or page.slug == Page.CUSTOM:
             raise BlockError(
                 "Cannot create a URL for a custom "
@@ -838,17 +851,26 @@ class UrlManager(models.Manager):
         else:
             slug = page.slug
             slug_menu = page.slug_menu
-        return self._create_url(
-            self.model.PAGE, page.url_name, slug, slug_menu
+        return self._init_url(
+            page.name, self.model.PAGE, page.url_name, slug, slug_menu
         )
 
-    def create_reverse_url(self, name, arg1=None, arg2=None):
-        return self._create_url(
-            self.model.REVERSE, name, arg1 or '', arg2 or ''
+    def init_reverse_url(self, title, name, arg1=None, arg2=None):
+        return self._init_url(
+            title, self.model.REVERSE, name, arg1 or '', arg2 or ''
         )
 
-    def init_pages_not_custom(self):
-        pass
+    def init_pages(self):
+        """Add all non-custom pages to the list of URLs."""
+        for page in Page.objects.pages():
+            self.init_page_url(page)
+
+    def urls(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'title'
+        )
 
 
 class Url(models.Model):
@@ -871,6 +893,7 @@ class Url(models.Model):
         (REVERSE, 'Reverse'),
     )
 
+    title = models.CharField(max_length=200)
     url_type = models.CharField(max_length=1, choices=URL_TYPE_CHOICES)
     name = models.CharField(
         max_length=100,
@@ -878,6 +901,7 @@ class Url(models.Model):
     )
     arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'")
     arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'")
+    deleted = models.BooleanField(default=False)
     objects = UrlManager()
 
     @property
