@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from django import forms
 from django.conf import settings
-from django.utils.html import format_html
+from django.forms.widgets import RadioFieldRenderer
+from django.utils.html import (
+    format_html,
+    format_html_join,
+)
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -73,8 +77,8 @@ class ImageForm(forms.ModelForm):
         }
 
 
-
 class ImageModelChoiceField(forms.ModelChoiceField):
+    """The label is the image."""
 
     def label_from_instance(self, obj):
         thumbnailer = get_thumbnailer(obj.image)
@@ -83,10 +87,17 @@ class ImageModelChoiceField(forms.ModelChoiceField):
             'size': (100, 100),
         }
         thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-        return format_html('<img src="{}" />{}'.format(
-            thumbnail.url,
+        return format_html('{}<br /><img src="{}" />'.format(
             obj.title,
+            thumbnail.url,
         ))
+
+
+class RadioRendererNoBullet(RadioFieldRenderer):
+    """Render radio buttons without bullet points."""
+
+    def render(self):
+        return format_html('\n'.join(['{}\n'.format(w) for w in self]))
 
 
 class ImageListForm(forms.Form):
@@ -96,7 +107,7 @@ class ImageListForm(forms.Form):
     images = ImageModelChoiceField(
         queryset=Image.objects.all(),
         empty_label=None,
-        widget=forms.RadioSelect,
+        widget=forms.RadioSelect(renderer=RadioRendererNoBullet),
     )
 
     def __init__(self, *args, **kwargs):
