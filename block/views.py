@@ -445,6 +445,10 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
             obj = self._get_current_content_instance()
             if form_id == ImageTypeForm.REMOVE:
                 self._update_image(obj, None)
+            elif form_id == ImageTypeForm.FORM_IMAGE_LIST:
+                form = form_dict[form_id]
+                image = form.cleaned_data['images']
+                self._update_image(obj, image)
             else:
                 form = form_dict[form_id]
                 if form_id == ImageTypeForm.FORM_IMAGE:

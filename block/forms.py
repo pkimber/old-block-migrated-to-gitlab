@@ -103,21 +103,15 @@ class RadioRendererNoBullet(RadioFieldRenderer):
 class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
-    title = forms.CharField(max_length=200)
     images = ImageModelChoiceField(
         queryset=Image.objects.all(),
         empty_label=None,
         widget=forms.RadioSelect(renderer=RadioRendererNoBullet),
     )
 
-    def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
-
     class Meta:
         model = Image
         fields = (
-            'title',
             'images',
         )
 
