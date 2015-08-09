@@ -92,6 +92,21 @@ class ImageModelChoiceField(forms.ModelChoiceField):
             thumbnail.url,
         ))
 
+class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """The label is the image."""
+
+    def label_from_instance(self, obj):
+        thumbnailer = get_thumbnailer(obj.image)
+        thumbnail_options = {
+            'crop': True,
+            'size': (100, 100),
+        }
+        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+        return format_html('{}<br /><img src="{}" />'.format(
+            obj.title,
+            thumbnail.url,
+        ))
+
 
 class RadioRendererNoBullet(RadioFieldRenderer):
     """Render radio buttons without bullet points."""
@@ -116,11 +131,27 @@ class ImageListForm(forms.Form):
         )
 
 
+class ImageMultiSelectForm(forms.Form):
+    """List of images (for the form wizard)."""
+
+    images = ImageModelMultipleChoiceField(
+        queryset=Image.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        model = Image
+        fields = (
+            'images',
+        )
+
+
 class ImageTypeForm(forms.Form):
     """Allow the user to select the image type (for the form wizard)."""
 
     FORM_IMAGE = 'i'
     FORM_IMAGE_LIST = 'a'
+    FORM_IMAGE_MULTI_SELECT = 'c'
     # this form :)
     FORM_IMAGE_TYPE = 'image_type'
     # remove does not have a form
@@ -130,6 +161,7 @@ class ImageTypeForm(forms.Form):
         choices=(
             (FORM_IMAGE, 'Upload an image and link to it'),
             (FORM_IMAGE_LIST, 'Use an existing image'),
+            (FORM_IMAGE_MULTI_SELECT, 'Select one or more images'),
             (REMOVE, 'Remove Image'),
         ),
         label="Choose the type of image",

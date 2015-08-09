@@ -28,6 +28,9 @@
   {% ifequal 'l' wizard.steps.current %}
     Enter an External Link
   {% endifequal %}
+  {% ifequal 'c' wizard.steps.current %}
+    Select all the images you want to use
+  {% endifequal %}
   {% ifequal 'p' wizard.steps.current %}
     Choose a page from the site
   {% endifequal %}
@@ -36,12 +39,6 @@
   {% endifequal %}
   {% ifequal 'e' wizard.steps.current %}
     Choose a previously uploaded document
-  {% endifequal %}
-  {% ifequal 'm' wizard.steps.current %}
-    Choose Membership Levels that have access to this document
-  {% endifequal %}
-  {% ifequal 'c' wizard.steps.current %}
-    Choose Courses that have access to this document
   {% endifequal %}
 {% endblock sub_heading %}
 

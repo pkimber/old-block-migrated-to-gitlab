@@ -3,6 +3,32 @@
   <legend>{{ legend }}</legend>
 {% endif %}
 {% for field in form.visible_fields %}
+  <label for="option-one" class="pure-checkbox">
+    <input id="option-one" type="checkbox" value="11">
+    Here's option one.
+  </label>
+  <label for="option-two" class="pure-checkbox">
+    <input id="option-two" type="checkbox" value="22">
+    Here's option two.
+  </label>
+
+  {% if field|is_checkbox_select_multiple %}
+    YES
+    {% for item in field %}
+      {{ forloop.counter }}
+      {{ item }}
+    {% endfor %}
+  {% endif %}
+
+  {% if field|is_radio_select %}
+    YES
+
+    {% for item in field %}
+      {{ forloop.counter }}
+      {{ item }}
+    {% endfor %}
+  {% endif %}
+
   <div class="pure-control-group">
     {% if field.label %}
       <label for='{{ field.id_for_label }}'>

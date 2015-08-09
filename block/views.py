@@ -33,6 +33,7 @@ from .forms import (
     DocumentListForm,
     ImageForm,
     ImageListForm,
+    ImageMultiSelectForm,
     ImageTypeForm,
     LinkTypeForm,
     ExternalLinkForm,
@@ -368,6 +369,11 @@ def url_existing_image(wizard):
     return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_LIST)
 
 
+def url_existing_image_multi(wizard):
+    """Return true if user opts for existing image."""
+    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_MULTI_SELECT)
+
+
 def url_external_link(wizard):
     """Return true if user opts for external link """
     return select_link_form(wizard, LinkTypeForm.FORM_EXTERNAL_URL)
@@ -399,6 +405,7 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
     condition_dict = {
         ImageTypeForm.FORM_IMAGE: url_upload_image,
         ImageTypeForm.FORM_IMAGE_LIST: url_existing_image,
+        ImageTypeForm.FORM_IMAGE_MULTI_SELECT: url_existing_image_multi,
     }
 
     temp_dir = 'temp'
@@ -410,6 +417,7 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
         (ImageTypeForm.FORM_IMAGE_TYPE, ImageTypeForm),
         (ImageTypeForm.FORM_IMAGE, ImageForm),
         (ImageTypeForm.FORM_IMAGE_LIST, ImageListForm),
+        (ImageTypeForm.FORM_IMAGE_MULTI_SELECT, ImageMultiSelectForm),
     ]
 
     template_name = 'block/wizard.html'
@@ -449,6 +457,10 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
                 form = form_dict[form_id]
                 image = form.cleaned_data['images']
                 self._update_image(obj, image)
+            elif form_id == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
+                form = form_dict[form_id]
+                import ipdb
+                ipdb.set_trace()
             else:
                 form = form_dict[form_id]
                 if form_id == ImageTypeForm.FORM_IMAGE:
