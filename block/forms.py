@@ -18,6 +18,32 @@ from block.models import (
 )
 
 
+def _label_from_instance(obj):
+    """The label is the image."""
+    thumbnailer = get_thumbnailer(obj.image)
+    thumbnail_options = {
+        'crop': True,
+        'size': (100, 100),
+    }
+    thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+    return format_html('{}<br /><img src="{}" />'.format(
+        obj.title,
+        thumbnail.url,
+    ))
+
+
+class ImageModelChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        return _label_from_instance(obj)
+
+
+class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _label_from_instance(obj)
+
+
 class ContentEmptyForm(forms.ModelForm):
 
     class Meta:
@@ -77,51 +103,13 @@ class ImageForm(forms.ModelForm):
         }
 
 
-class ImageModelChoiceField(forms.ModelChoiceField):
-    """The label is the image."""
-
-    def label_from_instance(self, obj):
-        thumbnailer = get_thumbnailer(obj.image)
-        thumbnail_options = {
-            'crop': True,
-            'size': (100, 100),
-        }
-        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-        return format_html('{}<br /><img src="{}" />'.format(
-            obj.title,
-            thumbnail.url,
-        ))
-
-class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
-    """The label is the image."""
-
-    def label_from_instance(self, obj):
-        thumbnailer = get_thumbnailer(obj.image)
-        thumbnail_options = {
-            'crop': True,
-            'size': (100, 100),
-        }
-        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-        return format_html('{}<br /><img src="{}" />'.format(
-            obj.title,
-            thumbnail.url,
-        ))
-
-
-class RadioRendererNoBullet(RadioFieldRenderer):
-    """Render radio buttons without bullet points."""
-
-    def render(self):
-        return format_html('\n'.join(['{}\n'.format(w) for w in self]))
-
-
 class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelChoiceField(
         queryset=Image.objects.all(),
         empty_label=None,
-        widget=forms.RadioSelect(renderer=RadioRendererNoBullet),
+        widget=forms.RadioSelect,
     )
 
     class Meta:

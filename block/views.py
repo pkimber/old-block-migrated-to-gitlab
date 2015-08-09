@@ -434,17 +434,28 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
         return self.kwargs['field']
 
     def _save_image(self, form, content_obj):
-         image = form.save()
-         self._update_image(content_obj, image)
+        image = form.save()
+        self._update_image(content_obj, image)
 
     def _update_image(self, content_obj, image):
-         field_name = self._get_link_field_name(content_obj)
-         if not hasattr(content_obj, field_name):
+        field_name = self._get_link_field_name(content_obj)
+        if not hasattr(content_obj, field_name):
             raise BlockError(
                 "Content object '{}' does not have a field "
                 "named '{}'".format(content_obj.__class__.__name__, field_name)
             )
-         setattr(content_obj, field_name, image)
+        setattr(content_obj, field_name, image)
+
+    def _update_images(self, content_obj, images):
+        field_name = self._get_link_field_name(content_obj)
+        if not hasattr(content_obj, field_name):
+            raise BlockError(
+                "Content object '{}' does not have a field "
+                "named '{}'".format(content_obj.__class__.__name__, field_name)
+            )
+        field = getattr(content_obj, field_name)
+        for image in images:
+            field.add(image)
 
     def done(self, form_list, form_dict, **kwargs):
         form_image_type = form_dict[ImageTypeForm.FORM_IMAGE_TYPE]
@@ -459,8 +470,8 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
                 self._update_image(obj, image)
             elif form_id == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
                 form = form_dict[form_id]
-                import ipdb
-                ipdb.set_trace()
+                images = form.cleaned_data['images']
+                self._update_images(obj, images)
             else:
                 form = form_dict[form_id]
                 if form_id == ImageTypeForm.FORM_IMAGE:

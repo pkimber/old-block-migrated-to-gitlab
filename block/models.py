@@ -635,19 +635,7 @@ class ContentModel(TimeStampedModel):
                 "Sorry, only pending content can be edited."
             )
 
-    # -------------------------------------------------------------------------
-    @property
-    def get_url_link(self):
-        """TODO PJK Temp"""
-        #return self.url
-        return ''
-
-    @property
-    def get_url_text(self):
-        """TODO PJK Temp"""
-        return None
-
-    def _url_wizard(self, url_name, field_name):
+    def _wizard_url(self, url_name, field_name, wizard_type):
         content_type = ContentType.objects.get_for_model(self)
         return reverse(
             url_name,
@@ -655,33 +643,36 @@ class ContentModel(TimeStampedModel):
                 'content': content_type.pk,
                 'pk': self.pk,
                 'field': field_name,
+                'type': wizard_type,
             }
         )
         return False
 
     @property
-    def url_image_wizard(self):
-        """Return the URL for the image wizard.
-
-        If this method returns 'True' the content model can use the image
-        wizard.
-
-        """
-        return self._url_wizard('block.image.wizard', 'picture')
-
-    @property
-    def url_link_wizard(self):
-        """Return the URL for the link wizard.
-
-        If this method returns 'True' the content model can use the link
-        wizard.
-
-        """
-        return self._url_wizard('block.link.wizard', 'link')
-
-    def set_url(self, url_link, url_text):
-        """TODO PJK Temp"""
-        self.url = url_link
+    def wizard_urls(self):
+        """Return the URLs for the image and link wizards."""
+        result = []
+        for field_name, wizard_type in self.wizard_fields.items():
+            if wizard_type in (Image.SINGLE, Image.MULTI):
+                url_name = 'block.image.wizard'
+                css_class = 'fa fa-image'
+            elif wizard_type in (Link.SINGLE, Link.MULTI):
+                url_name = 'block.link.wizard'
+                css_class = 'fa fa-globe'
+            else:
+                raise BlockError(
+                    "Unknown wizard type: '{}'".format(wizard_type)
+                )
+            result.append({
+                'caption': field_name.title(),
+                'class': css_class,
+                'url': self._wizard_url(
+                    url_name,
+                    field_name,
+                    'single' if wizard_type in (Image.SINGLE, Link.SINGLE) else 'multi',
+                ),
+            })
+        return result
 
 
 # Discussion with Malcolm - 05/08/2015 - see '1011-generic-carousel/wip.rst'
@@ -803,6 +794,9 @@ class Image(TimeStampedModel):
       e.g. https://github.com/alex/django-taggit
 
     """
+
+    MULTI = 'multi-image'
+    SINGLE = 'single-image'
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
@@ -980,6 +974,9 @@ class Link(TimeStampedModel):
     DOCUMENT = 'd'
     URL_INTERNAL = 'r'
     URL_EXTERNAL = 'u'
+
+    MULTI = 'multi-link'
+    SINGLE = 'single-link'
 
     LINK_TYPE_CHOICES = (
         (DOCUMENT, 'Document'),

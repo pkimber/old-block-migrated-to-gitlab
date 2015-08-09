@@ -8,39 +8,13 @@
   <i class="fa fa-edit"></i>
   Edit
 </a>
-{% if c.url_image_wizard %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_image_wizard }}">
-    <i class="fa fa-image"></i>
-    Picture
-  </a>
-{% endif %}
-{% if c.url_link_wizard %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
-    <i class="fa fa-globe"></i>
-    Link
-  </a>
-{% endif %}
 
-{% if c.link_wizard %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
-    <i class="fa fa-globe"></i>
-    References
+{% for url in c.wizard_urls %}
+  <a class="pure-button pure-button-xsmall" href="{{ url.url }}">
+    <i class="{{ url.class }}"></i>
+    {{ url.caption }}
   </a>
-{% endif %}
-
-{% if c.link_wizard %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
-    <i class="fa fa-globe"></i>
-    Picture
-  </a>
-{% endif %}
-
-{% if c.link_wizard %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
-    <i class="fa fa-globe"></i>
-    Carousel
-  </a>
-{% endif %}
+{% endfor %}
 
 {% if can_remove %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
