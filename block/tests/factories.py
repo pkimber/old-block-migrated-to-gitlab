@@ -2,7 +2,9 @@
 import factory
 
 from block.models import (
+    Document,
     EditState,
+    Image,
     Link,
     ModerateState,
     Page,
@@ -12,10 +14,26 @@ from block.models import (
 )
 
 
+class DocumentFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Document
+
+    document = factory.django.FileField()
+
+
 class EditStateFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = EditState
+
+
+class ImageFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Image
+
+    image = factory.django.ImageField()
 
 
 class LinkFactory(factory.django.DjangoModelFactory):

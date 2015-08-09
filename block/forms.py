@@ -4,6 +4,7 @@ from django import forms
 from block.models import (
     ContentModel,
     Document,
+    Image,
     Link,
     Page,
 )
@@ -45,6 +46,67 @@ class ExternalLinkForm(forms.ModelForm):
         fields = (
             'title',
             'url_external',
+        )
+
+
+class ImageForm(forms.ModelForm):
+    """Allow the user to upload an image (for the form wizard)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('alt', 'title'):
+            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = Image
+        fields = (
+            'title',
+            'image',
+            'alt',
+        )
+        widgets = {
+            'image': forms.FileInput,
+        }
+
+
+class ImageListForm(forms.ModelForm):
+    """List of images (for the form wizard)."""
+
+    def __init__(self, *args, **kwargs):
+        super ().__init__(*args,**kwargs)
+        for name in ('title', 'image'):
+            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = Image
+        fields = (
+            'title',
+            'image',
+        )
+
+
+class ImageTypeForm(forms.Form):
+    """Allow the user to select the image type (for the form wizard)."""
+
+    FORM_IMAGE = 'i'
+    FORM_IMAGE_LIST = 'l'
+    # this form :)
+    FORM_IMAGE_TYPE = 'image_type'
+    # remove does not have a form
+    REMOVE = 'r'
+
+    image_type = forms.ChoiceField(
+        choices=(
+            (FORM_IMAGE, 'Upload an image and link to it'),
+            (FORM_IMAGE_LIST, 'Use an existing image'),
+            (REMOVE, 'Remove Image'),
+        ),
+        label="Choose the type of image",
+    )
+
+    class Meta:
+        fields = (
+            'image_type',
         )
 
 

@@ -31,6 +31,9 @@ from base.view_utils import BaseMixin
 from .forms import (
     DocumentForm,
     DocumentListForm,
+    ImageForm,
+    ImageListForm,
+    ImageTypeForm,
     LinkTypeForm,
     ExternalLinkForm,
     PageListForm,
@@ -341,17 +344,28 @@ class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
 # -----------------------------------------------------------------------------
 # LinkWizard
 
+def select_image_form(wizard, image_type) :
+    """Return true if user has selected 'image_type'."""
+    data = wizard.get_cleaned_data_for_step(ImageTypeForm.FORM_IMAGE_TYPE)
+    selected = data['image_type'] if data else None
+    return selected == image_type
+
 
 def select_link_form(wizard, link_type) :
     """Return true if user has selected 'link_type'."""
     data = wizard.get_cleaned_data_for_step(LinkTypeForm.FORM_LINK_TYPE)
-    selected_link_type = data['link_type'] if data else None
-    return selected_link_type == link_type
+    selected = data['link_type'] if data else None
+    return selected == link_type
 
 
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
     return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT_LIST)
+
+
+def url_existing_image(wizard):
+    """Return true if user opts for existing image."""
+    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_LIST)
 
 
 def url_external_link(wizard):
@@ -367,6 +381,82 @@ def url_internal_page(wizard):
 def url_upload(wizard):
     """Return true if user opts for upload a document """
     return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT)
+
+
+def url_upload_image(wizard):
+    """Return true if user opts to upload an image """
+    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE)
+
+
+class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
+    """Image Wizard.
+
+    Documentation for the SessionWizardView in
+    http://django-formtools.readthedocs.org/en/latest/
+
+    """
+
+    condition_dict = {
+        ImageTypeForm.FORM_IMAGE: url_upload_image,
+        ImageTypeForm.FORM_IMAGE_LIST: url_existing_image,
+    }
+
+    temp_dir = 'temp'
+    file_storage = FileSystemStorage(
+        location=os.path.join(settings.MEDIA_ROOT, 'temp/wizard')
+    )
+    # this list of forms must stay in this order!
+    form_list = [
+        (ImageTypeForm.FORM_IMAGE_TYPE, ImageTypeForm),
+        (ImageTypeForm.FORM_IMAGE, ImageForm),
+        (ImageTypeForm.FORM_IMAGE_LIST, ImageListForm),
+    ]
+
+    template_name = 'block/wizard.html'
+
+    def _get_current_content_instance(self):
+        content_pk = self.kwargs['content']
+        pk = self.kwargs['pk']
+        content_type = ContentType.objects.get(pk=content_pk)
+        content_model = content_type.model_class()
+        return content_model.objects.get(pk=pk)
+
+    def _get_link_field_name(self, content_obj):
+        """Assign the link to the field with this name."""
+        return self.kwargs['field']
+
+    def _save_image(self, form, content_obj):
+         image = form.save()
+         self._update_image(content_obj, image)
+
+    def _update_image(self, content_obj, image):
+         field_name = self._get_link_field_name(content_obj)
+         if not hasattr(content_obj, field_name):
+            raise BlockError(
+                "Content object '{}' does not have a field "
+                "named '{}'".format(content_obj.__class__.__name__, field_name)
+            )
+         setattr(content_obj, field_name, image)
+
+    def done(self, form_list, form_dict, **kwargs):
+        form_image_type = form_dict[ImageTypeForm.FORM_IMAGE_TYPE]
+        form_id = form_image_type.cleaned_data['image_type']
+        with transaction.atomic():
+            obj = self._get_current_content_instance()
+            if form_id == ImageTypeForm.REMOVE:
+                self._update_image(obj, None)
+            else:
+                form = form_dict[form_id]
+                if form_id == ImageTypeForm.FORM_IMAGE:
+                    form = form_dict[form_id]
+                    image = form.save()
+                    self._update_image(obj, image)
+                else:
+                    self._save_image(form, obj)
+            obj.set_pending_edit()
+            obj.save()
+        url = obj.block.page_section.page.get_design_url()
+        return HttpResponseRedirect(url)
 
 
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
@@ -426,7 +516,15 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
          link = form.save(commit=False)
          link.link_type = link_type
          link = form.save()
+         self._update_link(content_obj, link)
+
+    def _update_link(self, content_obj, link):
          field_name = self._get_link_field_name(content_obj)
+         if not hasattr(content_obj, field_name):
+            raise BlockError(
+                "Content object '{}' does not have a field "
+                "named '{}'".format(content_obj.__class__.__name__, field_name)
+            )
          setattr(content_obj, field_name, link)
 
     def done(self, form_list, form_dict, **kwargs):
@@ -435,13 +533,13 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         with transaction.atomic():
             obj = self._get_current_content_instance()
             if form_id == LinkTypeForm.REMOVE:
-                obj.link = None
+                self._update_link(obj, None)
             else:
                 form = form_dict[form_id]
                 if form_id == LinkTypeForm.FORM_DOCUMENT:
                     form = form_dict[form_id]
                     document = form.save()
-                    obj.link = Link.objects.create_document_link(document)
+                    self._update_link(obj, Link.objects.create_document_link(document))
                 else:
                     link_type = self.form_link_type_map[form_id]
                     self._save_link(form, obj, link_type)

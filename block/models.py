@@ -646,37 +646,42 @@ class ContentModel(TimeStampedModel):
         """TODO PJK Temp"""
         return None
 
+    def _url_wizard(self, url_name, field_name):
+        content_type = ContentType.objects.get_for_model(self)
+        return reverse(
+            url_name,
+            kwargs={
+                'content': content_type.pk,
+                'pk': self.pk,
+                'field': field_name,
+            }
+        )
+        return False
+
+    @property
+    def url_image_wizard(self):
+        """Return the URL for the image wizard.
+
+        If this method returns 'True' the content model can use the image
+        wizard.
+
+        """
+        return self._url_wizard('block.image.wizard', 'picture')
+
     @property
     def url_link_wizard(self):
         """Return the URL for the link wizard.
 
-        If this method returns 'True' the content model can use the
-        'LinkWizard' (see the 'cms' app).
+        If this method returns 'True' the content model can use the link
+        wizard.
 
         """
-        content_type = ContentType.objects.get_for_model(self)
-        return reverse(
-            'block.link.wizard',
-            kwargs={
-                'content': content_type.pk,
-                'pk': self.pk,
-                'field': 'link',
-                #'app': content_type.app_label,
-                #'block': content_type.name,
-            }
-        )
-        return False
+        return self._url_wizard('block.link.wizard', 'link')
 
     def set_url(self, url_link, url_text):
         """TODO PJK Temp"""
         self.url = url_link
 
-    #def url_link_wizard(self):
-    #    return reverse(
-    #        'compose.article.link.wizard',
-    #        kwargs={'pk': self.pk, 'block': 'Article'}
-    #    )
-    # -------------------------------------------------------------------------
 
 # Discussion with Malcolm - 05/08/2015 - see '1011-generic-carousel/wip.rst'
 # class LinkManager(models.Manager):
@@ -798,17 +803,30 @@ class Image(TimeStampedModel):
 
     """
 
+    title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
-    description = models.TextField()
-    alt_tag = models.CharField(max_length=100)
+    alt = models.CharField(
+        max_length=100,
+        help_text=(
+            'Alternate text for an image '
+            '(if the image cannot be displayed)'
+        )
+    )
     original_file_name = models.CharField(max_length=100)
+    deleted = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Link Image'
         verbose_name_plural = 'Link Images'
 
     def __str__(self):
-        return '{}'.format(self.description)
+        return '{}'.format(self.title)
+
+    def save(self, *args, **kwargs):
+        """Save the original file name."""
+        self.original_file_name = os.path.basename(self.image.name)
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
 
 reversion.register(Image)
 

@@ -8,6 +8,12 @@
   <i class="fa fa-edit"></i>
   Edit
 </a>
+{% if c.url_image_wizard %}
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_image_wizard }}">
+    <i class="fa fa-image"></i>
+    Picture
+  </a>
+{% endif %}
 {% if c.url_link_wizard %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_link_wizard }}">
     <i class="fa fa-globe"></i>
