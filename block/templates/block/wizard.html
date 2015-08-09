@@ -13,8 +13,17 @@
 {% endblock sub_title %}
 
 {% block sub_heading %}
+  {% ifequal 'image_type' wizard.steps.current %}
+    Choose the type of image
+  {% endifequal %}
   {% ifequal 'url_type' wizard.steps.current %}
     Choose the type of link
+  {% endifequal %}
+  {% ifequal 'a' wizard.steps.current %}
+    Choose a previously uploaded image
+  {% endifequal %}
+  {% ifequal 'i' wizard.steps.current %}
+    Upload an image
   {% endifequal %}
   {% ifequal 'l' wizard.steps.current %}
     Enter an External Link

@@ -1,5 +1,9 @@
 # -*- encoding: utf-8 -*-
 from django import forms
+from django.conf import settings
+from django.utils.html import format_html
+
+from easy_thumbnails.files import get_thumbnailer
 
 from block.models import (
     ContentModel,
@@ -69,19 +73,41 @@ class ImageForm(forms.ModelForm):
         }
 
 
-class ImageListForm(forms.ModelForm):
+
+class ImageModelChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        thumbnailer = get_thumbnailer(obj.image)
+        thumbnail_options = {
+            'crop': True,
+            'size': (100, 100),
+        }
+        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+        return format_html('<img src="{}" />{}'.format(
+            thumbnail.url,
+            obj.title,
+        ))
+
+
+class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
+
+    title = forms.CharField(max_length=200)
+    images = ImageModelChoiceField(
+        queryset=Image.objects.all(),
+        empty_label=None,
+        widget=forms.RadioSelect,
+    )
 
     def __init__(self, *args, **kwargs):
         super ().__init__(*args,**kwargs)
-        for name in ('title', 'image'):
-            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
         fields = (
             'title',
-            'image',
+            'images',
         )
 
 
@@ -89,7 +115,7 @@ class ImageTypeForm(forms.Form):
     """Allow the user to select the image type (for the form wizard)."""
 
     FORM_IMAGE = 'i'
-    FORM_IMAGE_LIST = 'l'
+    FORM_IMAGE_LIST = 'a'
     # this form :)
     FORM_IMAGE_TYPE = 'image_type'
     # remove does not have a form

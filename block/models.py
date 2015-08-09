@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import os
+import reversion
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -12,7 +13,7 @@ from django.db import (
 from django.db.models import Max
 from django.utils import timezone
 
-import reversion
+from easy_thumbnails.fields import ThumbnailerImageField
 
 from base.model_utils import (
     copy_model_instance,
@@ -805,6 +806,9 @@ class Image(TimeStampedModel):
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
+    #thumbnail = ThumbnailerImageField(
+    #    resize_source=dict(size=(100, 100), sharpen=True)
+    #)
     alt = models.CharField(
         max_length=100,
         help_text=(
