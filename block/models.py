@@ -758,16 +758,6 @@ class Image(TimeStampedModel):
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
-    #thumbnail = ThumbnailerImageField(
-    #    resize_source=dict(size=(100, 100), sharpen=True)
-    #)
-    alt = models.CharField(
-        max_length=100,
-        help_text=(
-            'Alternate text for an image '
-            '(if the image cannot be displayed)'
-        )
-    )
     original_file_name = models.CharField(max_length=100)
     deleted = models.BooleanField(default=False)
 

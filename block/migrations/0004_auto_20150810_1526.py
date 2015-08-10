@@ -14,10 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Document',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('title', models.CharField(max_length=200)),
-                ('document', models.FileField(null=True, upload_to='link/document', blank=True, help_text='Uploaded document e.g. PDF')),
-                ('original_file_name', models.CharField(max_length=100, null=True, blank=True, help_text='Original file name of the document')),
+                ('document', models.FileField(help_text='Uploaded document e.g. PDF', null=True, upload_to='link/document', blank=True)),
+                ('original_file_name', models.CharField(help_text='Original file name of the document', null=True, max_length=100, blank=True)),
                 ('deleted', models.BooleanField(default=False)),
             ],
             options={
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HeaderFooter',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('header', models.CharField(max_length=150)),
                 ('url_twitter', models.URLField(verbose_name='Twitter URL', blank=True)),
                 ('url_linkedin', models.URLField(verbose_name='LinkedIn URL', blank=True)),
@@ -42,12 +42,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Image',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('title', models.CharField(max_length=200)),
                 ('image', models.ImageField(upload_to='link/image')),
-                ('alt', models.CharField(max_length=100, help_text='Alternate text for an image (if the image cannot be displayed)')),
                 ('original_file_name', models.CharField(max_length=100)),
                 ('deleted', models.BooleanField(default=False)),
             ],
@@ -59,12 +58,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Link',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('title', models.CharField(max_length=250)),
                 ('link_type', models.CharField(max_length=1, choices=[('d', 'Document'), ('u', 'External URL'), ('r', 'Internal URL')])),
-                ('url_external', models.URLField(null=True, verbose_name='Link', blank=True, help_text='URL for a web site e.g. http://www.bbc.co.uk/news')),
+                ('url_external', models.URLField(verbose_name='Link', help_text='URL for a web site e.g. http://www.bbc.co.uk/news', null=True, blank=True)),
                 ('document', models.ForeignKey(to='block.Document', blank=True, null=True)),
             ],
             options={
@@ -75,41 +74,41 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Template',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('template_name', models.CharField(max_length=150, help_text="File name e.g. 'compose/page_article.html'")),
+                ('template_name', models.CharField(help_text="File name e.g. 'compose/page_article.html'", max_length=150)),
             ],
             options={
-                'ordering': ('template_name',),
                 'verbose_name_plural': 'Templates',
                 'verbose_name': 'Template',
+                'ordering': ('template_name',),
             },
         ),
         migrations.CreateModel(
             name='TemplateSection',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('section', models.ForeignKey(to='block.Section')),
                 ('template', models.ForeignKey(to='block.Template')),
             ],
             options={
-                'ordering': ('template__template_name', 'section__name'),
                 'verbose_name_plural': 'Template sections',
                 'verbose_name': 'Template section',
+                'ordering': ('template__template_name', 'section__name'),
             },
         ),
         migrations.CreateModel(
             name='Url',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('title', models.CharField(max_length=200)),
                 ('url_type', models.CharField(max_length=1, choices=[('p', 'Page'), ('r', 'Reverse')])),
-                ('name', models.CharField(max_length=100, help_text="e.g. 'project.page' or 'web.training.application'")),
-                ('arg1', models.SlugField(max_length=100, help_text="e.g. 'training'")),
-                ('arg2', models.SlugField(max_length=100, help_text="e.g. 'application'")),
+                ('name', models.CharField(help_text="e.g. 'project.page' or 'web.training.application'", max_length=100)),
+                ('arg1', models.SlugField(help_text="e.g. 'training'", max_length=100)),
+                ('arg2', models.SlugField(help_text="e.g. 'application'", max_length=100)),
                 ('deleted', models.BooleanField(default=False)),
             ],
             options={
