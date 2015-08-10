@@ -952,6 +952,15 @@ class LinkManager(models.Manager):
         obj.save()
         return obj
 
+    def create_internal_link(self, url_internal):
+        obj = self.model(
+            url_internal=url_internal,
+            link_type=self.model.URL_INTERNAL,
+            title=url_internal.title,
+        )
+        obj.save()
+        return obj
+
 
 class Link(TimeStampedModel):
     """A link to something.
