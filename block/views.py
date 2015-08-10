@@ -11,6 +11,7 @@ from django.core.paginator import (
     PageNotAnInteger,
     Paginator,
 )
+from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import get_model
 from django.http import HttpResponseRedirect
@@ -460,7 +461,7 @@ class SectionCreateView(
     model = Section
 
     def get_success_url(self):
-        return reverse('cms.section.list')
+        return reverse('block.section.list')
 
 
 class SectionListView(
@@ -477,7 +478,7 @@ class SectionUpdateView(
     model = Section
 
     def get_success_url(self):
-        return reverse('cms.section.list')
+        return reverse('block.section.list')
 
 
 class TemplateCreateView(
@@ -487,7 +488,7 @@ class TemplateCreateView(
     model = Template
 
     def get_success_url(self):
-        return reverse('cms.template.list')
+        return reverse('block.template.list')
 
 
 class TemplateListView(
@@ -525,7 +526,7 @@ class TemplateSectionCreateView(
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('cms.template.list')
+        return reverse('block.template.list')
 
 
 class TemplateSectionRemoveView(
@@ -543,7 +544,7 @@ class TemplateSectionRemoveView(
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('cms.template.list')
+        return reverse('block.template.list')
 
 
 class TemplateUpdateView(
@@ -553,7 +554,7 @@ class TemplateUpdateView(
     model = Template
 
     def get_success_url(self):
-        return reverse('cms.template.list')
+        return reverse('block.template.list')
 
 
 # -----------------------------------------------------------------------------

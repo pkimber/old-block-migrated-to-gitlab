@@ -1,0 +1,90 @@
+{% extends 'project/base.html' %}
+
+{% block sub_title %}
+  Pages
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Pages
+{% endblock sub_heading %}
+
+{% block content %}
+  {% if user.is_staff %}
+    <div class="pure-g">
+      <div class="pure-u-1">
+        <div class="pure-menu pure-menu-horizontal">
+          <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+              <a href="{% url 'project.settings' %}" class="pure-menu-link">
+                <i class="fa fa-reply"></i>
+              </a>
+            </li>
+            <li class="pure-menu-item">
+              <a href="{% url 'block.page.create' %}" class="pure-menu-link">
+                <i class="fa fa-file-text-o"></i>
+                Create page
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include 'base/_paginate.html' %}
+      <table class="pure-table pure-table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Type</th>
+            <th>Config</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for object in object_list %}
+            <tr valign="top">
+              <td>
+                <a href="{{ object.get_absolute_url }}">
+                  {% if object.deleted %}<del>{% endif %}
+                  {% if object.order %}
+                    {{ object.order }})
+                  {% endif %}
+                  {{ object.name }}
+                  {% if object.deleted %}</del>{% endif %}
+                </a>
+              </td>
+              <td>
+                <a href="{{ object.get_design_url }}">
+                  <i class="fa fa-edit"></i>
+                  Design
+                </a>
+              </td>
+              <td>
+                {% if object.is_home %}
+                  Home
+                {% endif %}
+                {% if object.is_custom %}
+                  Custom
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'block.page.update' object.pk %}">
+                  <i class="fa fa-cog"></i>
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'block.page.delete' object.pk %}">
+                  <i class="fa fa-trash-o"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include 'base/_paginate.html' %}
+    </div>
+  </div>
+{% endblock content %}
