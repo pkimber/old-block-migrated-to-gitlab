@@ -14,7 +14,6 @@ from block.views import (
 
 from .views import (
     ExampleView,
-    PageListView,
     SettingsView,
     TitleCreateView,
     TitlePublishView,
@@ -38,6 +37,9 @@ urlpatterns = patterns(
     url(regex=r'^admin/',
         view=include(admin.site.urls)
         ),
+    url(regex=r'^block/',
+        view=include('block.urls')
+        ),
     url(regex=r'^settings/$',
         view=SettingsView.as_view(),
         name='project.settings'
@@ -55,11 +57,6 @@ urlpatterns = patterns(
         view=ExampleView.as_view(),
         kwargs=dict(page=Page.CUSTOM, menu='calendar-information'),
         name='calendar.information'
-        ),
-    # list of pages
-    url(regex=r'^block/page/list/$',
-        view=PageListView.as_view(),
-        name='block.page.list'
         ),
     # block page design
     url(regex=r'^(?P<page>[-\w\d]+)/design/$',

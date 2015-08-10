@@ -9,12 +9,17 @@ from django.utils.html import (
 
 from easy_thumbnails.files import get_thumbnailer
 
+from base.form_utils import RequiredFieldForm
 from block.models import (
     ContentModel,
     Document,
+    HeaderFooter,
     Image,
     Link,
     Page,
+    Section,
+    Template,
+    TemplateSection,
 )
 
 
@@ -33,12 +38,14 @@ def _label_from_instance(obj):
 
 
 class ImageModelChoiceField(forms.ModelChoiceField):
+    """The label is the image."""
 
     def label_from_instance(self, obj):
         return _label_from_instance(obj)
 
 
 class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """The label is the image."""
 
     def label_from_instance(self, obj):
         return _label_from_instance(obj)
@@ -49,6 +56,24 @@ class ContentEmptyForm(forms.ModelForm):
     class Meta:
         model = ContentModel
         fields = ()
+
+
+class DocumentForm(forms.ModelForm):
+    """Allow the user to upload a document (for the form wizard)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = Document
+        fields = (
+            'title',
+            'document',
+        )
+        widgets = {
+            'document': forms.FileInput,
+        }
 
 
 class DocumentListForm(forms.ModelForm):
@@ -80,6 +105,25 @@ class ExternalLinkForm(forms.ModelForm):
         fields = (
             'title',
             'url_external',
+        )
+
+
+class HeaderFooterForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super(HeaderFooterForm, self).__init__(*args, **kwargs)
+        for name in ('header', 'url_facebook', 'url_linkedin', 'url_twitter'):
+            self.fields[name].widget.attrs.update(
+                {'class': 'pure-input-2-3'}
+            )
+
+    class Meta:
+        model = HeaderFooter
+        fields = (
+            'header',
+            'url_facebook',
+            'url_linkedin',
+            'url_twitter',
         )
 
 
@@ -161,22 +205,6 @@ class ImageTypeForm(forms.Form):
         )
 
 
-class PageListForm(forms.ModelForm):
-    """Select a page from this web site (for the form wizard)."""
-
-    def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
-        self.fields['url_internal'].label = 'URL'
-
-    class Meta:
-        model = Link
-        fields = (
-            'title',
-            'url_internal',
-        )
-
-
 class LinkTypeForm(forms.Form):
     """Allow the user to select the link type (for the form wizard)."""
 
@@ -206,19 +234,79 @@ class LinkTypeForm(forms.Form):
         )
 
 
-class DocumentForm(forms.ModelForm):
-    """Allow the user to upload a document (for the form wizard)."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+class PageEmptyForm(forms.ModelForm):
 
     class Meta:
-        model = Document
+        model = Page
+        fields = ()
+
+
+class PageForm(RequiredFieldForm):
+
+    template = forms.ModelChoiceField(queryset=Template.objects.all())
+
+    class Meta:
+        model = Page
+        fields = (
+            'name',
+            'slug',
+            'slug_menu',
+            'order',
+            'is_home',
+            'template',
+        )
+
+
+class PageListForm(forms.ModelForm):
+    """Select a page from this web site (for the form wizard)."""
+
+    def __init__(self, *args, **kwargs):
+        super ().__init__(*args,**kwargs)
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+        self.fields['url_internal'].label = 'URL'
+
+    class Meta:
+        model = Link
         fields = (
             'title',
-            'document',
+            'url_internal',
         )
-        widgets = {
-            'document': forms.FileInput,
-        }
+
+
+class SectionForm(RequiredFieldForm):
+
+    class Meta:
+        model = Section
+        fields = (
+            'name',
+            'slug',
+            'block_app',
+            'block_model',
+            'create_url_name',
+            'paginated',
+        )
+
+
+class TemplateForm(RequiredFieldForm):
+
+    class Meta:
+        model = Template
+        fields = (
+            'template_name',
+        )
+
+
+class TemplateSectionEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = TemplateSection
+        fields = ()
+
+
+class TemplateSectionForm(RequiredFieldForm):
+
+    class Meta:
+        model = TemplateSection
+        fields = (
+            'section',
+        )

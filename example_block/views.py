@@ -37,11 +37,6 @@ class ExampleView(PageView):
         return context
 
 
-class PageListView(ListView):
-
-    model = Page
-
-
 class SettingsView(BaseMixin, TemplateView):
 
     template_name = 'example/settings.html'

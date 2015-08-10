@@ -10,7 +10,7 @@ from block.tests.factories import (
 @pytest.mark.django_db
 def test_url():
     url = UrlFactory(name='block.page.list')
-    assert '/block/page/list/' == url.url
+    assert '/block/page/' == url.url
 
 
 @pytest.mark.django_db

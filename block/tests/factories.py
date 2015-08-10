@@ -10,6 +10,8 @@ from block.models import (
     Page,
     PageSection,
     Section,
+    Template,
+    TemplateSection,
     Url,
 )
 
@@ -87,6 +89,21 @@ class PageSectionFactory(factory.django.DjangoModelFactory):
         model = PageSection
 
     page = factory.SubFactory(PageFactory)
+    section = factory.SubFactory(SectionFactory)
+
+
+class TemplateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Template
+
+
+class TemplateSectionFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = TemplateSection
+
+    template = factory.SubFactory(TemplateFactory)
     section = factory.SubFactory(SectionFactory)
 
 
