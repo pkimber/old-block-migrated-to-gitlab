@@ -779,26 +779,6 @@ reversion.register(Image)
 
 class UrlManager(models.Manager):
 
-    def _init_url(self, title, url_type, name, arg1, arg2):
-        try:
-            obj = self.model.objects.get(
-                name=name, arg1=arg1, arg2=arg2
-            )
-            obj.title = title
-            obj.url_type = url_type
-        except self.model.DoesNotExist:
-            obj = self.model(
-                title=title,
-                url_type=url_type,
-                name=name,
-                arg1=arg1,
-                arg2=arg2
-            )
-        # check this is a valid url
-        obj.url
-        obj.save()
-        return obj
-
     def init_page_url(self, page):
         if page.is_custom or page.slug == Page.CUSTOM:
             raise BlockError(
@@ -810,20 +790,43 @@ class UrlManager(models.Manager):
                 "Cannot create a URL for a deleted "
                 "page: '{}'".format(page.name)
             )
-        if page.is_home:
-            slug = ''
-            slug_menu = ''
-        else:
-            slug = page.slug
-            slug_menu = page.slug_menu
-        return self._init_url(
-            page.name, self.model.PAGE, page.url_name, slug, slug_menu
-        )
+        try:
+            obj = self.model.objects.get(page=page)
+            obj.title = page.name
+        except self.model.DoesNotExist:
+            obj = self.model(
+                title=page.name,
+                url_type=self.model.PAGE,
+                page=page,
+            )
+        obj.save()
+        return obj
 
-    def init_reverse_url(self, title, name, arg1=None, arg2=None):
-        return self._init_url(
-            title, self.model.REVERSE, name, arg1 or '', arg2 or ''
-        )
+    def init_reverse_url(self, title, name, arg1=None, arg2=None, arg3=None):
+        arg1 = arg1 or ''
+        arg2 = arg2 or ''
+        arg3 = arg3 or ''
+        try:
+            obj = self.model.objects.get(
+                name=name,
+                arg1=arg1,
+                arg2=arg2,
+                arg3=arg3,
+            )
+            obj.title = title
+        except self.model.DoesNotExist:
+            obj = self.model(
+                title=title,
+                url_type=self.model.REVERSE,
+                name=name,
+                arg1=arg1,
+                arg2=arg2,
+                arg3=arg3,
+            )
+        # check this is a valid url
+        obj.url
+        obj.save()
+        return obj
 
     def init_pages(self):
         """Add all non-custom pages to the list of URLs."""
@@ -860,26 +863,39 @@ class Url(models.Model):
 
     title = models.CharField(max_length=200)
     url_type = models.CharField(max_length=1, choices=URL_TYPE_CHOICES)
+    page = models.ForeignKey(
+        Page,
+        blank=True,
+        null=True,
+    )
     name = models.CharField(
         max_length=100,
         help_text="e.g. 'project.page' or 'web.training.application'"
     )
     arg1 = models.SlugField(max_length=100, help_text="e.g. 'training'")
     arg2 = models.SlugField(max_length=100, help_text="e.g. 'application'")
+    arg3 = models.SlugField(max_length=100, help_text="e.g. 'urgent'")
     deleted = models.BooleanField(default=False)
     objects = UrlManager()
 
     @property
     def url(self):
-        params = []
-        if self.arg1:
-            params.append(self.arg1)
-        if self.arg2:
-            params.append(self.arg2)
-        return reverse(self.name, args=params)
+        result = None
+        if self.url_type == self.PAGE:
+            return self.page.get_absolute_url()
+        else:
+            params = []
+            if self.arg1:
+                params.append(self.arg1)
+            if self.arg2:
+                params.append(self.arg2)
+            if self.arg3:
+                params.append(self.arg3)
+            result = reverse(self.name, args=params)
+        return result
 
     class Meta:
-        unique_together = ('name', 'arg1', 'arg2')
+        unique_together = ('page', 'name', 'arg1', 'arg2', 'arg3')
         verbose_name = 'URL'
         verbose_name_plural = 'URLs'
 

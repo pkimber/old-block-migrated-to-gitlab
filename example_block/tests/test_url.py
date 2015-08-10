@@ -14,17 +14,17 @@ from block.models import (
 
 @pytest.mark.django_db
 def test_init_page_url():
-    page = PageFactory(slug='info', slug_menu='')
+    page = PageFactory(name='Information', slug='info', slug_menu='')
     url = Url.objects.init_page_url(page)
-    assert url.name == 'project.page'
+    assert url.title == 'Information'
     assert url.url == '/info/'
 
 
 @pytest.mark.django_db
 def test_init_page_url_home():
-    page = PageFactory(slug=Page.HOME, slug_menu='', is_home=True)
+    page = PageFactory(name='Home', slug=Page.HOME, slug_menu='', is_home=True)
     url = Url.objects.init_page_url(page)
-    assert url.name == 'project.home'
+    assert url.title == 'Home'
     assert url.url == '/'
 
 
