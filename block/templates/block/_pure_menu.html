@@ -1,0 +1,50 @@
+
+  <style>
+    .sub-item {
+        padding-left: 15px;
+        font-size: 80%;
+    }
+    div.pure-menu-link,
+    div.pure-menu-link:hover { 
+      background: #191818;
+      margin-left: -8px;
+    }
+  </style>
+  {% if page.is_home %}
+    {% include 'cms/_design_menu.html' %}
+  {% endif %}
+  {% for menu_item in main_menu_items %}
+    <li class="pure-menu-item">
+      {% if menu_item.has_link %}
+      <a class="pure-menu-link" href="{{menu_item.get_link }}">
+      {% else %}
+      <div class="pure-menu-link">
+      {% endif %}
+        {{ menu_item.title }}
+      {% if menu_item.has_link %}
+      </a>
+      {% else %}
+      </div>
+      {% endif %}
+    </li>
+
+    {% if menu_item.link and menu_item.link.page and menu_item.link.page.pk == page.pk %}
+      {% include 'cms/_design_menu.html' %}
+    {% endif %}
+
+    {% if menu_item.has_children %}
+
+      {% for sub_menu_item in menu_item.menuitem_set.all %}
+        <li class="pure-menu-item sub-item">
+          <a class="pure-menu-link" href="{{ sub_menu_item.get_link }}">
+            {{ sub_menu_item.title }}
+          </a>
+        </li>
+        {% if sub_menu_item.link and sub_menu_item.link.page and sub_menu_item.link.page.pk == page.pk %}
+          {% include 'cms/_design_menu.html' %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+
+
