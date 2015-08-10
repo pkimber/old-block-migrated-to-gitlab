@@ -646,7 +646,14 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
 
     def _get_link_field_name(self, content_obj):
         """Assign the link to the field with this name."""
-        return self.kwargs['field']
+        field_name = self.kwargs['field']
+        if hasattr(content_obj, field_name):
+            return field_name
+        else:
+            raise BlockError(
+                "Content object '{}' does not have a field "
+                "named '{}'".format(content_obj.__class__.__name__, field_name)
+            )
 
     def _get_link_type(self):
         """Is this a 'single' or a 'multi' link?"""
@@ -658,23 +665,25 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
 
     def _update_image(self, content_obj, image):
         field_name = self._get_link_field_name(content_obj)
-        if not hasattr(content_obj, field_name):
-            raise BlockError(
-                "Content object '{}' does not have a field "
-                "named '{}'".format(content_obj.__class__.__name__, field_name)
-            )
         setattr(content_obj, field_name, image)
 
     def _update_images(self, content_obj, images):
         field_name = self._get_link_field_name(content_obj)
-        if not hasattr(content_obj, field_name):
-            raise BlockError(
-                "Content object '{}' does not have a field "
-                "named '{}'".format(content_obj.__class__.__name__, field_name)
-            )
         field = getattr(content_obj, field_name)
         for image in images:
             field.add(image)
+
+    def get_form_initial(self, step):
+        result = {}
+        link_type = self._get_link_type()
+        if step == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
+            obj = self._get_current_content_instance()
+            field_name = self._get_link_field_name(obj)
+            field = getattr(obj, field_name)
+            result.update({
+                'images': [item.pk for item in field.all()],
+            })
+        return result
 
     def get_form_kwargs(self, step):
         result = {}
@@ -683,6 +692,13 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
             result.update({
                 'link_type': link_type,
             })
+        #elif step == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
+        #    obj = self._get_current_content_instance()
+        #    field_name = self._get_link_field_name(obj)
+        #    field = getattr(obj, field_name)
+        #    result.update({
+        #        'selected': [item.pk for item in field.all()],
+        #    })
         return result
 
     def done(self, form_list, form_dict, **kwargs):

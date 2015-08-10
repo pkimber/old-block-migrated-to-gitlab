@@ -166,7 +166,7 @@ class ImageMultiSelectForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelMultipleChoiceField(
-        queryset=Image.objects.all(),
+        queryset=Image.objects.all().order_by('title'),
         widget=forms.CheckboxSelectMultiple,
     )
 
@@ -214,6 +214,7 @@ class ImageTypeForm(forms.Form):
                 self.FORM_IMAGE_MULTI_SELECT,
                 self.REMOVE,
             ]
+        # build the list of choices - adding the description
         choices = []
         for item in items:
             choices.append((item, self.FORM_CHOICES[item]))
@@ -268,6 +269,7 @@ class LinkTypeForm(forms.Form):
                 self.FORM_DOCUMENT_LIST,
                 self.REMOVE,
             ]
+        # build the list of choices - adding the description
         choices = []
         for item in items:
             choices.append((item, self.FORM_CHOICES[item]))
