@@ -11,7 +11,7 @@
     }
   </style>
   {% if page.is_home %}
-    {% include 'cms/_design_menu.html' %}
+    {% include 'block/_design_menu.html' %}
   {% endif %}
   {% for menu_item in main_menu_items %}
     <li class="pure-menu-item">
@@ -29,7 +29,7 @@
     </li>
 
     {% if menu_item.link and menu_item.link.page and menu_item.link.page.pk == page.pk %}
-      {% include 'cms/_design_menu.html' %}
+      {% include 'block/_design_menu.html' %}
     {% endif %}
 
     {% if menu_item.has_children %}
@@ -41,7 +41,7 @@
           </a>
         </li>
         {% if sub_menu_item.link and sub_menu_item.link.page and sub_menu_item.link.page.pk == page.pk %}
-          {% include 'cms/_design_menu.html' %}
+          {% include 'block/_design_menu.html' %}
         {% endif %}
       {% endfor %}
     {% endif %}

@@ -552,7 +552,7 @@ class TemplateSectionRemoveView(
 
     form_class = TemplateSectionEmptyForm
     model = TemplateSection
-    template_name = 'cms/templatesection_remove_form.html'
+    template_name = 'block/templatesection_remove_form.html'
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
