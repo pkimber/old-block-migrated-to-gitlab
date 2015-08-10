@@ -762,6 +762,16 @@ class HeaderFooter(SingletonModel):
 reversion.register(HeaderFooter)
 
 
+class ImageManager(models.Manager):
+
+    def images(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'title'
+        )
+
+
 class Image(TimeStampedModel):
     """An image *library*, used with the 'ImageWizard'.
 
@@ -785,6 +795,7 @@ class Image(TimeStampedModel):
     image = models.ImageField(upload_to='link/image')
     original_file_name = models.CharField(max_length=100)
     deleted = models.BooleanField(default=False)
+    objects = ImageManager()
 
     class Meta:
         verbose_name = 'Link Image'
