@@ -20,6 +20,7 @@ from block.models import (
     Section,
     Template,
     TemplateSection,
+    Wizard,
 )
 
 
@@ -187,15 +188,36 @@ class ImageTypeForm(forms.Form):
     # remove does not have a form
     REMOVE = 'r'
 
-    image_type = forms.ChoiceField(
-        choices=(
-            (FORM_IMAGE, 'Upload an image and link to it'),
-            (FORM_IMAGE_LIST, 'Use an existing image'),
-            (FORM_IMAGE_MULTI_SELECT, 'Select one or more images'),
-            (REMOVE, 'Remove Image'),
-        ),
-        label="Choose the type of image",
-    )
+    FORM_CHOICES = {
+        FORM_IMAGE: 'Upload an image and link to it',
+        FORM_IMAGE_LIST: 'Use an existing image',
+        FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
+        REMOVE: 'Remove Image',
+    }
+
+    image_type = forms.ChoiceField(label="Choose the type of image")
+
+    def __init__(self, *args, **kwargs):
+        link_type = kwargs.pop('link_type')
+        super ().__init__(*args,**kwargs)
+        # get the list of items (in the order displayed)
+        if link_type == Wizard.SINGLE:
+            items = [
+                self.FORM_IMAGE,
+                self.FORM_IMAGE_LIST,
+                self.REMOVE,
+            ]
+        else:
+            items = [
+                self.FORM_IMAGE,
+                self.FORM_IMAGE_LIST,
+                self.FORM_IMAGE_MULTI_SELECT,
+                self.REMOVE,
+            ]
+        choices = []
+        for item in items:
+            choices.append((item, self.FORM_CHOICES[item]))
+        self.fields['image_type'].choices = choices
 
     class Meta:
         fields = (
@@ -215,16 +237,41 @@ class LinkTypeForm(forms.Form):
     # remove does not have a form
     REMOVE = 'r'
 
-    link_type = forms.ChoiceField(
-        choices=(
-            (FORM_EXTERNAL_URL, 'Link to another site'),
-            (FORM_PAGE_URL, 'Page on this site'),
-            (FORM_DOCUMENT, 'Upload a document and link to it'),
-            (FORM_DOCUMENT_LIST, 'Use an existing document'),
-            (REMOVE, 'Remove Link'),
-        ),
-        label="Choose the type of link",
-    )
+    FORM_CHOICES = {
+        FORM_EXTERNAL_URL: 'Link to another site',
+        FORM_PAGE_URL: 'Page on this site',
+        FORM_DOCUMENT: 'Upload a document and link to it',
+        FORM_DOCUMENT_LIST: 'Use an existing document',
+        REMOVE: 'Remove Link',
+    }
+
+    link_type = forms.ChoiceField(label="Choose the type of link")
+
+    def __init__(self, *args, **kwargs):
+        link_type = kwargs.pop('link_type')
+        super ().__init__(*args,**kwargs)
+        # get the list of items (in the order displayed)
+        # I don't think we are handling multi-links yet.
+        if link_type == Wizard.SINGLE:
+            items = [
+                self.FORM_EXTERNAL_URL,
+                self.FORM_PAGE_URL,
+                self.FORM_DOCUMENT,
+                self.FORM_DOCUMENT_LIST,
+                self.REMOVE,
+            ]
+        else:
+            items = [
+                self.FORM_EXTERNAL_URL,
+                self.FORM_PAGE_URL,
+                self.FORM_DOCUMENT,
+                self.FORM_DOCUMENT_LIST,
+                self.REMOVE,
+            ]
+        choices = []
+        for item in items:
+            choices.append((item, self.FORM_CHOICES[item]))
+        self.fields['link_type'].choices = choices
 
     class Meta:
         fields = (

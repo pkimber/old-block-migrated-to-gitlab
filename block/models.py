@@ -698,7 +698,7 @@ class ContentModel(TimeStampedModel):
                 'url': self._wizard_url(
                     item.url_name,
                     item.field_name,
-                    self.link_type,
+                    item.link_type,
                 ),
             })
         return result

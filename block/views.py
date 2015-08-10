@@ -648,6 +648,10 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
         """Assign the link to the field with this name."""
         return self.kwargs['field']
 
+    def _get_link_type(self):
+        """Is this a 'single' or a 'multi' link?"""
+        return self.kwargs['type']
+
     def _save_image(self, form, content_obj):
         image = form.save()
         self._update_image(content_obj, image)
@@ -671,6 +675,15 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
         field = getattr(content_obj, field_name)
         for image in images:
             field.add(image)
+
+    def get_form_kwargs(self, step):
+        result = {}
+        link_type = self._get_link_type()
+        if step == ImageTypeForm.FORM_IMAGE_TYPE:
+            result.update({
+                'link_type': link_type,
+            })
+        return result
 
     def done(self, form_list, form_dict, **kwargs):
         form_image_type = form_dict[ImageTypeForm.FORM_IMAGE_TYPE]
@@ -754,6 +767,10 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         """Assign the link to the field with this name."""
         return self.kwargs['field']
 
+    def _get_link_type(self):
+        """Is this a 'single' or a 'multi' link?"""
+        return self.kwargs['type']
+
     def _save_link(self, form, content_obj, link_type):
          link = form.save(commit=False)
          link.link_type = link_type
@@ -768,6 +785,15 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
                 "named '{}'".format(content_obj.__class__.__name__, field_name)
             )
          setattr(content_obj, field_name, link)
+
+    def get_form_kwargs(self, step):
+        result = {}
+        link_type = self._get_link_type()
+        if step == LinkTypeForm.FORM_LINK_TYPE:
+            result.update({
+                'link_type': link_type,
+            })
+        return result
 
     def done(self, form_list, form_dict, **kwargs):
         form_link_type = form_dict[LinkTypeForm.FORM_LINK_TYPE]
