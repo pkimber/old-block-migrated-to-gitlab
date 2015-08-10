@@ -30,6 +30,44 @@ def _default_moderate_state():
     return ModerateState.objects._pending().pk
 
 
+class Wizard:
+
+    # 'wizard_type'
+    IMAGE = 'image'
+    LINK = 'link'
+
+    # 'link_type'
+    MULTI = 'multi'
+    SINGLE = 'single'
+
+    def __init__(self, field_name, wizard_type, link_type):
+        self.field_name = field_name
+        self.wizard_type = wizard_type
+        self.link_type = link_type
+
+    @property
+    def css_class(self):
+        result = ''
+        if self.wizard_type == self.IMAGE:
+            result ='fa fa-image'
+        elif self.wizard_type == self.LINK:
+            result = 'fa fa-globe'
+        else:
+            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+        return result
+
+    @property
+    def url_name(self):
+        result = ''
+        if self.wizard_type == self.IMAGE:
+            result = 'block.image.wizard'
+        elif self.wizard_type == self.LINK:
+            result = 'block.link.wizard'
+        else:
+            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+        return result
+
+
 class BlockError(Exception):
 
     def __init__(self, value):
@@ -653,24 +691,14 @@ class ContentModel(TimeStampedModel):
     def wizard_urls(self):
         """Return the URLs for the image and link wizards."""
         result = []
-        for field_name, wizard_type in self.wizard_fields.items():
-            if wizard_type in (Image.SINGLE, Image.MULTI):
-                url_name = 'block.image.wizard'
-                css_class = 'fa fa-image'
-            elif wizard_type in (Link.SINGLE, Link.MULTI):
-                url_name = 'block.link.wizard'
-                css_class = 'fa fa-globe'
-            else:
-                raise BlockError(
-                    "Unknown wizard type: '{}'".format(wizard_type)
-                )
+        for item in self.wizard_fields:
             result.append({
-                'caption': field_name.title(),
-                'class': css_class,
+                'caption': item.field_name.title(),
+                'class': item.css_class,
                 'url': self._wizard_url(
-                    url_name,
-                    field_name,
-                    'single' if wizard_type in (Image.SINGLE, Link.SINGLE) else 'multi',
+                    item.url_name,
+                    item.field_name,
+                    item.link_type,
                 ),
             })
         return result
@@ -752,9 +780,6 @@ class Image(TimeStampedModel):
       e.g. https://github.com/alex/django-taggit
 
     """
-
-    MULTI = 'multi-image'
-    SINGLE = 'single-image'
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
@@ -938,9 +963,6 @@ class Link(TimeStampedModel):
     DOCUMENT = 'd'
     URL_INTERNAL = 'r'
     URL_EXTERNAL = 'u'
-
-    MULTI = 'multi-link'
-    SINGLE = 'single-link'
 
     LINK_TYPE_CHOICES = (
         (DOCUMENT, 'Document'),
