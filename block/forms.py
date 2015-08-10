@@ -132,15 +132,13 @@ class ImageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for name in ('alt', 'title'):
-            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
         fields = (
             'title',
             'image',
-            'alt',
         )
         widgets = {
             'image': forms.FileInput,
