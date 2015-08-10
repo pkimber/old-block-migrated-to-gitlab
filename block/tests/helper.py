@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import IntegrityError
 
 from block.models import BlockError
@@ -57,6 +55,14 @@ def check_content(
     except AttributeError:
         raise BlockError(
             "The {} model does not have an 'order' field"
+            "".format(model_instance.__class__)
+        )
+    # check the wizard fields
+    try:
+        model_instance.wizard_fields
+    except AttributeError:
+        raise BlockError(
+            "The {} model does not have a 'wizard_fields' property"
             "".format(model_instance.__class__)
         )
 
