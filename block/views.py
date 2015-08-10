@@ -670,6 +670,7 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
     def _update_images(self, content_obj, images):
         field_name = self._get_link_field_name(content_obj)
         field = getattr(content_obj, field_name)
+        field.clear()
         for image in images:
             field.add(image)
 
@@ -692,13 +693,6 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
             result.update({
                 'link_type': link_type,
             })
-        #elif step == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
-        #    obj = self._get_current_content_instance()
-        #    field_name = self._get_link_field_name(obj)
-        #    field = getattr(obj, field_name)
-        #    result.update({
-        #        'selected': [item.pk for item in field.all()],
-        #    })
         return result
 
     def done(self, form_list, form_dict, **kwargs):

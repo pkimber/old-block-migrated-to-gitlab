@@ -166,7 +166,7 @@ class ImageMultiSelectForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelMultipleChoiceField(
-        queryset=Image.objects.all().order_by('title'),
+        queryset=Image.objects.images(),
         widget=forms.CheckboxSelectMultiple,
     )
 
