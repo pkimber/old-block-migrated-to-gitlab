@@ -952,6 +952,15 @@ class LinkManager(models.Manager):
         obj.save()
         return obj
 
+    def create_internal_link(self, url_internal):
+        obj = self.model(
+            url_internal=url_internal,
+            link_type=self.model.URL_INTERNAL,
+            title=url_internal.title,
+        )
+        obj.save()
+        return obj
+
 
 class Link(TimeStampedModel):
     """A link to something.
@@ -1202,3 +1211,50 @@ class ViewUrl(models.Model):
         return '{} {}'.format(self.user.username, self.page.name, self.url)
 
 reversion.register(ViewUrl)
+
+
+class Menu (models.Model):
+    slug = models.SlugField(max_length=100)
+    title = models.CharField(max_length=100)
+    navigation = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('navigation', 'slug',)
+        verbose_name = "Menu"
+        verbose_name_plural = "Menus"
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+reversion.register(Menu)
+
+
+class MenuItem (models.Model):
+    menu = models.ForeignKey(Menu, blank=False, null=True)
+    slug = models.SlugField(max_length=100)
+    parent = models.ForeignKey('self', blank=True, null=True)
+    title = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+    link = models.ForeignKey (Link, blank=True, null=True)
+
+    class Meta:
+        ordering=('order','title',)
+        verbose_name = "Menu Item"
+        verbose_name_plural = "Menu Items"
+
+    def __str__(self):
+        return '{} - {}'.format(self.menu.title, self.title)
+
+    def has_children(self):
+        return bool(self.menuitem_set.count())
+
+    def has_link(self):
+        return bool(self.link)
+
+    def get_link(self):
+        if self.link:
+            return self.link.url
+        else:
+            return '#'
+
+reversion.register(MenuItem)

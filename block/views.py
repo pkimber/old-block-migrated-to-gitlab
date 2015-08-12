@@ -53,6 +53,8 @@ from .models import (
     BlockError,
     HeaderFooter,
     Link,
+    Menu,
+    MenuItem,
     Page,
     PageSection,
     Section,
@@ -365,7 +367,15 @@ class CmsPageDesignView(PageDesignView):
 
     def get_context_data(self, **kwargs):
         context = super(CmsPageDesignView, self).get_context_data(**kwargs)
-        context.update(dict(header_footer=HeaderFooter.load()))
+        try:
+            main_menu_items = MenuItem.objects.filter(menu__slug='main', parent=None)
+        except:
+            main_menu_items = []
+
+        context.update(dict(
+            header_footer=HeaderFooter.load(),
+            main_menu_items=main_menu_items,
+        ))
         return context
 
 
@@ -450,7 +460,15 @@ class CmsPageView(PageView):
 
     def get_context_data(self, **kwargs):
         context = super(CmsPageView, self).get_context_data(**kwargs)
-        context.update(dict(header_footer=HeaderFooter.load()))
+        try:
+            main_menu_items = MenuItem.objects.filter(menu__slug='main', parent=None)
+        except:
+            main_menu_items = []
+
+        context.update(dict(
+            header_footer=HeaderFooter.load(),
+            main_menu_items=main_menu_items
+        ))
         return context
 
 
@@ -534,7 +552,7 @@ class TemplateSectionRemoveView(
 
     form_class = TemplateSectionEmptyForm
     model = TemplateSection
-    template_name = 'cms/templatesection_remove_form.html'
+    template_name = 'block/templatesection_remove_form.html'
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
