@@ -9,7 +9,10 @@ from django.utils.html import (
 
 from easy_thumbnails.files import get_thumbnailer
 
-from base.form_utils import RequiredFieldForm
+from base.form_utils import (
+    RequiredFieldForm,
+    set_widget_required,
+)
 from block.models import (
     ContentModel,
     Document,
@@ -133,7 +136,9 @@ class ImageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+        title = self.fields['title']
+        title.widget.attrs.update({'class': 'pure-input-2-3'})
+        set_widget_required(title)
 
     class Meta:
         model = Image
