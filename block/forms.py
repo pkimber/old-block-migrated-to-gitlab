@@ -194,10 +194,10 @@ class ImageTypeForm(forms.Form):
     REMOVE = 'r'
 
     FORM_CHOICES = {
-        FORM_IMAGE_LIST: 'Use an existing image',
         FORM_IMAGE: 'Upload an image and link to it',
+        FORM_IMAGE_LIST: 'Use an existing image',
         FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
-        REMOVE: 'Remove Image from Page',
+        REMOVE: 'Remove image from the page',
     }
 
     image_type = forms.ChoiceField(label="Choose the type of image")
@@ -208,8 +208,8 @@ class ImageTypeForm(forms.Form):
         # get the list of items (in the order displayed)
         if link_type == Wizard.SINGLE:
             items = [
-                self.FORM_IMAGE,
                 self.FORM_IMAGE_LIST,
+                self.FORM_IMAGE,
                 self.REMOVE,
             ]
         else:
