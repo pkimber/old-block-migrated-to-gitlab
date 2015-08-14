@@ -194,10 +194,10 @@ class ImageTypeForm(forms.Form):
     REMOVE = 'r'
 
     FORM_CHOICES = {
-        FORM_IMAGE: 'Upload an image and link to it',
         FORM_IMAGE_LIST: 'Use an existing image',
+        FORM_IMAGE: 'Upload an image and link to it',
         FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
-        REMOVE: 'Remove Image',
+        REMOVE: 'Remove Image from Page',
     }
 
     image_type = forms.ChoiceField(label="Choose the type of image")
