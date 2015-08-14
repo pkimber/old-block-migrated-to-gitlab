@@ -193,11 +193,11 @@ class ImageTypeForm(forms.Form):
     # remove does not have a form
     REMOVE = 'r'
 
-    FORM_CHOICES = {
-        FORM_IMAGE: 'Upload an image and link to it',
+    OPTION_CAPTION = {
+        FORM_IMAGE: 'Upload an image',
         FORM_IMAGE_LIST: 'Use an existing image',
         FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
-        REMOVE: 'Remove image from the page',
+        REMOVE: 'Remove {} from the page',
     }
 
     image_type = forms.ChoiceField(label="Choose the type of image")
@@ -214,15 +214,20 @@ class ImageTypeForm(forms.Form):
             ]
         else:
             items = [
-                self.FORM_IMAGE,
-                self.FORM_IMAGE_LIST,
                 self.FORM_IMAGE_MULTI_SELECT,
+                self.FORM_IMAGE,
                 self.REMOVE,
             ]
         # build the list of choices - adding the description
         choices = []
         for item in items:
-            choices.append((item, self.FORM_CHOICES[item]))
+            description = self.OPTION_CAPTION[item]
+            if item == self.REMOVE:
+                if link_type == Wizard.MULTI:
+                    description = description.format('images')
+                else:
+                    description = description.format('image')
+            choices.append((item, description))
         self.fields['image_type'].choices = choices
 
     class Meta:
