@@ -38,7 +38,7 @@ urlpatterns = patterns(
         view=include(admin.site.urls)
         ),
     url(regex=r'^block/',
-        view=include('block.urls')
+        view=include('block.urls.block')
         ),
     url(regex=r'^settings/$',
         view=SettingsView.as_view(),
