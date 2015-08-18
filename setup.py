@@ -20,14 +20,14 @@ def get_readme():
 
 setup(
     name='kb-block',
-    packages=['block', 'block.templatetags', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
+    packages=['block', 'block.templatetags', 'block.urls', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
     package_data={
         'block': [
             'templates/*.*',
             'templates/block/*.*',
         ],
     },
-    version='0.1.31',
+    version='0.1.32',
     description='block',
     author='Patrick Kimber',
     author_email='code@pkimber.net',
