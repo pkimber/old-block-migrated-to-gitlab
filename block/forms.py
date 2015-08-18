@@ -165,7 +165,7 @@ class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelChoiceField(
-        queryset=Image.objects.all(),
+        queryset=Image.objects.images(),
         empty_label=None,
         widget=forms.RadioSelect,
     )
