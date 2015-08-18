@@ -745,9 +745,9 @@ reversion.register(Document)
 class HeaderFooter(SingletonModel):
     """Move to ``block``?"""
 
-    header = models.CharField(max_length=150)
-    #footer_left = models.TextField(blank=True)
-    #footer_right = models.TextField(blank=True)
+    header = models.CharField(max_length=150, blank=True)
+    footer_left = models.CharField(max_length=150, blank=True)
+    footer_right = models.CharField(max_length=150, blank=True)
     url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
     url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
     url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)

@@ -61,6 +61,7 @@ from .models import (
     Template,
     TemplateSection,
     ViewUrl,
+    Wizard,
 )
 
 
@@ -683,7 +684,12 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
 
     def _update_image(self, content_obj, image):
         field_name = self._get_link_field_name(content_obj)
-        setattr(content_obj, field_name, image)
+        link_type = self._get_link_type()
+        if link_type == Wizard.SINGLE:
+            setattr(content_obj, field_name, image)
+        elif link_type == Wizard.MULTI:
+            field = getattr(content_obj, field_name)
+            field.add(image)
 
     def _update_images(self, content_obj, images):
         field_name = self._get_link_field_name(content_obj)
@@ -694,7 +700,6 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
 
     def get_form_initial(self, step):
         result = {}
-        link_type = self._get_link_type()
         if step == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
             obj = self._get_current_content_instance()
             field_name = self._get_link_field_name(obj)

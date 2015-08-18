@@ -115,8 +115,16 @@ class ExternalLinkForm(forms.ModelForm):
 class HeaderFooterForm(RequiredFieldForm):
 
     def __init__(self, *args, **kwargs):
-        super(HeaderFooterForm, self).__init__(*args, **kwargs)
-        for name in ('header', 'url_facebook', 'url_linkedin', 'url_twitter'):
+        super().__init__(*args, **kwargs)
+        field_names = (
+            'header',
+            'footer_left',
+            'footer_right',
+            'url_facebook',
+            'url_linkedin',
+            'url_twitter',
+        )
+        for name in field_names:
             self.fields[name].widget.attrs.update(
                 {'class': 'pure-input-2-3'}
             )
@@ -125,6 +133,8 @@ class HeaderFooterForm(RequiredFieldForm):
         model = HeaderFooter
         fields = (
             'header',
+            'footer_left',
+            'footer_right',
             'url_facebook',
             'url_linkedin',
             'url_twitter',
