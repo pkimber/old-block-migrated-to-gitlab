@@ -693,7 +693,8 @@ class ContentModel(TimeStampedModel):
         result = []
         for item in self.wizard_fields:
             result.append({
-                'caption': item.field_name.title(),
+                'caption': item.field_name.title().translate(
+                            item.field_name.maketrans('_', ' ')),
                 'class': item.css_class,
                 'url': self._wizard_url(
                     item.url_name,

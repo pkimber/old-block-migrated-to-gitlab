@@ -743,7 +743,12 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
                     self._save_image(form, obj)
             obj.set_pending_edit()
             obj.save()
-        url = obj.block.page_section.page.get_design_url()
+
+        try:
+            url = obj.get_design_url()
+        except:
+            url = obj.block.page_section.page.get_design_url()
+
         return HttpResponseRedirect(url)
 
 
@@ -846,5 +851,9 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
                     self._save_link(form, obj, link_type)
             obj.set_pending_edit()
             obj.save()
-        url = obj.block.page_section.page.get_design_url()
+
+        try:
+            url = obj.get_design_url()
+        except:
+            url = obj.block.page_section.page.get_design_url()
         return HttpResponseRedirect(url)
