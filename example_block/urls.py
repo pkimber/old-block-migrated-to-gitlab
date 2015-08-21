@@ -9,7 +9,7 @@ from django.views.generic import RedirectView
 from block.models import Page
 from block.views import (
     PageDesignView,
-    PageView,
+    PageTemplateView,
 )
 
 from .views import (
@@ -29,7 +29,7 @@ urlpatterns = patterns(
     '',
     # '/' send to home
     url(regex=r'^$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         kwargs=dict(page=Page.HOME),
         name='project.home'
         ),
@@ -69,11 +69,11 @@ urlpatterns = patterns(
         ),
     # block page view
     url(regex=r'^(?P<page>[-\w\d]+)/$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         name='project.page'
         ),
     url(regex=r'^(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         name='project.page'
         ),
     # title create, publish, update and remove
