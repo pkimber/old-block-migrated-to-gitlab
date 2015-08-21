@@ -18,6 +18,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
     DeleteView,
+    DetailView,
     ListView,
     UpdateView,
     TemplateView,
@@ -426,6 +427,14 @@ class PageFormMixin(PageMixin, PageTemplateMixin, ContentPageMixin):
     pass
 
 
+class PageDetailView(PageFormMixin, DetailView):
+    pass
+
+
+class PageTemplateView(PageFormMixin, TemplateView):
+    pass
+
+
 class PageUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
 
@@ -453,11 +462,7 @@ class PageUpdateView(
         return reverse('block.page.list')
 
 
-class PageView(PageMixin, PageTemplateMixin, ContentPageMixin, TemplateView):
-    pass
-
-
-class CmsPageView(PageView):
+class CmsPageView(PageTemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CmsPageView, self).get_context_data(**kwargs)
