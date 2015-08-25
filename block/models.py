@@ -691,17 +691,18 @@ class ContentModel(TimeStampedModel):
     def wizard_urls(self):
         """Return the URLs for the image and link wizards."""
         result = []
-        for item in self.wizard_fields:
-            result.append({
-                'caption': item.field_name.title().translate(
-                            item.field_name.maketrans('_', ' ')),
-                'class': item.css_class,
-                'url': self._wizard_url(
-                    item.url_name,
-                    item.field_name,
-                    item.link_type,
-                ),
-            })
+        if hasattr(self, 'wizard_fields'):
+            for item in self.wizard_fields:
+                result.append({
+                    'caption': item.field_name.title().translate(
+                                item.field_name.maketrans('_', ' ')),
+                    'class': item.css_class,
+                    'url': self._wizard_url(
+                        item.url_name,
+                        item.field_name,
+                        item.link_type,
+                    ),
+                })
         return result
 
 
@@ -1000,6 +1001,7 @@ class Link(TimeStampedModel):
         null=True,
     )
     url_external = models.URLField(
+        max_length=512,
         verbose_name='Link',
         blank=True,
         null=True,
