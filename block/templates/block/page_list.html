@@ -41,14 +41,18 @@
           {% for object in object_list %}
             <tr valign="top">
               <td>
+                {% if not object.is_custom %}
                 <a href="{{ object.get_absolute_url }}">
+                {% endif %}
                   {% if object.deleted %}<del>{% endif %}
                   {% if object.order %}
                     {{ object.order }})
                   {% endif %}
                   {{ object.name }}
                   {% if object.deleted %}</del>{% endif %}
+                {% if not object.is_custom %}
                 </a>
+                {% endif %}
               </td>
               <td>
                 <a href="{{ object.get_design_url }}">
