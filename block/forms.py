@@ -67,7 +67,9 @@ class DocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
+        title = self.fields['title']
+        title.widget.attrs.update({'class': 'pure-input-2-3'})
+        set_widget_required(title)
 
     class Meta:
         model = Document
@@ -103,6 +105,7 @@ class ExternalLinkForm(forms.ModelForm):
         super ().__init__(*args,**kwargs)
         for name in ('title', 'url_external'):
             self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+        set_widget_required(title)
 
     class Meta:
         model = Link
