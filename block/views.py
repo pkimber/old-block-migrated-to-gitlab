@@ -842,6 +842,13 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
             field = getattr(content_obj, field_name)
             field.add(link)
 
+    def _update_links(self, content_obj, links):
+        field_name = self._get_link_field_name(content_obj)
+        field = getattr(content_obj, field_name)
+        field.clear()
+        for link in links:
+            field.add(link)
+
     def get_form_kwargs(self, step):
         result = {}
         link_type = self._get_link_type()
@@ -866,6 +873,10 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
             obj = self._get_current_content_instance()
             if form_id == LinkTypeForm.REMOVE:
                 self._update_link(obj, None)
+            elif form_id == LinkTypeForm.FORM_LINK_MULTI_REMOVE:
+                form = form_dict[form_id]
+                links = form.cleaned_data['links']
+                self._update_links(obj, links)
             else:
                 form = form_dict[form_id]
                 if form_id == LinkTypeForm.FORM_DOCUMENT:
