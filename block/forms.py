@@ -184,6 +184,7 @@ class ImageMultiSelectForm(forms.Form):
 
     images = ImageModelMultipleChoiceField(
         queryset=Image.objects.images(),
+        required=False,
         widget=forms.CheckboxSelectMultiple,
     )
 
@@ -250,7 +251,6 @@ class ImageTypeForm(forms.Form):
             items = [
                 self.FORM_IMAGE_MULTI_SELECT,
                 self.FORM_IMAGE,
-                self.REMOVE,
             ]
         # build the list of choices - adding the description
         choices = []

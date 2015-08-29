@@ -4,6 +4,9 @@
 {% endif %}
 {% for field in form.visible_fields %}
   {% if field|is_radio_select or field|is_checkbox_select_multiple %}
+    {% for error in field.errors %}
+      <span class="errorlist"><mark>{{ error }}</mark></span>
+    {% endfor %}
     {% for item in field %}
       {{ item }}
     {% endfor %}
