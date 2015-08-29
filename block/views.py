@@ -712,7 +712,10 @@ class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView)
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         multi_column = False
-        if self.steps.current == ImageTypeForm.FORM_IMAGE_LIST:
+        if self.steps.current in (
+            ImageTypeForm.FORM_IMAGE_LIST,
+            ImageTypeForm.FORM_IMAGE_MULTI_SELECT,
+            ):
             multi_column = True
         context.update(dict(multi_column=multi_column))
         return context
