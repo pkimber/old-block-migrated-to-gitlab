@@ -314,7 +314,6 @@ class LinkTypeForm(forms.Form):
                 self.FORM_DOCUMENT,
                 self.FORM_DOCUMENT_LIST,
                 self.FORM_LINK_MULTI_REMOVE,
-                self.REMOVE,
             ]
         # build the list of choices - adding the description
         choices = []
