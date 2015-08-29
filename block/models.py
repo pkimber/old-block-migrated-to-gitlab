@@ -977,7 +977,7 @@ class Link(TimeStampedModel):
 
     TODO
 
-    - Do we want to add tags field in here so we can search/group images?
+    - Do we want to add tags field in here so we can search/group links?
       e.g. https://github.com/alex/django-taggit
 
     """

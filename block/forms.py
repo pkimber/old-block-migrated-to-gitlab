@@ -105,7 +105,6 @@ class ExternalLinkForm(forms.ModelForm):
         super ().__init__(*args,**kwargs)
         for name in ('title', 'url_external'):
             self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
-        set_widget_required(title)
 
     class Meta:
         model = Link
@@ -189,9 +188,31 @@ class ImageMultiSelectForm(forms.Form):
     )
 
     class Meta:
-        model = Image
         fields = (
             'images',
+        )
+
+
+class LinkMultiSelectForm(forms.Form):
+    """List of links (for the form wizard)."""
+
+    links = forms.ModelMultipleChoiceField(
+        queryset=Link.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def __init__(self, *args, **kwargs):
+        links = kwargs.pop('links')
+        super ().__init__(*args,**kwargs)
+        links_field = self.fields['links']
+        links_field.queryset = links
+        # tick every link - so the user can untick the ones they want to remove
+        initial = {item.pk: True for item in links}
+        links_field.initial = initial
+
+    class Meta:
+        fields = (
+            'links',
         )
 
 
@@ -258,6 +279,7 @@ class LinkTypeForm(forms.Form):
     FORM_PAGE_URL = 'p'
     # this form :)
     FORM_LINK_TYPE = 'link_type'
+    FORM_LINK_MULTI_REMOVE = 'x'
     # remove does not have a form
     REMOVE = 'r'
 
@@ -266,6 +288,7 @@ class LinkTypeForm(forms.Form):
         FORM_PAGE_URL: 'Page on this site',
         FORM_DOCUMENT: 'Upload a document and link to it',
         FORM_DOCUMENT_LIST: 'Use an existing document',
+        FORM_LINK_MULTI_REMOVE: 'Remove one or more links',
         REMOVE: 'Remove Link',
     }
 
@@ -290,6 +313,7 @@ class LinkTypeForm(forms.Form):
                 self.FORM_PAGE_URL,
                 self.FORM_DOCUMENT,
                 self.FORM_DOCUMENT_LIST,
+                self.FORM_LINK_MULTI_REMOVE,
                 self.REMOVE,
             ]
         # build the list of choices - adding the description

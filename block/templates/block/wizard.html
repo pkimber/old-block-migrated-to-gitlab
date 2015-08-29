@@ -31,6 +31,9 @@
   {% ifequal 'c' wizard.steps.current %}
     Select all the images you want to use
   {% endifequal %}
+  {% ifequal 'x' wizard.steps.current %}
+    Untick the links you want to remove
+  {% endifequal %}
   {% ifequal 'p' wizard.steps.current %}
     Choose a page from the site
   {% endifequal %}

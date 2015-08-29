@@ -41,6 +41,7 @@ from .forms import (
     ImageListForm,
     ImageMultiSelectForm,
     ImageTypeForm,
+    LinkMultiSelectForm,
     LinkTypeForm,
     PageEmptyForm,
     PageForm,
@@ -613,6 +614,11 @@ def url_existing_image_multi(wizard):
     return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_MULTI_SELECT)
 
 
+def url_existing_link_multi(wizard):
+    """Return true if user opts for an existing link."""
+    return select_link_form(wizard, LinkTypeForm.FORM_LINK_MULTI_REMOVE)
+
+
 def url_external_link(wizard):
     """Return true if user opts for external link """
     return select_link_form(wizard, LinkTypeForm.FORM_EXTERNAL_URL)
@@ -776,6 +782,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         LinkTypeForm.FORM_PAGE_URL: url_internal_page,
         LinkTypeForm.FORM_DOCUMENT: url_upload,
         LinkTypeForm.FORM_DOCUMENT_LIST: url_existing,
+        LinkTypeForm.FORM_LINK_MULTI_REMOVE: url_existing_link_multi,
     }
 
     temp_dir = 'temp'
@@ -789,6 +796,7 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         (LinkTypeForm.FORM_PAGE_URL, PageListForm),
         (LinkTypeForm.FORM_DOCUMENT, DocumentForm),
         (LinkTypeForm.FORM_DOCUMENT_LIST, DocumentListForm),
+        (LinkTypeForm.FORM_LINK_MULTI_REMOVE, LinkMultiSelectForm),
     ]
 
     form_link_type_map = {
@@ -815,19 +823,24 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         return self.kwargs['type']
 
     def _save_link(self, form, content_obj, link_type):
-         link = form.save(commit=False)
-         link.link_type = link_type
-         link = form.save()
-         self._update_link(content_obj, link)
+        link = form.save(commit=False)
+        link.link_type = link_type
+        link = form.save()
+        self._update_link(content_obj, link)
 
     def _update_link(self, content_obj, link):
-         field_name = self._get_link_field_name(content_obj)
-         if not hasattr(content_obj, field_name):
-            raise BlockError(
-                "Content object '{}' does not have a field "
-                "named '{}'".format(content_obj.__class__.__name__, field_name)
-            )
-         setattr(content_obj, field_name, link)
+        field_name = self._get_link_field_name(content_obj)
+        link_type = self._get_link_type()
+        if link_type == Wizard.SINGLE:
+            if not hasattr(content_obj, field_name):
+                raise BlockError(
+                    "Content object '{}' does not have a field "
+                    "named '{}'".format(content_obj.__class__.__name__, field_name)
+                )
+            setattr(content_obj, field_name, link)
+        elif link_type == Wizard.MULTI:
+            field = getattr(content_obj, field_name)
+            field.add(link)
 
     def get_form_kwargs(self, step):
         result = {}
@@ -835,6 +848,14 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         if step == LinkTypeForm.FORM_LINK_TYPE:
             result.update({
                 'link_type': link_type,
+            })
+        elif step == LinkTypeForm.FORM_LINK_MULTI_REMOVE:
+            # list the current links for the content object
+            content_obj = self._get_current_content_instance()
+            field_name = self._get_link_field_name(content_obj)
+            field = getattr(content_obj, field_name)
+            result.update({
+                'links': field.all(),
             })
         return result
 
