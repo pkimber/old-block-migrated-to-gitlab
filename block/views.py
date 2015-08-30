@@ -463,20 +463,23 @@ class PageUpdateView(
         return reverse('block.page.list')
 
 
-class CmsPageView(PageTemplateView):
+class CmsMixin(object):
 
     def get_context_data(self, **kwargs):
-        context = super(CmsPageView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         try:
             main_menu_items = MenuItem.objects.filter(menu__slug='main', parent=None)
-        except:
+        except MenuItem.DoesNotExist:
             main_menu_items = []
-
         context.update(dict(
             header_footer=HeaderFooter.load(),
             main_menu_items=main_menu_items
         ))
         return context
+
+
+class CmsPageView(CmsMixin, PageTemplateView):
+    pass
 
 
 class SectionCreateView(
