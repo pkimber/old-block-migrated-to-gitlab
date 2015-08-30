@@ -29,18 +29,23 @@
 {% block sub_title %}
 {% endblock sub_title %}
 
-{% block menu %}
+{% block menu_dash %}
   {% if page.is_home %}
     {% include 'block/_design_menu.html' %}
   {% endif %}
   {% include 'block/_menu_list.html' %}
   {{ block.super }}
-{% endblock menu %}
+{% endblock menu_dash %}
 
 {% block footer %}
   <div class="legal pure-g">
-    <div class="pure-u-1 pure-u-md-2-5">
+    <div class="pure-u-1 pure-u-md-8-24">
       <div class="l-box">
+        {% if header_footer.url_facebook %}
+          <a href="{{ header_footer.url_facebook }}" target="_blank">
+            <i class="fa fa-facebook-official fa-2x"></i>
+          </a>
+        {% endif %}
         {% if header_footer.url_linkedin %}
           <a href="{{ header_footer.url_linkedin }}" target="_blank">
             <i class="fa fa-linkedin fa-2x"></i>
@@ -51,9 +56,12 @@
             <i class="fa fa-twitter fa-2x"></i>
           </a>
         {% endif %}
+        {% if header_footer %}
+          &nbsp; {{ header_footer.footer_left }}
+        {% endif %}
       </div>
     </div>
-    <div class="pure-u-1 pure-u-md-1-5">
+    <div class="pure-u-1 pure-u-md-8-24">
       <div class="l-box legal-logo">
         <a href="http://yuilibrary.com/" target="_blank">
           <img height="30" width="65" alt="YUI logo" src="{% static "img/project/yui.png" %}">
@@ -66,7 +74,7 @@
         </p>
       </div>
     </div>
-    <div class="pure-u-1 pure-u-md-2-5">
+    <div class="pure-u-1 pure-u-md-8-24">
       <div class="l-box">
         <ul class="legal-links pure-g">
           <li class="pure-u-1">
