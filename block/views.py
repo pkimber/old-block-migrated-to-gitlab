@@ -366,22 +366,6 @@ class PageDesignView(
     pass
 
 
-class CmsPageDesignView(PageDesignView):
-
-    def get_context_data(self, **kwargs):
-        context = super(CmsPageDesignView, self).get_context_data(**kwargs)
-        try:
-            main_menu_items = MenuItem.objects.filter(menu__slug='main', parent=None)
-        except:
-            main_menu_items = []
-
-        context.update(dict(
-            header_footer=HeaderFooter.load(),
-            main_menu_items=main_menu_items,
-        ))
-        return context
-
-
 class PageMixin(object):
 
     def _check_url(self, page):
@@ -468,7 +452,10 @@ class CmsMixin(object):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            main_menu_items = MenuItem.objects.filter(menu__slug='main', parent=None)
+            main_menu_items = MenuItem.objects.filter(
+                menu__slug='main',
+                parent=None
+            )
         except MenuItem.DoesNotExist:
             main_menu_items = []
         context.update(dict(
@@ -476,6 +463,10 @@ class CmsMixin(object):
             main_menu_items=main_menu_items
         ))
         return context
+
+
+class CmsPageDesignView(CmsMixin, PageDesignView):
+    pass
 
 
 class CmsPageView(CmsMixin, PageTemplateView):
