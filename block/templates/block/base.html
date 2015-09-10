@@ -57,7 +57,9 @@
             <i class="fa fa-twitter fa-2x"></i>
           </a>
           {% endif %}
-          &nbsp; {{ header_footer.footer_left }}
+          {% if header_footer.footer_left %}
+            &nbsp; {{ header_footer.footer_left }}
+          {% endif %}
         </div>
       </div>
       <div class="pure-u-1 pure-u-md-8-24">
