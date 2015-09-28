@@ -17,7 +17,7 @@ from block.views import (
     ContentPublishView,
     ContentRemoveView,
     ContentUpdateView,
-    PageView,
+    PageTemplateView,
 )
 
 from .forms import TitleForm
@@ -27,7 +27,7 @@ from .models import (
 )
 
 
-class ExampleView(PageView):
+class ExampleView(PageTemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ExampleView, self).get_context_data(**kwargs)
@@ -35,11 +35,6 @@ class ExampleView(PageView):
             calendar=('Jan', 'Feb', 'Mar'),
         ))
         return context
-
-
-class PageListView(ListView):
-
-    model = Page
 
 
 class SettingsView(BaseMixin, TemplateView):

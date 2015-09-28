@@ -1,0 +1,77 @@
+{% extends 'dash/base.html' %}
+
+{% block sub_title %}
+  Templates
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Templates
+{% endblock sub_heading %}
+
+{% block content %}
+  {% if user.is_staff %}
+    <div class="pure-menu pure-menu-horizontal">
+      <ul class="pure-menu-list">
+        <li class="pure-menu-item">
+          <a href="{% url 'project.settings' %}" class="pure-menu-link">
+            <i class="fa fa-reply"></i>
+          </a>
+        </li>
+        {% if user.is_superuser %}
+          <li class="pure-menu-item">
+            <a href="{% url 'block.template.create' %}" class="pure-menu-link">
+              <i class="fa fa-file-code-o"></i>
+              Create template
+            </a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="{% url 'block.section.list' %}" class="pure-menu-link">
+              <i class="fa fa-file-code-o"></i>
+              Sections
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include 'base/_paginate.html' %}
+      <table class="pure-table pure-table-bordered">
+        <thead>
+          <tr>
+            <th>Template</th>
+            <th>Sections</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for object in object_list %}
+            <tr valign="top">
+              <td>
+                <a href="{% url 'block.template.update' object.pk %}">
+                  <i class="fa fa-edit"></i>
+                  {{ object.template_name }}
+                </a>
+              </td>
+              <td>
+                {% for template_section in object.templatesection_set.all %}
+                  <a href="{% url 'block.template.section.remove' template_section.pk %}">
+                    <i class="fa fa-times"></i>
+                    {{ template_section.section.name }}
+                    <small>({{ template_section.section.block_app }}.models.{{ template_section.section.block_model }})</small>
+                  </a>
+                  <br />
+                {% endfor %}
+                <a href="{% url 'block.template.section.create' object.pk %}">
+                  <i class="fa fa-plus"></i>
+                  Add section...
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include 'base/_paginate.html' %}
+    </div>
+  </div>
+{% endblock content %}

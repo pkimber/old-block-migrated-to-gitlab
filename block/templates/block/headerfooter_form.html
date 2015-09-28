@@ -1,18 +1,20 @@
 {% extends 'dash/base.html' %}
 
 {% block sub_title %}
-  Edit title
+  Header and footer
 {% endblock sub_title %}
 
 {% block sub_heading %}
-  Edit title
+  Header and footer
 {% endblock sub_heading %}
 
 {% block content %}
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="l-box">
-        {% include '_form.html' with legend='Title' multipart=True %}
+        <strong>Please note</strong>: When you click the 'Publish' button the
+        changes to the header and footer will be published to the live site.
+        {% include '_form.html' with submit='Publish' %}
       </div>
     </div>
   </div>

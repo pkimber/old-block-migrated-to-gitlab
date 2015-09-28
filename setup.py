@@ -20,17 +20,17 @@ def get_readme():
 
 setup(
     name='kb-block',
-    packages=['block', 'block.templatetags', 'block.migrations', 'block.tests', 'block.management', 'block.management.commands'],
+    packages=['block', 'block.templatetags', 'block.urls', 'block.management', 'block.management.commands', 'block.tests', 'block.migrations'],
     package_data={
         'block': [
             'templates/*.*',
             'templates/block/*.*',
         ],
     },
-    version='0.1.31',
+    version='0.1.40',
     description='block',
-    author='Patrick Kimber',
-    author_email='code@pkimber.net',
+    author='Greg Bushell',
+    author_email='greg@kbsoftware.co.uk',
     url='git@github.com:pkimber/block.git',
     classifiers=[
         'Development Status :: 1 - Planning',

@@ -1,0 +1,17 @@
+{% if user.is_staff %}
+  {% if is_block_page %}
+    <li class="pure-menu-item">
+      <a href="{% if design %}{{ page.get_absolute_url }}{% else %}{{ page.get_design_url }}{% endif %}"
+        title="{% if design %}View{% else %}Design{% endif %}"
+        class="pure-menu-link menu-mini">
+        {% if design %}
+          View
+          <i class="fa fa-square-o"></i>
+        {% else %}
+          Design
+          <i class="fa fa-edit"></i>
+        {% endif %}
+      </a>
+    </li>
+  {% endif %}
+{% endif %}

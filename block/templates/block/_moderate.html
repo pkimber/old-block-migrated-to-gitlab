@@ -8,6 +8,14 @@
   <i class="fa fa-edit"></i>
   Edit
 </a>
+
+{% for url in c.wizard_urls %}
+  <a class="pure-button pure-button-xsmall" href="{{ url.url }}">
+    <i class="{{ url.class }}"></i>
+    {{ url.caption }}
+  </a>
+{% endfor %}
+
 {% if can_remove %}
   <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
     <i class="fa fa-times"></i>

@@ -1,18 +1,19 @@
 {% extends 'dash/base.html' %}
 
 {% block sub_title %}
-  Edit title
+  Template section
 {% endblock sub_title %}
 
 {% block sub_heading %}
-  Edit title
+  Add section to {{ template.template_name }}
 {% endblock sub_heading %}
 
 {% block content %}
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="l-box">
-        {% include '_form.html' with legend='Title' multipart=True %}
+        Add a section to the '{{ template.template_name }}' template.
+        {% include '_form.html' with legend='Template section' %}
       </div>
     </div>
   </div>

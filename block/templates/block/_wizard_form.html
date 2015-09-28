@@ -1,0 +1,44 @@
+{% load base_tags %}
+{% if legend %}
+  <legend>{{ legend }}</legend>
+{% endif %}
+{% if multi_column %}
+  <div class="pure-g">
+{% endif %}
+{% for field in form.visible_fields %}
+  {% if field|is_radio_select or field|is_checkbox_select_multiple %}
+    {% for error in field.errors %}
+      <span class="errorlist"><mark>{{ error }}</mark></span>
+    {% endfor %}
+    {% for item in field %}
+      {% if multi_column %}
+        <div class="pure-u-1-2 pure-u-md-1-4">
+      {% endif %}
+      {{ item }}
+      {% if multi_column %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <div class="pure-control-group">
+      {% if field.label %}
+        <label for='{{ field.id_for_label }}'>
+          {{ field.label }}
+          {% if field.help_text %} - {{ field.help_text }}{% endif %}:
+        </label>
+      {% endif %}
+      {% if aligned %}
+        {{ field }}
+      {% endif %}
+      {% for error in field.errors %}
+        <span class="errorlist"><mark>{{ error }}</mark></span>
+      {% endfor %}
+      {% if not aligned %}
+        {{ field }}
+      {% endif %}
+    </div>
+  {% endif %}
+{% endfor %}
+{% if multi_column %}
+  </div>
+{% endif %}

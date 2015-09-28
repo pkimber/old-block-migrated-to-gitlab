@@ -9,12 +9,11 @@ from django.views.generic import RedirectView
 from block.models import Page
 from block.views import (
     PageDesignView,
-    PageView,
+    PageTemplateView,
 )
 
 from .views import (
     ExampleView,
-    PageListView,
     SettingsView,
     TitleCreateView,
     TitlePublishView,
@@ -30,13 +29,16 @@ urlpatterns = patterns(
     '',
     # '/' send to home
     url(regex=r'^$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         kwargs=dict(page=Page.HOME),
         name='project.home'
         ),
     # admin, login
     url(regex=r'^admin/',
         view=include(admin.site.urls)
+        ),
+    url(regex=r'^block/',
+        view=include('block.urls.block')
         ),
     url(regex=r'^settings/$',
         view=SettingsView.as_view(),
@@ -47,7 +49,7 @@ urlpatterns = patterns(
         ),
     # home page when logged in
     url(r'^home/user/$',
-        view=RedirectView.as_view(url=reverse_lazy('project.home')),
+        view=RedirectView.as_view(url=reverse_lazy('project.home'), permanent=False),
         name='project.dash'
         ),
     # custom page - see https://www.pkimber.net/open/app-block.html
@@ -55,11 +57,6 @@ urlpatterns = patterns(
         view=ExampleView.as_view(),
         kwargs=dict(page=Page.CUSTOM, menu='calendar-information'),
         name='calendar.information'
-        ),
-    # list of pages
-    url(regex=r'^block/page/list/$',
-        view=PageListView.as_view(),
-        name='block.page.list'
         ),
     # block page design
     url(regex=r'^(?P<page>[-\w\d]+)/design/$',
@@ -72,11 +69,11 @@ urlpatterns = patterns(
         ),
     # block page view
     url(regex=r'^(?P<page>[-\w\d]+)/$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         name='project.page'
         ),
     url(regex=r'^(?P<page>[-\w\d]+)/(?P<menu>[-\w\d]+)/$',
-        view=PageView.as_view(),
+        view=PageTemplateView.as_view(),
         name='project.page'
         ),
     # title create, publish, update and remove

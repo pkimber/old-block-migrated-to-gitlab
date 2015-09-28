@@ -7,6 +7,9 @@ import reversion
 from block.models import (
     BlockModel,
     ContentModel,
+    Image,
+    Link,
+    Wizard,
 )
 
 
@@ -21,7 +24,16 @@ class Title(ContentModel):
     block = models.ForeignKey(TitleBlock, related_name='content')
     order = models.IntegerField()
     title = models.TextField()
-    picture = models.ImageField(upload_to='block', blank=True)
+    picture = models.ForeignKey(
+        Image,
+        related_name='title_picture',
+        blank=True, null=True
+    )
+    link = models.ForeignKey(
+        Link,
+        related_name='title_link',
+        blank=True, null=True
+    )
 
     class Meta:
         # cannot put 'unique_together' on abstract base class
@@ -43,5 +55,12 @@ class Title(ContentModel):
 
     def url_update(self):
         return reverse('example.title.update', kwargs={'pk': self.pk})
+
+    @property
+    def wizard_fields(self):
+        return [
+            Wizard('picture', Wizard.IMAGE, Wizard.SINGLE),
+            Wizard('link', Wizard.LINK, Wizard.SINGLE),
+        ]
 
 reversion.register(Title)

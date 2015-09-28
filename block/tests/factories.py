@@ -2,18 +2,46 @@
 import factory
 
 from block.models import (
+    Document,
     EditState,
+    Image,
+    Link,
     ModerateState,
     Page,
     PageSection,
     Section,
+    Template,
+    TemplateSection,
+    Url,
 )
+
+
+class DocumentFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Document
+
+    document = factory.django.FileField()
 
 
 class EditStateFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = EditState
+
+
+class ImageFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Image
+
+    image = factory.django.ImageField()
+
+
+class LinkFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Link
 
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):
@@ -62,3 +90,24 @@ class PageSectionFactory(factory.django.DjangoModelFactory):
 
     page = factory.SubFactory(PageFactory)
     section = factory.SubFactory(SectionFactory)
+
+
+class TemplateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Template
+
+
+class TemplateSectionFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = TemplateSection
+
+    template = factory.SubFactory(TemplateFactory)
+    section = factory.SubFactory(SectionFactory)
+
+
+class UrlFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Url
