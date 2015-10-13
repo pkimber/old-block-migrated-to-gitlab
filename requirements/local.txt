@@ -7,13 +7,12 @@ beautifulsoup4
 devpi-client
 django-debug-toolbar
 factory-boy
-gitpython
-hgapi
-ipdb
-IPy
 psycopg2
+pytest-cov
 pytest-django
 pytest-flakes
 pytest-pep8
+pytest-sugar
+pytest-watch
 pyyaml
 walkdir
