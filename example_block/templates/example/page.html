@@ -1,6 +1,7 @@
 {% extends 'dash/base.html' %}
 
 {% load block_tags %}
+{% load thumbnail %}
 
 {% block content %}
   <div class="pure-g">
@@ -25,9 +26,9 @@
                 </td>
                 <td>
                   {{ c.title }}
-                  <br />
                   {% if c.picture %}
-                    <img src="{{ MEDIA_URL }}{{ c.picture }}">
+                    <br>
+                    <img src="{% thumbnail c.picture.image 200x200  crop='center' %}">
                   {% endif %}
                 </td>
                 <td>
