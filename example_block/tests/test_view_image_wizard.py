@@ -67,6 +67,7 @@ def test_page_initial_to_image_form(client):
 @pytest.mark.django_db
 def test_page_initial_to_image_list(client):
     """Choose from a list of images."""
+    ImageFactory()
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     content = TitleFactory()

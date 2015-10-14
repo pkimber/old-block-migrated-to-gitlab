@@ -163,6 +163,21 @@ class ImageForm(forms.ModelForm):
         }
 
 
+class ImageListDeleteForm(forms.Form):
+    """List of images (so the user can delete them)."""
+
+    images = ImageModelMultipleChoiceField(
+        queryset=Image.objects.images(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        fields = (
+            'images',
+        )
+
+
 class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
@@ -223,6 +238,7 @@ class ImageTypeForm(forms.Form):
     FORM_IMAGE = 'i'
     FORM_IMAGE_LIST = 'a'
     FORM_IMAGE_MULTI_SELECT = 'c'
+    FORM_LIST_DELETE = 'list_delete'
     # this form :)
     FORM_IMAGE_TYPE = 'image_type'
     # remove does not have a form
@@ -233,6 +249,7 @@ class ImageTypeForm(forms.Form):
         FORM_IMAGE_LIST: 'Use an existing image',
         FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
         REMOVE: 'Remove {} from the page',
+        FORM_LIST_DELETE: 'Maintenance (delete images from the library)'
     }
 
     image_type = forms.ChoiceField(label="Choose the type of image")
@@ -240,18 +257,20 @@ class ImageTypeForm(forms.Form):
     def __init__(self, *args, **kwargs):
         link_type = kwargs.pop('link_type')
         super ().__init__(*args,**kwargs)
+        image_count = Image.objects.images().count()
         # get the list of items (in the order displayed)
+        items = []
         if link_type == Wizard.SINGLE:
-            items = [
-                self.FORM_IMAGE_LIST,
-                self.FORM_IMAGE,
-                self.REMOVE,
-            ]
+            if image_count:
+                items.append(self.FORM_IMAGE_LIST)
         else:
-            items = [
-                self.FORM_IMAGE_MULTI_SELECT,
-                self.FORM_IMAGE,
-            ]
+            if image_count:
+                items.append(self.FORM_IMAGE_MULTI_SELECT)
+        items.append(self.FORM_IMAGE)
+        items.append(self.REMOVE)
+        # only allow images to be deleted if there are any
+        if image_count:
+            items.append(self.FORM_LIST_DELETE)
         # build the list of choices - adding the description
         choices = []
         for item in items:
@@ -263,6 +282,10 @@ class ImageTypeForm(forms.Form):
                     description = description.format('image')
             choices.append((item, description))
         self.fields['image_type'].choices = choices
+        if image_count:
+            self.initial['image_type'] = self.FORM_IMAGE_LIST
+        else:
+            self.initial['image_type'] = self.FORM_IMAGE
 
     class Meta:
         fields = (

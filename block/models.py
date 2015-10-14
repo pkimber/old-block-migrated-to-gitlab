@@ -826,6 +826,10 @@ class Image(TimeStampedModel):
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
+    def set_deleted(self):
+        self.deleted = True
+        self.save()
+
 reversion.register(Image)
 
 

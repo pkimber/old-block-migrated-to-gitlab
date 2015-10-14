@@ -38,6 +38,7 @@ from .forms import (
     ExternalLinkForm,
     HeaderFooterForm,
     ImageForm,
+    ImageListDeleteForm,
     ImageListForm,
     ImageMultiSelectForm,
     ImageTypeForm,
@@ -603,6 +604,10 @@ def url_existing_image(wizard):
     return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_LIST)
 
 
+def url_form_list_delete(wizard):
+    return select_image_form(wizard, ImageTypeForm.FORM_LIST_DELETE)
+
+
 def url_existing_image_multi(wizard):
     """Return true if user opts for existing image."""
     return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_MULTI_SELECT)
@@ -646,6 +651,7 @@ class ImageWizard(
         ImageTypeForm.FORM_IMAGE: url_upload_image,
         ImageTypeForm.FORM_IMAGE_LIST: url_existing_image,
         ImageTypeForm.FORM_IMAGE_MULTI_SELECT: url_existing_image_multi,
+        ImageTypeForm.FORM_LIST_DELETE: url_form_list_delete,
     }
 
     temp_dir = 'temp'
@@ -658,6 +664,7 @@ class ImageWizard(
         (ImageTypeForm.FORM_IMAGE, ImageForm),
         (ImageTypeForm.FORM_IMAGE_LIST, ImageListForm),
         (ImageTypeForm.FORM_IMAGE_MULTI_SELECT, ImageMultiSelectForm),
+        (ImageTypeForm.FORM_LIST_DELETE, ImageListDeleteForm),
     ]
 
     template_name = 'block/wizard.html'
@@ -696,6 +703,10 @@ class ImageWizard(
         elif link_type == Wizard.MULTI:
             field = getattr(content_obj, field_name)
             field.add(image)
+
+    def _delete_from_library(self, images):
+        for image in images:
+            image.set_deleted()
 
     def _update_images(self, content_obj, images):
         field_name = self._get_link_field_name(content_obj)
@@ -742,6 +753,11 @@ class ImageWizard(
             obj = self._get_current_content_instance()
             if form_id == ImageTypeForm.REMOVE:
                 self._update_image(obj, None)
+            elif form_id == ImageTypeForm.FORM_LIST_DELETE:
+                form = form_dict[form_id]
+                images = form.cleaned_data['images']
+                self._delete_from_library(images)
+                return self.render_goto_step(ImageTypeForm.FORM_IMAGE_TYPE)
             elif form_id == ImageTypeForm.FORM_IMAGE_LIST:
                 form = form_dict[form_id]
                 image = form.cleaned_data['images']
@@ -760,7 +776,6 @@ class ImageWizard(
                     self._save_image(form, obj)
             obj.set_pending_edit()
             obj.save()
-
         try:
             url = obj.get_design_url()
         except:
