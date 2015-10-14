@@ -7,9 +7,19 @@
 {% endif %}
 {% for field in form.visible_fields %}
   {% if field|is_radio_select or field|is_checkbox_select_multiple %}
-    {% for error in field.errors %}
-      <span class="errorlist"><mark>{{ error }}</mark></span>
-    {% endfor %}
+    <!-- errors -->
+    {% if field.errors %}
+      {% if multi_column %}
+        <div class="pure-u-1">
+      {% endif %}
+      {% for error in field.errors %}
+        <span class="errorlist"><mark>{{ error }}</mark></span>
+      {% endfor %}
+      {% if multi_column %}
+        </div>
+      {% endif %}
+    {% endif %}
+    <!-- end - errors -->
     {% for item in field %}
       {% if multi_column %}
         <div class="pure-u-1-2 pure-u-md-1-4">
