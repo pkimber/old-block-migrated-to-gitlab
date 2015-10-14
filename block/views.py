@@ -633,7 +633,8 @@ def url_upload_image(wizard):
     return select_image_form(wizard, ImageTypeForm.FORM_IMAGE)
 
 
-class ImageWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
+class ImageWizard(
+        LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
     """Image Wizard.
 
     Documentation for the SessionWizardView in

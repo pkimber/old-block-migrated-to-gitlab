@@ -685,17 +685,31 @@ class ContentModel(TimeStampedModel):
                 'type': wizard_type,
             }
         )
-        return False
 
     @property
     def wizard_urls(self):
-        """Return the URLs for the image and link wizards."""
+        """Return the URLs for the image and link wizards.
+
+        The return value looks like this::
+            [
+                {
+                    'caption': 'Picture',
+                    'url': '/block/wizard/image/29/1/picture/single/',
+                    'class': 'fa fa-image'
+                },
+                {
+                    'caption': 'Link',
+                    'url': '/block/wizard/link/29/1/link/single/',
+                    'class': 'fa fa-globe'
+                }
+            ]
+
+        """
         result = []
         if hasattr(self, 'wizard_fields'):
             for item in self.wizard_fields:
                 result.append({
-                    'caption': item.field_name.title().translate(
-                                item.field_name.maketrans('_', ' ')),
+                    'caption': item.field_name.title(),
                     'class': item.css_class,
                     'url': self._wizard_url(
                         item.url_name,

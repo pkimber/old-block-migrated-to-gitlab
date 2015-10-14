@@ -84,8 +84,8 @@ def test_page_initial_post_image_list_to(client):
     image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-
     session = client.session
+    # https://www.pkimber.net/howto/django/testing/wizard.html
     session['wizard_image_wizard'] = {
         'step_data': {
             'image_type': {
@@ -99,8 +99,6 @@ def test_page_initial_post_image_list_to(client):
         'step_files': {'image_type': {}}
     }
     session.save()
-
-
     content = TitleFactory()
     url = picture_url(content)
     data = {
