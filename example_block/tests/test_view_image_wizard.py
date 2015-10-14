@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
+import io
 import pytest
 
+from PIL import Image
+
 from django.core.urlresolvers import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from block.forms import (
     ImageForm,
@@ -89,14 +93,13 @@ def test_image_list_to_done(client):
     session['wizard_image_wizard'] = {
         'step_data': {
             'image_type': {
-                'image_wizard-current_step': ['image_type'],
-                'image_type-image_type': ['a'],
-                'csrfmiddlewaretoken': ['WdhBpAqzd2tuT5gc9HCiKqT6tsZb']
+                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
+                'image_type-image_type': [ImageTypeForm.FORM_IMAGE_LIST],
             }
         },
         'step': ImageTypeForm.FORM_IMAGE_LIST,
         'extra_data': {},
-        'step_files': {'image_type': {}}
+        'step_files': {ImageTypeForm.FORM_IMAGE_TYPE: {}}
     }
     session.save()
     content = TitleFactory()
@@ -130,11 +133,10 @@ def test_image_remove_to_done(client):
             'image_type': {
                 'image_type-image_type': [ImageTypeForm.REMOVE],
                 'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
-                'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
             }
         },
-        'step': 'image_type',
-        'step_files': {'image_type': {}}
+        'step': ImageTypeForm.FORM_IMAGE_TYPE,
+        'step_files': {ImageTypeForm.FORM_IMAGE_TYPE: {}}
     }
     session.save()
     content = TitleFactory(picture=ImageFactory())
@@ -156,8 +158,6 @@ def test_image_remove_to_done(client):
 @pytest.mark.django_db
 def test_image_upload_to_done(client):
     """Upload an image and attach to the content."""
-    #ImageFactory()
-    #image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     session = client.session
@@ -166,53 +166,25 @@ def test_image_upload_to_done(client):
         'extra_data': {},
         'step_data': {
             'image_type': {
-                'image_type-image_type': ['i'],
-                'image_wizard-current_step': ['image_type'],
-                'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
+                'image_type-image_type': [ImageTypeForm.FORM_IMAGE],
+                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
             },
-            'i': {
-                'i-title': ['TEst'],
-                'image_wizard-current_step': ['i'],
-                'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
-            }
         },
-        'step': 'i',
-        'step_files': {
-            'image_type': {},
-            'i': {
-                'i-image': {
-                    'name': '80x80-place.png',
-                    'charset': None,
-                    'size': 260,
-                    'content_type': 'image/png',
-                    'tmp_name': '80x80-place.png',
-                }
-            }
-        }
+        'step': ImageTypeForm.FORM_IMAGE,
+        'step_files': {ImageTypeForm.FORM_IMAGE_TYPE: {}},
     }
     session.save()
     content = TitleFactory(picture=ImageFactory())
+    # create an image ready to upload
     url = picture_url(content)
-    from django.core.files.uploadedfile import SimpleUploadedFile
-    import io
-    #from django.utils.image import Image
-    from PIL import Image #, ImageDraw
     fp = io.BytesIO()
-    Image.new('P', (1,1)).save(fp, 'png')
+    Image.new('1', (1,1)).save(fp, 'png')
     fp.seek(0)
-
-    #img = Image.new('RGBA',(100, 100))
-
-    image = SimpleUploadedFile(
-        "file.png",
-        fp.read(),
-        #bytes("file_content", 'UTF-8'),
-        content_type="image/png",
-    )
+    image = SimpleUploadedFile("file.png", fp.read(), content_type="image/png")
     data = {
         'image_wizard-current_step': ImageTypeForm.FORM_IMAGE,
         'image_type-image_type': ImageTypeForm.REMOVE,
-        'i-title': 'Title for My Image',
+        'i-title': 'My Image Title',
         'i-image': image,
     }
     response = client.post(url, data)
@@ -220,6 +192,7 @@ def test_image_upload_to_done(client):
     # make sure we redirect to page design
     page_design_url = content.block.page_section.page.get_design_url()
     assert page_design_url in response['Location']
-    # check image is removed
+    # check image has been uploaded and attached
     content.refresh_from_db()
     assert content.picture is not None
+    assert 'My Image Title' == content.picture.title
