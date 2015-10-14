@@ -78,7 +78,7 @@ def test_page_initial_post_initial_to_image_list(client):
 
 
 @pytest.mark.django_db
-def test_page_initial_post_image_list_to(client):
+def test_image_list_to_done(client):
     """Choose an image from the list."""
     ImageFactory()
     image = ImageFactory()
@@ -94,7 +94,7 @@ def test_page_initial_post_image_list_to(client):
                 'csrfmiddlewaretoken': ['WdhBpAqzd2tuT5gc9HCiKqT6tsZb']
             }
         },
-        'step': 'a',
+        'step': ImageTypeForm.FORM_IMAGE_LIST,
         'extra_data': {},
         'step_files': {'image_type': {}}
     }
@@ -107,7 +107,47 @@ def test_page_initial_post_image_list_to(client):
     }
     response = client.post(url, data)
     assert 302 == response.status_code
+    # make sure we redirect to page design
     page_design_url = content.block.page_section.page.get_design_url()
     assert page_design_url in response['Location']
+    # check image is attached
     content.refresh_from_db()
     assert image.pk == content.picture.pk
+
+
+@pytest.mark.django_db
+def test_image_remove_to_done(client):
+    """Remove an image from the page."""
+    #ImageFactory()
+    #image = ImageFactory()
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    session = client.session
+    # https://www.pkimber.net/howto/django/testing/wizard.html
+    session['wizard_image_wizard'] = {
+        'extra_data': {},
+        'step_data': {
+            'image_type': {
+                'image_type-image_type': [ImageTypeForm.REMOVE],
+                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
+                'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
+            }
+        },
+        'step': 'image_type',
+        'step_files': {'image_type': {}}
+    }
+    session.save()
+    content = TitleFactory(picture=ImageFactory())
+    url = picture_url(content)
+    data = {
+        'image_wizard-current_step': ImageTypeForm.FORM_IMAGE_TYPE,
+        'image_type-image_type': ImageTypeForm.REMOVE,
+    }
+    response = client.post(url, data)
+    assert 302 == response.status_code
+    # make sure we redirect to page design
+    page_design_url = content.block.page_section.page.get_design_url()
+    assert page_design_url in response['Location']
+    # check image is removed
+    content.refresh_from_db()
+    assert content.picture is None
