@@ -197,3 +197,51 @@ def test_image_upload_to_done(client):
     content.refresh_from_db()
     assert content.picture is not None
     assert 'My Image Title' == content.picture.title
+
+
+@pytest.mark.django_db
+def test_image_delete_to_start(client):
+    """Delete an image from the library."""
+    image_1 = ImageFactory()
+    image_2 = ImageFactory()
+    image_3 = ImageFactory()
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    session = client.session
+    # https://www.pkimber.net/howto/django/testing/wizard.html
+    session['wizard_image_wizard'] = {
+        'extra_data': {},
+        'step': 'image_type',
+        'step_data': {
+            #'list_delete': {
+            #    'image_wizard-current_step': ['list_delete'],
+            #    'list_delete-images': ['1', '2'],
+            #    'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
+            #},
+            'image_type': {
+                'image_wizard-current_step': ['image_type'],
+                'image_type-image_type': ['list_delete'],
+            }
+        },
+        'step_files': {
+            'list_delete': {},
+            'image_type': {}
+        }
+    }
+    session.save()
+    content = TitleFactory(picture=ImageFactory())
+    url = picture_url(content)
+
+    data = {
+        'image_wizard-current_step': ImageTypeForm.FORM_LIST_DELETE,
+        'list_delete-images': [image_1.pk, image_3.pk],
+    }
+    response = client.post(url, data)
+    assert 200 == response.status_code
+    # check image has been deleted from the library
+    image_1.refresh_from_db()
+    image_2.refresh_from_db()
+    image_3.refresh_from_db()
+    assert image_1.deleted is True
+    assert image_2.deleted is False
+    assert image_3.deleted is True
