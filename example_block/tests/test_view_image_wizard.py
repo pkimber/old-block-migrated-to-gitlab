@@ -94,7 +94,6 @@ def test_image_list_to_done(client):
     session['wizard_image_wizard'] = {
         'step_data': {
             'image_type': {
-                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
                 'image_type-image_type': [ImageTypeForm.FORM_IMAGE_LIST],
             }
         },
@@ -133,7 +132,6 @@ def test_image_remove_to_done(client):
         'step_data': {
             'image_type': {
                 'image_type-image_type': [ImageTypeForm.REMOVE],
-                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
             }
         },
         'step': ImageTypeForm.FORM_IMAGE_TYPE,
@@ -168,7 +166,6 @@ def test_image_upload_to_done(client):
         'step_data': {
             'image_type': {
                 'image_type-image_type': [ImageTypeForm.FORM_IMAGE],
-                'image_wizard-current_step': [ImageTypeForm.FORM_IMAGE_TYPE],
             },
         },
         'step': ImageTypeForm.FORM_IMAGE,
@@ -213,14 +210,8 @@ def test_image_delete_to_start(client):
         'extra_data': {},
         'step': 'image_type',
         'step_data': {
-            #'list_delete': {
-            #    'image_wizard-current_step': ['list_delete'],
-            #    'list_delete-images': ['1', '2'],
-            #    'csrfmiddlewaretoken': ['H1VQUMYxcPg9UTOH0lLmeYmw1SIhItIo']
-            #},
             'image_type': {
-                'image_wizard-current_step': ['image_type'],
-                'image_type-image_type': ['list_delete'],
+                'image_type-image_type': [ImageTypeForm.FORM_LIST_DELETE],
             }
         },
         'step_files': {
@@ -234,7 +225,10 @@ def test_image_delete_to_start(client):
 
     data = {
         'image_wizard-current_step': ImageTypeForm.FORM_LIST_DELETE,
-        'list_delete-images': [image_1.pk, image_3.pk],
+        '{}-images'.format(ImageTypeForm.FORM_LIST_DELETE): [
+            image_1.pk,
+            image_3.pk,
+        ],
     }
     response = client.post(url, data)
     assert 200 == response.status_code
