@@ -748,7 +748,7 @@ class ImageWizard(
 
     def done(self, form_list, form_dict, **kwargs):
         form_image_type = form_dict[ImageTypeForm.FORM_IMAGE_TYPE]
-        form_id = form_image_type.cleaned_data['image_type']
+        form_id = form_image_type.cleaned_data[ImageTypeForm.FORM_IMAGE_TYPE]
         with transaction.atomic():
             obj = self._get_current_content_instance()
             if form_id == ImageTypeForm.REMOVE:
