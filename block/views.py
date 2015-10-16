@@ -1005,11 +1005,13 @@ class WizardImageRemove(
     template_name = 'block/wizard_image_remove.html'
 
     def form_valid(self, form):
+        """Set the image on the content object to ``None`` (remove it)."""
         content_obj = self._content_obj()
         self._update_image(content_obj, None)
         return HttpResponseRedirect(self._page_design_url(content_obj))
 
     def get_context_data(self, **kwargs):
+        """Return the current image in the context, so we can display it."""
         context = super().get_context_data(**kwargs)
         field_name = self.kwargs['field']
         context.update(dict(
