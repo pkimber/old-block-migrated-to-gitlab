@@ -60,7 +60,7 @@ class Wizard:
     def url_name(self):
         result = ''
         if self.wizard_type == self.IMAGE:
-            result = 'block.image.wizard'
+            result = 'block.wizard.image.option'
         elif self.wizard_type == self.LINK:
             result = 'block.link.wizard'
         else:

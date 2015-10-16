@@ -1,35 +1,34 @@
 # -*- encoding: utf-8 -*-
+import pytest
+
 from django.core.urlresolvers import reverse
 
-from base.tests.test_utils import PermTestCase
-
 from block.tests.factories import PageFactory
-from login.tests.factories import UserFactory
+from login.tests.fixture import perm_check
 
 
-class TestViewPerm(PermTestCase):
+@pytest.mark.django_db
+def test_create(perm_check):
+    perm_check.staff(reverse('block.page.create'))
 
-    def setUp(self):
-        UserFactory(username='staff', is_staff=True, is_superuser=True)
-        UserFactory(username='web')
 
-    def test_create(self):
-        self.assert_staff_only(reverse('block.page.create'))
+@pytest.mark.django_db
+def test_delete(perm_check):
+    page = PageFactory()
+    perm_check.staff(reverse('block.page.delete', kwargs=dict(pk=page.pk)))
 
-    def test_delete(self):
-        page = PageFactory()
-        self.assert_staff_only(
-            reverse('block.page.delete', kwargs=dict(pk=page.pk))
-        )
 
-    def test_header_footer_update(self):
-        self.assert_staff_only(reverse('block.header.footer.update'))
+@pytest.mark.django_db
+def test_header_footer_update(perm_check):
+    perm_check.staff(reverse('block.header.footer.update'))
 
-    def test_list(self):
-        self.assert_staff_only(reverse('block.page.list'))
 
-    def test_update(self):
-        page = PageFactory()
-        self.assert_staff_only(
-            reverse('block.page.update', kwargs=dict(pk=page.pk))
-        )
+@pytest.mark.django_db
+def test_list(perm_check):
+    perm_check.staff(reverse('block.page.list'))
+
+
+@pytest.mark.django_db
+def test_update(perm_check):
+    page = PageFactory()
+    perm_check.staff(reverse('block.page.update', kwargs=dict(pk=page.pk)))

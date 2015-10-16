@@ -915,3 +915,79 @@ class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
         except:
             url = obj.block.page_section.page.get_design_url()
         return HttpResponseRedirect(url)
+
+
+class WizardMixin:
+
+    def _content_obj(self):
+        content_type_pk = self.kwargs['content']
+        pk = self.kwargs['pk']
+        content_type = ContentType.objects.get(pk=content_type_pk)
+        content_model = content_type.model_class()
+        return content_model.objects.get(pk=pk)
+
+    def _link_field_name(self, content_obj):
+        """Assign the link to the field with this name."""
+        field_name = self.kwargs['field']
+        if hasattr(content_obj, field_name):
+            return field_name
+        else:
+            raise BlockError(
+                "Content object '{}' does not have a field "
+                "named '{}'".format(content_obj.__class__.__name__, field_name)
+            )
+
+    def _link_type(self):
+        """Is this a 'single' or a 'multi' link?"""
+        return self.kwargs['type']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        content_type_pk = self.kwargs['content']
+        field_name = self.kwargs['field']
+        wizard_type = self.kwargs['type']
+        content_obj = self._content_obj()
+        kwargs = {
+            'content': content_type_pk,
+            'pk': content_obj.pk,
+            'field': field_name,
+            'type': wizard_type,
+        }
+        url_option = reverse('block.wizard.image.option', kwargs=kwargs)
+        url_upload = reverse('block.wizard.image.upload', kwargs=kwargs)
+        context.update(dict(
+            object=content_obj,
+            url_option=url_option,
+            url_upload=url_upload,
+        ))
+        return context
+
+
+class WizardImageOption(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, TemplateView):
+
+    template_name = 'block/wizard_image_option.html'
+
+
+class WizardImageUpload(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, CreateView):
+
+    form_class = ImageForm
+    template_name = 'block/wizard_image_upload.html'
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        field_name = self._link_field_name(content_obj)
+        link_type = self._link_type()
+        with transaction.atomic():
+            self.object = form.save()
+            if link_type == Wizard.SINGLE:
+                setattr(content_obj, field_name, self.object)
+            elif link_type == Wizard.MULTI:
+                field = getattr(content_obj, field_name)
+                field.add(image)
+            content_obj.set_pending_edit()
+            content_obj.save()
+        return HttpResponseRedirect(
+            content_obj.block.page_section.page.get_design_url()
+        )

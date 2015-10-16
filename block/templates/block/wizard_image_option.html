@@ -1,0 +1,21 @@
+{% extends 'dash/base.html' %}
+
+{% block sub_title %}
+  Image Wizard
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Image Wizard
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <h3>What would you like to do?</h3>
+      <a href="{{ url_upload }}" class="pure-menu-link">
+        <i class="fa fa-cloud-upload"></i>
+        Upload an image
+      </a>
+    </div>
+  </div>
+{% endblock content %}
