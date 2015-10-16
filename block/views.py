@@ -1050,7 +1050,10 @@ class ImageDeleteView(
     template_name = 'block/image_delete.html'
 
     def form_valid(self, form):
-        image = form.cleaned_data['images']
+        images = form.cleaned_data['images']
+        for image in images:
+            image.set_deleted()
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('project.settings')
+        return reverse('block.image.delete')

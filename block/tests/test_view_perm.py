@@ -3,7 +3,10 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
-from block.tests.factories import PageFactory
+from block.tests.factories import (
+    ImageFactory,
+    PageFactory,
+)
 from login.tests.fixture import perm_check
 
 
@@ -21,6 +24,13 @@ def test_delete(perm_check):
 @pytest.mark.django_db
 def test_header_footer_update(perm_check):
     perm_check.staff(reverse('block.header.footer.update'))
+
+
+@pytest.mark.django_db
+def test_image_delete(perm_check):
+    ImageFactory()
+    url = reverse('block.image.delete')
+    perm_check.staff(url)
 
 
 @pytest.mark.django_db

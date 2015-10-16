@@ -1,4 +1,4 @@
-{% extends 'base/base.html' %}
+{% extends 'block/base.html' %}
 {% load staticfiles %}
 
 {% block title %}
@@ -15,30 +15,15 @@
   {{ page.name }}
 {% endblock sub_heading %}
 
-{% block menu %}
+{% block menu_extra %}
   {{ block.super }}
-  {% if page.is_home %}
-    {% include 'example/_design_menu.html' %}
-  {% endif %}
-  {% include 'example/_menu_list.html' %}
   <li class="pure-menu-item">
     <a href="{% url 'calendar.information' %}" class="pure-menu-link">
       <i class="fa fa-calendar"></i>
       Calendar
     </a>
   </li>
-  {% if page.slug_menu == 'calendar-information' %}
-    {% include 'example/_design_menu.html' %}
-  {% endif %}
-  {% if user.is_staff %}
-    <li class="pure-menu-item{% if 'settings' in path %} pure-menu-selected{% endif %}">
-      <a href="{% url 'project.settings' %}" class="pure-menu-link">
-        <i class="fa fa-cog"></i>
-        Settings
-      </a>
-    </li>
-  {% endif %}
-{% endblock menu %}
+{% endblock menu_extra %}
 
 {% block footer %}
 {% endblock footer %}
