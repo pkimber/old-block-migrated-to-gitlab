@@ -6,6 +6,10 @@ from django.conf.urls import (
 
 from block.views import (
     HeaderFooterUpdateView,
+    ImageCategoryCreateView,
+    ImageCategoryDeleteView,
+    ImageCategoryListView,
+    ImageCategoryUpdateView,
     ImageListDeleteView,
     ImageListView,
     ImageUpdateView,
@@ -35,6 +39,26 @@ urlpatterns = patterns(
         view=HeaderFooterUpdateView.as_view(),
         name='block.header.footer.update'
         ),
+
+    url(regex=r'^image/category/$',
+        view=ImageCategoryListView.as_view(),
+        name='block.image.category.list'
+        ),
+    url(regex=r'^image/category/create/$',
+        view=ImageCategoryCreateView.as_view(),
+        name='block.image.category.create'
+        ),
+    url(regex=r'^image/category/(?P<pk>\d+)/update/$',
+        view=ImageCategoryUpdateView.as_view(),
+        name='block.image.category.update'
+        ),
+    url(regex=r'^image/category/(?P<pk>\d+)/delete/$',
+        view=ImageCategoryDeleteView.as_view(),
+        name='block.image.category.delete'
+        ),
+
+
+
     url(regex=r'^image/$',
         view=ImageListView.as_view(),
         name='block.image.list'

@@ -1,0 +1,25 @@
+{% extends 'dash/base.html' %}
+
+{% block sub_title %}
+  Delete Image Category
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Delete Image Category
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <br>
+      Are you sure you want to delete the
+      <strong>{{ object.name }}</strong>
+      image category?
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include '_form.html' with submit='Delete Image Category' %}
+    </div>
+  </div>
+{% endblock content %}

@@ -5,6 +5,7 @@ from block.models import (
     Document,
     EditState,
     Image,
+    ImageCategory,
     Link,
     ModerateState,
     Page,
@@ -28,6 +29,16 @@ class EditStateFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = EditState
+
+
+class ImageCategoryFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = ImageCategory
+
+    @factory.sequence
+    def name(n):
+        return 'name_{}'.format(n)
 
 
 class ImageFactory(factory.django.DjangoModelFactory):

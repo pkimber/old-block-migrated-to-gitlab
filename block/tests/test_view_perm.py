@@ -4,6 +4,7 @@ import pytest
 from django.core.urlresolvers import reverse
 
 from block.tests.factories import (
+    ImageCategoryFactory,
     ImageFactory,
     PageFactory,
 )
@@ -57,3 +58,25 @@ def test_list(perm_check):
 def test_update(perm_check):
     page = PageFactory()
     perm_check.staff(reverse('block.page.update', kwargs=dict(pk=page.pk)))
+
+
+@pytest.mark.django_db
+def test_image_category(perm_check):
+    perm_check.staff(reverse('block.image.category.list'))
+
+
+@pytest.mark.django_db
+def test_image_category_create(perm_check):
+    perm_check.staff(reverse('block.image.category.create'))
+
+
+@pytest.mark.django_db
+def test_image_category_delete(perm_check):
+    obj = ImageCategoryFactory()
+    perm_check.staff(reverse('block.image.category.delete', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_image_category_update(perm_check):
+    obj = ImageCategoryFactory()
+    perm_check.staff(reverse('block.image.category.update', args=[obj.pk]))

@@ -1,0 +1,17 @@
+{% extends 'dash/base.html' %}
+
+{% block sub_title %}
+  Image Category
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Image Category
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include '_form.html' with legend='Image Category' %}
+    </div>
+  </div>
+{% endblock content %}

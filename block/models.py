@@ -13,7 +13,7 @@ from django.db import (
 from django.db.models import Max
 from django.utils import timezone
 
-from easy_thumbnails.fields import ThumbnailerImageField
+from django_extensions.db.fields import AutoSlugField
 
 from base.model_utils import (
     copy_model_instance,
@@ -778,6 +778,24 @@ class HeaderFooter(SingletonModel):
 reversion.register(HeaderFooter)
 
 
+class ImageCategory(models.Model):
+
+    name = models.CharField(max_length=100)
+    slug = AutoSlugField(max_length=100, unique=True, populate_from=('name',))
+    deleted = models.BooleanField(default=False)
+    objects = ModerateStateManager()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Image Category'
+        verbose_name_plural = 'Image Categories'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+reversion.register(ImageCategory)
+
+
 class ImageManager(models.Manager):
 
     def images(self):
@@ -804,6 +822,7 @@ class Image(TimeStampedModel):
 
     - Do we want to add tags field in here so we can search/group images?
       e.g. https://github.com/alex/django-taggit
+    - For now, we are adding a category only.
 
     """
 
@@ -811,6 +830,7 @@ class Image(TimeStampedModel):
     image = models.ImageField(upload_to='link/image')
     original_file_name = models.CharField(max_length=100)
     deleted = models.BooleanField(default=False)
+    category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
 
     class Meta:

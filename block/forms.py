@@ -18,6 +18,7 @@ from block.models import (
     Document,
     HeaderFooter,
     Image,
+    ImageCategory,
     Link,
     Page,
     Section,
@@ -150,8 +151,34 @@ class HeaderFooterForm(RequiredFieldForm):
         )
 
 
+class ImageCategoryEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = ImageCategory
+        fields = ()
+
+
+class ImageCategoryForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = ImageCategory
+        fields = (
+            'name',
+        )
+
+
 class ImageForm(forms.ModelForm):
     """Allow the user to upload an image (for the form wizard)."""
+
+    add_to_library = forms.BooleanField(
+        help_text='tick this box to add the image to the library',
+        initial=True,
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -162,8 +189,10 @@ class ImageForm(forms.ModelForm):
     class Meta:
         model = Image
         fields = (
-            'title',
             'image',
+            'title',
+            'category',
+            'add_to_library',
         )
         widgets = {
             'image': forms.FileInput,
@@ -228,6 +257,7 @@ class ImageUpdateForm(RequiredFieldForm):
         model = Image
         fields = (
             'title',
+            'category',
         )
 
 

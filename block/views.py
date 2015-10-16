@@ -39,6 +39,8 @@ from .forms import (
     EmptyForm,
     ExternalLinkForm,
     HeaderFooterForm,
+    ImageCategoryEmptyForm,
+    ImageCategoryForm,
     ImageForm,
     ImageListDeleteForm,
     ImageListForm,
@@ -59,6 +61,7 @@ from .models import (
     BlockError,
     HeaderFooter,
     Image,
+    ImageCategory,
     Link,
     Menu,
     MenuItem,
@@ -1075,3 +1078,45 @@ class ImageUpdateView(
 
     def get_success_url(self):
         return reverse('block.image.list')
+
+
+class ImageCategoryCreateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, CreateView):
+
+    form_class = ImageCategoryForm
+    model = ImageCategory
+
+    def get_success_url(self):
+        return reverse('block.image.category.list')
+
+
+class ImageCategoryDeleteView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
+
+    form_class = ImageCategoryEmptyForm
+    model = ImageCategory
+    template_name = 'block/imagecategory_delete_form.html'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.deleted = True
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('block.image.category.list')
+
+
+class ImageCategoryListView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
+
+    model = ImageCategory
+
+
+class ImageCategoryUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
+
+    form_class = ImageCategoryForm
+    model = ImageCategory
+
+    def get_success_url(self):
+        return reverse('block.image.category.list')
