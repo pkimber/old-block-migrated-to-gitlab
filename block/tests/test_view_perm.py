@@ -37,7 +37,14 @@ def test_image(perm_check):
 @pytest.mark.django_db
 def test_image_delete(perm_check):
     ImageFactory()
-    url = reverse('block.image.delete')
+    url = reverse('block.image.list.delete')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_image_update(perm_check):
+    image = ImageFactory()
+    url = reverse('block.image.update', args=[image.pk])
     perm_check.staff(url)
 
 

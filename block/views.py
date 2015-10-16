@@ -44,6 +44,7 @@ from .forms import (
     ImageListForm,
     ImageMultiSelectForm,
     ImageTypeForm,
+    ImageUpdateForm,
     LinkMultiSelectForm,
     LinkTypeForm,
     PageEmptyForm,
@@ -1044,7 +1045,7 @@ class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
         return Image.objects.images()
 
 
-class ImageDeleteView(
+class ImageListDeleteView(
         LoginRequiredMixin, StaffuserRequiredMixin, FormView):
     """Mark images (in the library) as deleted.
 
@@ -1054,7 +1055,7 @@ class ImageDeleteView(
     """
 
     form_class = ImageListDeleteForm
-    template_name = 'block/image_delete.html'
+    template_name = 'block/image_list_delete.html'
 
     def form_valid(self, form):
         images = form.cleaned_data['images']
@@ -1063,4 +1064,14 @@ class ImageDeleteView(
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('block.image.delete')
+        return reverse('block.image.list')
+
+
+class ImageUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, UpdateView):
+
+    form_class = ImageUpdateForm
+    model = Image
+
+    def get_success_url(self):
+        return reverse('block.image.list')

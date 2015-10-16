@@ -6,8 +6,9 @@ from django.conf.urls import (
 
 from block.views import (
     HeaderFooterUpdateView,
-    ImageDeleteView,
+    ImageListDeleteView,
     ImageListView,
+    ImageUpdateView,
     LinkWizard,
     PageCreateView,
     PageDeleteView,
@@ -39,8 +40,12 @@ urlpatterns = patterns(
         name='block.image.list'
         ),
     url(regex=r'^image/delete/$',
-        view=ImageDeleteView.as_view(),
-        name='block.image.delete'
+        view=ImageListDeleteView.as_view(),
+        name='block.image.list.delete'
+        ),
+    url(regex=r'^image/(?P<pk>\d+)/update/$',
+        view=ImageUpdateView.as_view(),
+        name='block.image.update'
         ),
     url(regex=r'^page/$',
         view=PageListView.as_view(),

@@ -17,7 +17,7 @@
         <ul class="pure-menu-list">
           {% include 'base/_back_to_settings.html' %}
           <li class="pure-menu-item">
-            <a href="{% url 'block.image.delete' %}" class="pure-menu-link">
+            <a href="{% url 'block.image.list.delete' %}" class="pure-menu-link">
               <i class="fa fa-trash-o"></i>
               Delete Images
             </a>
@@ -29,7 +29,10 @@
   <div class="pure-g">
     {% for image in image_list %}
       <div class="pure-u-1-2 pure-u-md-1-4">
-        {{ image.title }}
+        <a href="{% url 'block.image.update' image.pk %}">
+          <i class="fa fa-edit"></i>
+          {{ image.title }}
+        </a>
         <br>
         <img src="{% thumbnail image.image 100x100  crop='center' %}">
       </div>

@@ -1,0 +1,22 @@
+{% extends 'dash/base.html' %}
+
+{% load thumbnail %}
+
+{% block sub_title %}
+  Image Wizard
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Update Image Detail
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <br>
+      <img src="{% thumbnail object.image 100x100  crop='center' %}">
+      {% include '_form.html' %}
+      <br>
+    </div>
+  </div>
+{% endblock content %}

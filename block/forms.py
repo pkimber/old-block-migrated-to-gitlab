@@ -216,6 +216,21 @@ class ImageMultiSelectForm(forms.Form):
         )
 
 
+class ImageUpdateForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        title = self.fields['title']
+        title.widget.attrs.update({'class': 'pure-input-2-3'})
+        set_widget_required(title)
+
+    class Meta:
+        model = Image
+        fields = (
+            'title',
+        )
+
+
 class LinkMultiSelectForm(forms.Form):
     """List of links (for the form wizard)."""
 
