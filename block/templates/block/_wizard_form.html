@@ -11,40 +11,20 @@
     {% endif %}
     <div class="pure-g">
       {% for field in form.visible_fields %}
-        {% if field|is_radio_select or field|is_checkbox_select_multiple %}
-          <!-- errors -->
-          {% if field.errors %}
-              <div class="pure-u-1">
-            {% for error in field.errors %}
-              <span class="errorlist"><mark>{{ error }}</mark></span>
-            {% endfor %}
-              </div>
-          {% endif %}
-          <!-- end - errors -->
-          {% for item in field %}
-            <div class="pure-u-1-2 pure-u-md-1-4">
-              {{ item }}
-            </div>
+        <!-- errors -->
+        {% if field.errors %}
+            <div class="pure-u-1">
+          {% for error in field.errors %}
+            <span class="errorlist"><mark>{{ error }}</mark></span>
           {% endfor %}
-        {% else %}
-          <div class="pure-control-group">
-            {% if field.label %}
-              <label for='{{ field.id_for_label }}'>
-                {{ field.label }}
-                {% if field.help_text %} - {{ field.help_text }}{% endif %}:
-              </label>
-            {% endif %}
-            {% if aligned %}
-              {{ field }}
-            {% endif %}
-            {% for error in field.errors %}
-              <span class="errorlist"><mark>{{ error }}</mark></span>
-            {% endfor %}
-            {% if not aligned %}
-              {{ field }}
-            {% endif %}
-          </div>
+            </div>
         {% endif %}
+        <!-- end - errors -->
+        {% for item in field %}
+          <div class="pure-u-1-2 pure-u-md-1-4">
+            {{ item }}
+          </div>
+        {% endfor %}
       {% endfor %}
     </div>
     <div class="pure-controls">

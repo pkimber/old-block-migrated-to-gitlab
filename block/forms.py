@@ -223,6 +223,15 @@ class ImageListForm(forms.Form):
         widget=forms.RadioSelect,
     )
 
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            images = self.fields['images']
+            images.queryset = Image.objects.images().filter(
+                category__slug=category_slug
+            )
+
     class Meta:
         model = Image
         fields = (

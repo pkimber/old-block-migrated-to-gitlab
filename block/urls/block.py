@@ -123,6 +123,10 @@ urlpatterns = patterns(
         view=WizardImageChoose.as_view(),
         name='block.wizard.image.choose'
         ),
+    url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/(?P<category>[-\w\d]+)/choose/$',
+        view=WizardImageChoose.as_view(),
+        name='block.wizard.image.choose'
+        ),
     url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/option/$',
         view=WizardImageOption.as_view(),
         name='block.wizard.image.option'

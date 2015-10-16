@@ -17,15 +17,15 @@
         <ul class="pure-menu-list">
           {% include 'base/_back_to_settings.html' %}
           <li class="pure-menu-item">
-            <a href="{% url 'block.image.list.delete' %}" class="pure-menu-link">
-              <i class="fa fa-trash-o"></i>
-              Delete Images
-            </a>
-          </li>
-          <li class="pure-menu-item">
             <a href="{% url 'block.image.category.list' %}" class="pure-menu-link">
               <i class="fa fa-picture-o"></i>
               Image Categories
+            </a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="{% url 'block.image.list.delete' %}" class="pure-menu-link">
+              <i class="fa fa-trash-o"></i>
+              Delete Images
             </a>
           </li>
         </ul>
@@ -34,13 +34,25 @@
   </div>
   <div class="pure-g">
     {% for image in image_list %}
+      {% ifchanged image.category %}
+        {% if image.category %}
+          </div>
+            <div class="pure-g">
+              <div class="pure-u-1">
+                <br>
+                <h3>{{ image.category.name }}</h3>
+              </div>
+            </div>
+          <div class="pure-g">
+        {% endif %}
+      {% endifchanged %}
       <div class="pure-u-1-2 pure-u-md-1-4">
+        <img src="{% thumbnail image.image 100x100  crop='center' %}">
+        <br>
         <a href="{% url 'block.image.update' image.pk %}">
           <i class="fa fa-edit"></i>
           {{ image.title }}
         </a>
-        <br>
-        <img src="{% thumbnail image.image 100x100  crop='center' %}">
       </div>
     {% endfor %}
   </div>

@@ -778,12 +778,22 @@ class HeaderFooter(SingletonModel):
 reversion.register(HeaderFooter)
 
 
+class ImageCategoryManager(models.Manager):
+
+    def categories(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'slug',
+        )
+
+
 class ImageCategory(models.Model):
 
     name = models.CharField(max_length=100)
     slug = AutoSlugField(max_length=100, unique=True, populate_from=('name',))
     deleted = models.BooleanField(default=False)
-    objects = ModerateStateManager()
+    objects = ImageCategoryManager()
 
     class Meta:
         ordering = ['name']
@@ -802,7 +812,8 @@ class ImageManager(models.Manager):
         return self.model.objects.all().exclude(
             deleted=True,
         ).order_by(
-            'title'
+            'category__slug',
+            'title',
         )
 
 

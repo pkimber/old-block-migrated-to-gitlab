@@ -12,10 +12,27 @@
   <div class="pure-g">
     <div class="pure-u-1">
       <h3>What would you like to do?</h3>
+      {% if categories %}
+        <p>
+          Choose an image from one of these categories:
+        </p>
+        {% for category in categories %}
+            <a href="{{ category.url }}" class="pure-menu-link">
+              <i class="fa fa-picture-o"></i>
+              {{ category.name }}
+            </a>
+        {% endfor %}
+      {% endif %}
+      <p>
+        Choose from the whole library:
+      </p>
       <a href="{{ url_choose }}" class="pure-menu-link">
         <i class="fa fa-picture-o"></i>
-        Choose a previously uploaded image
+        Image Library
       </a>
+      <p>
+        Or:
+      </p>
       <a href="{{ url_upload }}" class="pure-menu-link">
         <i class="fa fa-cloud-upload"></i>
         Upload an image

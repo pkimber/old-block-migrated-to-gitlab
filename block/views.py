@@ -974,7 +974,14 @@ class WizardMixin:
             'field': field_name,
             'type': wizard_type,
         }
+        categories = []
+        for category in ImageCategory.objects.categories():
+            kw = kwargs.copy()
+            kw.update({'category': category.slug})
+            url = reverse('block.wizard.image.choose', kwargs=kw)
+            categories.append(dict(name=category.name, url=url))
         context.update(dict(
+            categories=categories,
             object=content_obj,
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
@@ -989,6 +996,21 @@ class WizardImageChoose(
 
     form_class = ImageListForm
     template_name = 'block/wizard_image_choose.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_slug = self.kwargs.get('category')
+        category = None
+        if category_slug:
+            category = ImageCategory.objects.get(slug=category_slug)
+        context.update(dict(category=category))
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        category_slug = self.kwargs.get('category')
+        kwargs.update(dict(category_slug=category_slug))
+        return kwargs
 
     def form_valid(self, form):
         image = form.cleaned_data['images']
