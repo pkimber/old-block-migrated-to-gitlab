@@ -1,6 +1,19 @@
 block
 *****
 
+- Change to normal views...
+
+- Settings - Image Library
+
+  - Icon for delete.
+  - Edit icon for changing title, category
+
+- Upload an image
+
+  - Category drop down.  Defined in settings.  No tags!
+  - Tick box... add to library.  Default is ticked.
+  - Title as alt tag.  Yes... no change to the UI.
+
 Django application
 
 Install
