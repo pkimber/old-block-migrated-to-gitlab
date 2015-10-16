@@ -1035,3 +1035,22 @@ class WizardImageUpload(
             self.object = form.save()
             self._update_image(content_obj, self.object)
         return HttpResponseRedirect(self._page_design_url(content_obj))
+
+
+class ImageDeleteView(
+        LoginRequiredMixin, StaffuserRequiredMixin, FormView):
+    """Mark images (in the library) as deleted.
+
+    Images will still be attached to content objects, but will not display in
+    the library (image wizard).
+
+    """
+
+    form_class = ImageListDeleteForm
+    template_name = 'block/image_delete.html'
+
+    def form_valid(self, form):
+        image = form.cleaned_data['images']
+
+    def get_success_url(self):
+        return reverse('project.settings')

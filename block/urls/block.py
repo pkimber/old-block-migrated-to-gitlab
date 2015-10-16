@@ -6,7 +6,7 @@ from django.conf.urls import (
 
 from block.views import (
     HeaderFooterUpdateView,
-    ImageWizard,
+    ImageDeleteView,
     LinkWizard,
     PageCreateView,
     PageDeleteView,
@@ -32,6 +32,10 @@ urlpatterns = patterns(
     url(regex=r'^header-footer/$',
         view=HeaderFooterUpdateView.as_view(),
         name='block.header.footer.update'
+        ),
+    url(regex=r'^image/delete/$',
+        view=ImageDeleteView.as_view(),
+        name='block.image.delete'
         ),
     url(regex=r'^page/$',
         view=PageListView.as_view(),
