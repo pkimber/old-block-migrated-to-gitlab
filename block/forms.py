@@ -35,7 +35,7 @@ def _label_from_instance(obj):
         'size': (100, 100),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-    return format_html('{}<br /><img src="{}" />'.format(
+    return format_html('{}<br><img src="{}" />'.format(
         obj.title,
         thumbnail.url,
     ))

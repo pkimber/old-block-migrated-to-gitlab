@@ -27,6 +27,14 @@ def test_header_footer_update(perm_check):
 
 
 @pytest.mark.django_db
+def test_image(perm_check):
+    """Image library."""
+    ImageFactory()
+    url = reverse('block.image.list')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
 def test_image_delete(perm_check):
     ImageFactory()
     url = reverse('block.image.delete')

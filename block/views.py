@@ -57,6 +57,7 @@ from .forms import (
 from .models import (
     BlockError,
     HeaderFooter,
+    Image,
     Link,
     Menu,
     MenuItem,
@@ -1035,6 +1036,12 @@ class WizardImageUpload(
             self.object = form.save()
             self._update_image(content_obj, self.object)
         return HttpResponseRedirect(self._page_design_url(content_obj))
+
+
+class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+
+    def get_queryset(self):
+        return Image.objects.images()
 
 
 class ImageDeleteView(
