@@ -19,6 +19,7 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
+    FormView,
     ListView,
     UpdateView,
     TemplateView,
@@ -968,17 +969,27 @@ class WizardMixin:
             'field': field_name,
             'type': wizard_type,
         }
-        url_option = reverse('block.wizard.image.option', kwargs=kwargs)
-        url_remove = reverse('block.wizard.image.remove', kwargs=kwargs)
-        url_upload = reverse('block.wizard.image.upload', kwargs=kwargs)
         context.update(dict(
             object=content_obj,
-            url_option=url_option,
-            url_remove=url_remove,
-            url_upload=url_upload,
+            url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
+            url_option=reverse('block.wizard.image.option', kwargs=kwargs),
+            url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
+            url_upload=reverse('block.wizard.image.upload', kwargs=kwargs),
         ))
         return context
 
+
+class WizardImageChoose(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+
+    form_class = ImageListForm
+    template_name = 'block/wizard_image_choose.html'
+
+    def form_valid(self, form):
+        image = form.cleaned_data['images']
+        content_obj = self._content_obj()
+        self._update_image(content_obj, image)
+        return HttpResponseRedirect(self._page_design_url(content_obj))
 
 
 class WizardImageOption(

@@ -1,13 +1,11 @@
 {% extends 'dash/base.html' %}
 
-{% load thumbnail %}
-
 {% block sub_title %}
   Image Wizard
 {% endblock sub_title %}
 
 {% block sub_heading %}
-  Remove Image
+  Choose an Image
 {% endblock sub_heading %}
 
 {% block content %}
@@ -27,12 +25,8 @@
   </div>
   <div class="pure-g">
     <div class="pure-u-1">
-      <img src="{% thumbnail image.image 200x200 crop='center' %}">
-    </div>
-  </div>
-  <div class="pure-g">
-    <div class="pure-u-1">
-      {% include '_form.html' with submit='Remove Image' %}
+      {% include 'block/_wizard_form.html' with submit='Choose' %}
+      <br>
     </div>
   </div>
 {% endblock content %}

@@ -24,6 +24,13 @@ def reverse_url(content, url_name):
 
 
 @pytest.mark.django_db
+def test_wizard_image_choose(perm_check):
+    content = TitleFactory()
+    url = reverse_url(content, 'block.wizard.image.choose')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
 def test_wizard_image_option(perm_check):
     content = TitleFactory()
     url = reverse_url(content, 'block.wizard.image.option')
