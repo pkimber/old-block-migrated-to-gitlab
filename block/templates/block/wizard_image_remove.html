@@ -1,0 +1,38 @@
+{% extends 'dash/base.html' %}
+
+{% load thumbnail %}
+
+{% block sub_title %}
+  Image Wizard
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Remove Image
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+            <a href="{{ url_option }}" class="pure-menu-link">
+              <i class="fa fa-backward"></i>
+              Options
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <img src="{% thumbnail image.image 200x200  crop='center' %}">
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include '_form.html' with submit='Remove Image' %}
+    </div>
+  </div>
+{% endblock content %}

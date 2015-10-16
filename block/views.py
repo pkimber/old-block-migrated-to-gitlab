@@ -35,6 +35,7 @@ from base.view_utils import BaseMixin
 from .forms import (
     DocumentForm,
     DocumentListForm,
+    EmptyForm,
     ExternalLinkForm,
     HeaderFooterForm,
     ImageForm,
@@ -941,6 +942,20 @@ class WizardMixin:
         """Is this a 'single' or a 'multi' link?"""
         return self.kwargs['type']
 
+    def _page_design_url(self, content_obj):
+        return content_obj.block.page_section.page.get_design_url()
+
+    def _update_image(self, content_obj, image):
+        field_name = self._link_field_name(content_obj)
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            setattr(content_obj, field_name, image)
+        elif link_type == Wizard.MULTI:
+            field = getattr(content_obj, field_name)
+            field.add(image)
+        content_obj.set_pending_edit()
+        content_obj.save()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         content_type_pk = self.kwargs['content']
@@ -954,19 +969,45 @@ class WizardMixin:
             'type': wizard_type,
         }
         url_option = reverse('block.wizard.image.option', kwargs=kwargs)
+        url_remove = reverse('block.wizard.image.remove', kwargs=kwargs)
         url_upload = reverse('block.wizard.image.upload', kwargs=kwargs)
         context.update(dict(
             object=content_obj,
             url_option=url_option,
+            url_remove=url_remove,
             url_upload=url_upload,
         ))
         return context
+
 
 
 class WizardImageOption(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, TemplateView):
 
     template_name = 'block/wizard_image_option.html'
+
+
+class WizardImageRemove(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, UpdateView):
+
+    form_class = EmptyForm
+    template_name = 'block/wizard_image_remove.html'
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        self._update_image(content_obj, None)
+        return HttpResponseRedirect(self._page_design_url(content_obj))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        field_name = self.kwargs['field']
+        context.update(dict(
+            image=getattr(self.object, field_name),
+        ))
+        return context
+
+    def get_object(self):
+        return self._content_obj()
 
 
 class WizardImageUpload(
@@ -977,17 +1018,7 @@ class WizardImageUpload(
 
     def form_valid(self, form):
         content_obj = self._content_obj()
-        field_name = self._link_field_name(content_obj)
-        link_type = self._link_type()
         with transaction.atomic():
             self.object = form.save()
-            if link_type == Wizard.SINGLE:
-                setattr(content_obj, field_name, self.object)
-            elif link_type == Wizard.MULTI:
-                field = getattr(content_obj, field_name)
-                field.add(image)
-            content_obj.set_pending_edit()
-            content_obj.save()
-        return HttpResponseRedirect(
-            content_obj.block.page_section.page.get_design_url()
-        )
+            self._update_image(content_obj, self.object)
+        return HttpResponseRedirect(self._page_design_url(content_obj))

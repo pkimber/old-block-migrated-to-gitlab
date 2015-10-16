@@ -21,6 +21,7 @@ from block.views import (
     TemplateSectionRemoveView,
     TemplateUpdateView,
     WizardImageOption,
+    WizardImageRemove,
     WizardImageUpload,
 )
 
@@ -82,6 +83,10 @@ urlpatterns = patterns(
     url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/option/$',
         view=WizardImageOption.as_view(),
         name='block.wizard.image.option'
+        ),
+    url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/remove/$',
+        view=WizardImageRemove.as_view(),
+        name='block.wizard.image.remove'
         ),
     url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/upload/$',
         view=WizardImageUpload.as_view(),

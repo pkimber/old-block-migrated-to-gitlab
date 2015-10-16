@@ -31,6 +31,13 @@ def test_wizard_image_option(perm_check):
 
 
 @pytest.mark.django_db
+def test_wizard_image_remove(perm_check):
+    content = TitleFactory()
+    url = reverse_url(content, 'block.wizard.image.remove')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
 def test_wizard_image_upload(perm_check):
     content = TitleFactory()
     url = reverse_url(content, 'block.wizard.image.upload')

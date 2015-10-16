@@ -98,6 +98,13 @@ class DocumentListForm(forms.ModelForm):
         )
 
 
+class EmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = ContentModel
+        fields = ()
+
+
 class ExternalLinkForm(forms.ModelForm):
     """Enter a URL for a web site (for the form wizard)."""
 
