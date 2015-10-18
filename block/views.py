@@ -1121,6 +1121,11 @@ class ImageCategoryDeleteView(
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
+        if self.object.in_use:
+            raise BlockError(
+                "Cannot delete an image category which is "
+                "in use: '{}'".format(self.object.slug)
+            )
         self.object.deleted = True
         return super().form_valid(form)
 

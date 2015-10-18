@@ -59,7 +59,7 @@
                 {% endif %}
               </td>
               <td>
-                {% if not o.deleted %}
+                {% if not o.deleted and not o.in_use %}
                   <a href="{% url 'block.image.category.delete' o.pk %}">
                     <i class="fa fa-trash-o"></i>
                   </a>

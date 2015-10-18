@@ -1,11 +1,6 @@
 block
 *****
 
-Image Categories
-
-- Only allow delete if un-used
-- Don't allow the user to select a deleted category for an image.
-
 Django application
 
 Install

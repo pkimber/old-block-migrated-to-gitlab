@@ -803,6 +803,11 @@ class ImageCategory(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
+    @property
+    def in_use(self):
+        images = Image.objects.filter(category=self, deleted=False)
+        return images.count() > 0
+
 reversion.register(ImageCategory)
 
 
