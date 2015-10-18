@@ -8,6 +8,7 @@ from block.models import (
     Image,
 )
 from block.tests.factories import (
+    ImageCategory,
     ImageCategoryFactory,
     ImageFactory,
 )
@@ -15,6 +16,24 @@ from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
 )
+
+
+@pytest.mark.django_db
+def test_category_create(client):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = reverse('block.image.category.create')
+    data = {
+        'name': 'Tennis',
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = reverse('block.image.category.list')
+    assert expect in response['Location']
+    categories = ImageCategory.objects.all()
+    assert 1 == categories.count()
+    assert 'Tennis' == categories[0].name
 
 
 @pytest.mark.django_db
