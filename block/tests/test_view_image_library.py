@@ -86,6 +86,7 @@ def test_image_delete(client):
     result = [image.pk for image in Image.objects.images()]
     assert [image_2.pk] == result
 
+
 @pytest.mark.django_db
 def test_image_update(client):
     user = UserFactory(is_staff=True)

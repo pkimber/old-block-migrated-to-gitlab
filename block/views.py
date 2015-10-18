@@ -959,6 +959,8 @@ class WizardMixin:
         elif link_type == Wizard.MULTI:
             field = getattr(content_obj, field_name)
             field.add(image)
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         content_obj.set_pending_edit()
         content_obj.save()
 

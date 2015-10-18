@@ -5,8 +5,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 from block.models import Wizard
+from block.tests.factories import ImageFactory
 from example_block.tests.factories import TitleFactory
-from login.tests.fixture import perm_check
+from login.tests.factories import (
+    TEST_PASSWORD,
+    UserFactory,
+)
 
 
 def reverse_url(content, url_name):
@@ -24,28 +28,21 @@ def reverse_url(content, url_name):
 
 
 @pytest.mark.django_db
-def test_wizard_image_choose(perm_check):
+def test_wizard_image_choose(client):
     content = TitleFactory()
+    ImageFactory()
+    image = ImageFactory()
+    user = UserFactory(is_staff=True)
+    assert content.picture is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
     url = reverse_url(content, 'block.wizard.image.choose')
-    perm_check.staff(url)
-
-
-@pytest.mark.django_db
-def test_wizard_image_option(perm_check):
-    content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.option')
-    perm_check.staff(url)
-
-
-@pytest.mark.django_db
-def test_wizard_image_remove(perm_check):
-    content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.remove')
-    perm_check.staff(url)
-
-
-@pytest.mark.django_db
-def test_wizard_image_upload(perm_check):
-    content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.upload')
-    perm_check.staff(url)
+    data = {
+        'images': image.pk,
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = content.block.page_section.page.get_design_url()
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert image == content.picture
