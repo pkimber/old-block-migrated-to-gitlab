@@ -44,3 +44,21 @@ def test_category_delete_exception(client):
     with pytest.raises(BlockError) as e:
         client.post(url)
     assert 'Cannot delete an image category which is in use' in str(e.value)
+
+
+@pytest.mark.django_db
+def test_category_update(client):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    category = ImageCategoryFactory()
+    url = reverse('block.image.category.update', args=[category.pk])
+    data = {
+        'name': 'Cricket',
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = reverse('block.image.category.list')
+    assert expect in response['Location']
+    category.refresh_from_db()
+    assert 'Cricket' == category.name
