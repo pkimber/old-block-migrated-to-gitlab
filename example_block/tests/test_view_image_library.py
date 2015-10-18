@@ -56,6 +56,23 @@ def test_wizard_image_choose(client):
 
 
 @pytest.mark.django_db
+def test_wizard_image_remove(client):
+    image = ImageFactory()
+    content = TitleFactory(picture=image)
+    user = UserFactory(is_staff=True)
+    assert content.picture is not None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = reverse_url(content, 'block.wizard.image.remove')
+    response = client.post(url)
+    # check
+    content.refresh_from_db()
+    expect = content.block.page_section.page.get_design_url()
+    assert 302 == response.status_code
+    assert expect in response['Location']
+    assert content.picture is None
+
+
+@pytest.mark.django_db
 def test_wizard_image_upload(client):
     content = TitleFactory()
     category = ImageCategoryFactory()
