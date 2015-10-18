@@ -185,6 +185,8 @@ class ImageForm(forms.ModelForm):
         title = self.fields['title']
         title.widget.attrs.update({'class': 'pure-input-2-3'})
         set_widget_required(title)
+        category = self.fields['category']
+        category.queryset = ImageCategory.objects.categories()
 
     class Meta:
         model = Image
@@ -261,6 +263,8 @@ class ImageUpdateForm(RequiredFieldForm):
         title = self.fields['title']
         title.widget.attrs.update({'class': 'pure-input-2-3'})
         set_widget_required(title)
+        category = self.fields['category']
+        category.queryset = ImageCategory.objects.categories()
 
     class Meta:
         model = Image
