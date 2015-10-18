@@ -62,3 +62,21 @@ def test_category_update(client):
     assert expect in response['Location']
     category.refresh_from_db()
     assert 'Cricket' == category.name
+
+
+@pytest.mark.django_db
+def test_image_update(client):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    image = ImageFactory()
+    url = reverse('block.image.update', args=[image.pk])
+    data = {
+        'title': 'Football',
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = reverse('block.image.list')
+    assert expect in response['Location']
+    image.refresh_from_db()
+    assert 'Football' == image.title
