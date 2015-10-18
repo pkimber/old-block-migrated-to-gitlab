@@ -3,7 +3,10 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
-from block.models import BlockError
+from block.models import (
+    BlockError,
+    Image,
+)
 from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
@@ -63,6 +66,25 @@ def test_category_update(client):
     category.refresh_from_db()
     assert 'Cricket' == category.name
 
+
+@pytest.mark.django_db
+def test_image_delete(client):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    image_1 = ImageFactory()
+    image_2 = ImageFactory()
+    image_3 = ImageFactory()
+    url = reverse('block.image.list.delete')
+    data = {
+        'images': [image_1.pk, image_3.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = reverse('block.image.list')
+    assert expect in response['Location']
+    result = [image.pk for image in Image.objects.images()]
+    assert [image_2.pk] == result
 
 @pytest.mark.django_db
 def test_image_update(client):
