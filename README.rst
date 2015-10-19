@@ -1,6 +1,14 @@
 block
 *****
 
+To Do
+
+- Ordering images in a slideshow
+- Multi-select
+- Link wizard
+- Other tickets (to minimise migrations)
+  - SEO
+
 Django application
 
 Install
