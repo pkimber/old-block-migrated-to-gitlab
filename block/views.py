@@ -933,6 +933,18 @@ class WizardMixin:
         content_model = content_type.model_class()
         return content_model.objects.get(pk=pk)
 
+    def _get_images(self, content_obj):
+        result = []
+        field_name = self._link_field_name(content_obj)
+        link_type = self._link_type()
+        field = getattr(content_obj, field_name)
+        if link_type == Wizard.SINGLE:
+            result.append(field)
+        elif link_type == Wizard.MULTI:
+            for image in field.all():
+                result.append(field)
+        return result
+
     def _link_field_name(self, content_obj):
         """Assign the link to the field with this name."""
         field_name = self.kwargs['field']
@@ -976,14 +988,18 @@ class WizardMixin:
             'field': field_name,
             'type': wizard_type,
         }
+        # categories
         categories = []
         for category in ImageCategory.objects.categories():
             kw = kwargs.copy()
             kw.update({'category': category.slug})
             url = reverse('block.wizard.image.choose', kwargs=kw)
             categories.append(dict(name=category.name, url=url))
+        # images
         context.update(dict(
             categories=categories,
+            field_name=field_name,
+            images=self._get_images(content_obj),
             object=content_obj,
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
