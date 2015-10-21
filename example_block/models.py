@@ -34,6 +34,11 @@ class Title(ContentModel):
         related_name='title_link',
         blank=True, null=True
     )
+    slideshow = models.ManyToManyField(
+        Image,
+        related_name='slideshow',
+        through='TitleImage'
+    )
 
     class Meta:
         # cannot put 'unique_together' on abstract base class
@@ -46,6 +51,19 @@ class Title(ContentModel):
         return '{} ({}, {})'.format(
             self.title, self.order, self.moderate_state.name
         )
+
+    def add_image(self, image):
+        obj = TitleImage(
+            title=self,
+            image=image,
+            order=1,
+        )
+        obj.save()
+
+    def copy_related_data(self, published_instance):
+        """Copy slideshow images."""
+        for image in self.slideshow.all():
+            published_instance.slideshow.add(image)
 
     def url_publish(self):
         return reverse('example.title.publish', kwargs={'pk': self.pk})
@@ -61,6 +79,36 @@ class Title(ContentModel):
         return [
             Wizard('picture', Wizard.IMAGE, Wizard.SINGLE),
             Wizard('link', Wizard.LINK, Wizard.SINGLE),
+            Wizard('slideshow', Wizard.IMAGE, Wizard.MULTI),
         ]
 
 reversion.register(Title)
+
+
+#class TitleImageManager(models.Manager):
+#
+#    def add_image(self, title, image):
+#        obj = self.model(title=title, image=image)
+#        obj.save()
+
+
+class TitleImage(models.Model):
+    """Slideshow images for the title.
+
+    This is the model that is used to govern the many-to-many relationship
+    between ``Title`` and ``Image``.
+
+    https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
+
+    """
+    title = models.ForeignKey(Title)
+    image = models.ForeignKey(Image)
+    order = models.IntegerField()
+    #objects = TitleImageManager()
+
+    class Meta:
+        unique_together = ('title', 'image')
+        verbose_name = 'Title Image'
+        verbose_name_plural = 'Title Images'
+
+reversion.register(TitleImage)

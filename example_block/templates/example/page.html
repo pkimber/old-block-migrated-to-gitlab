@@ -28,7 +28,15 @@
                   {{ c.title }}
                   {% if c.picture %}
                     <br>
-                    <img src="{% thumbnail c.picture.image 200x200  crop='center' %}">
+                    <img src="{% thumbnail c.picture.image 200x200 crop='center' %}">
+                  {% endif %}
+                  {% if c.slideshow %}
+                    {% for item in c.slideshow.all %}
+                      <br>
+                      <img src="{% thumbnail item.image 100x100 crop='center' %}">
+                      <br>
+                      {{ item.title }}
+                    {% endfor %}
                   {% endif %}
                 </td>
                 <td>

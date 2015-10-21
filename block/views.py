@@ -942,7 +942,7 @@ class WizardMixin:
             result.append(field)
         elif link_type == Wizard.MULTI:
             for image in field.all():
-                result.append(field)
+                result.append(image)
         return result
 
     def _link_field_name(self, content_obj):
@@ -969,8 +969,7 @@ class WizardMixin:
         if link_type == Wizard.SINGLE:
             setattr(content_obj, field_name, image)
         elif link_type == Wizard.MULTI:
-            field = getattr(content_obj, field_name)
-            field.add(image)
+            content_obj.add_image(image)
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         content_obj.set_pending_edit()
