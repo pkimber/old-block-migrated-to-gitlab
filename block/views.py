@@ -1001,6 +1001,7 @@ class WizardMixin:
             field_name=field_name,
             images=self._get_images(content_obj),
             object=content_obj,
+            url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
             url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
