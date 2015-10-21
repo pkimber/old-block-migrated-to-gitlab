@@ -287,19 +287,13 @@ class ImageSelectForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        #field_images = kwargs.pop('field_images')
         qs_many_to_many = kwargs.pop('many_to_many')
         super().__init__(*args, **kwargs)
-        #images = self.fields['images']
-        #images.queryset = field_images.all()
-        #import pdb; pdb.set_trace()
         many_to_many = self.fields['many_to_many']
         many_to_many.queryset = qs_many_to_many.order_by('order')
         # tick every link - so the user can untick the ones they want to remove
-        #initial = {item.pk: True for item in field_images.all()}
         initial = {item.pk: True for item in qs_many_to_many}
         many_to_many.initial = initial
-        #images.initial = initial
 
     class Meta:
         fields = (
