@@ -294,7 +294,7 @@ class ImageSelectForm(forms.Form):
         #images.queryset = field_images.all()
         #import pdb; pdb.set_trace()
         many_to_many = self.fields['many_to_many']
-        many_to_many.queryset = qs_many_to_many
+        many_to_many.queryset = qs_many_to_many.order_by('order')
         # tick every link - so the user can untick the ones they want to remove
         #initial = {item.pk: True for item in field_images.all()}
         initial = {item.pk: True for item in qs_many_to_many}

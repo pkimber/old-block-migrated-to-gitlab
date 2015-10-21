@@ -13,7 +13,10 @@ from django.core.paginator import (
 )
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.models import get_model
+from django.db.models import (
+    get_model,
+    Max,
+)
 from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
@@ -1009,15 +1012,18 @@ class WizardMixin:
         if link_type == Wizard.SINGLE:
             setattr(content_obj, field_name, image)
         elif link_type == Wizard.MULTI:
-            #import pdb; pdb.set_trace()
-            #content_obj.add_image(image)
             field = self._get_field()
             class_many_to_many = field.through
-            # TODO duplicate code
+            result = class_many_to_many.objects.filter(
+                content_obj=content_obj
+            ).aggregate(
+                Max('order')
+            )
+            order = result.get('order__max', 1) + 1
             obj = class_many_to_many(
                 content_obj=content_obj,
                 image=image,
-                order=1,
+                order=order,
             )
             obj.save()
         else:
@@ -1134,24 +1140,20 @@ class WizardImageSelect(
     form_class = ImageSelectForm
     template_name = 'block/wizard_image_select.html'
 
-    #def form_invalid(self, form):
-    #    import pdb; pdb.set_trace()
-    #    print(form)
-
     def _update_many_to_many(self, many_to_many):
-        #import pdb; pdb.set_trace()
         content_obj = self._content_obj()
         field = self._get_field()
         with transaction.atomic():
             field = self._get_field()
             field.clear()
             class_many_to_many = field.through
+            order = 0
             for item in many_to_many:
-                # TODO duplicate code
+                order = order + 1
                 obj = class_many_to_many(
                     content_obj=content_obj,
                     image=item.image,
-                    order=item.order,
+                    order=order,
                 )
                 obj.save()
 
@@ -1159,25 +1161,12 @@ class WizardImageSelect(
         content_obj = self._content_obj()
         many_to_many = form.cleaned_data['many_to_many']
         self._update_many_to_many(many_to_many)
-        #import pdb; pdb.set_trace()
-        #self._update_image(content_obj, None)
         return HttpResponseRedirect(
             reverse('block.wizard.image.option', kwargs=self._kwargs())
         )
 
-    #def get_context_data(self, **kwargs):
-    #    """Return the current image in the context, so we can display it."""
-    #    context = super().get_context_data(**kwargs)
-    #    field_name = self.kwargs['field']
-    #    context.update(dict(
-    #        images=getattr(self.object, field_name),
-    #    ))
-    #    return context
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        #content_obj = self._content_obj()
-        #kwargs.update(dict(field_images=self._get_field(content_obj)))
         kwargs.update(dict(many_to_many=self._get_many_to_many()))
         return kwargs
 

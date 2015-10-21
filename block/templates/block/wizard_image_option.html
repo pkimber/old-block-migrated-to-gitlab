@@ -53,12 +53,18 @@
         Upload an image
       </a>
       {% if image %}
+        <p>
+          Maintenance:
+        </p>
         <a href="{{ url_remove }}" class="pure-menu-link">
           <i class="fa fa-times"></i>
           Remove the {{ field_name }} from your page
         </a>
       {% endif %}
       {% if many_to_many.count %}
+        <p>
+          Maintenance:
+        </p>
         <a href="{{ url_select }}" class="pure-menu-link">
           <i class="fa fa-times"></i>
           Remove images from your {{ field_name }}
