@@ -933,6 +933,9 @@ class WizardMixin:
         content_model = content_type.model_class()
         return content_model.objects.get(pk=pk)
 
+    def _field_name(self):
+        return self.kwargs['field']
+
     def _get_images(self, content_obj):
         result = []
         field_name = self._link_field_name(content_obj)
@@ -944,6 +947,17 @@ class WizardMixin:
             for image in field.all():
                 result.append(image)
         return result
+
+    def _kwargs(self):
+        content_type_pk = self.kwargs['content']
+        wizard_type = self.kwargs['type']
+        content_obj = self._content_obj()
+        return {
+            'content': content_type_pk,
+            'pk': content_obj.pk,
+            'field': self._field_name(),
+            'type': wizard_type,
+        }
 
     def _link_field_name(self, content_obj):
         """Assign the link to the field with this name."""
@@ -977,16 +991,7 @@ class WizardMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        content_type_pk = self.kwargs['content']
-        field_name = self.kwargs['field']
-        wizard_type = self.kwargs['type']
-        content_obj = self._content_obj()
-        kwargs = {
-            'content': content_type_pk,
-            'pk': content_obj.pk,
-            'field': field_name,
-            'type': wizard_type,
-        }
+        kwargs = self._kwargs()
         # categories
         categories = []
         for category in ImageCategory.objects.categories():
@@ -994,10 +999,10 @@ class WizardMixin:
             kw.update({'category': category.slug})
             url = reverse('block.wizard.image.choose', kwargs=kw)
             categories.append(dict(name=category.name, url=url))
-        # images
+        content_obj = self._content_obj()
         context.update(dict(
             categories=categories,
-            field_name=field_name,
+            field_name=self._field_name(),
             images=self._get_images(content_obj),
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
@@ -1079,7 +1084,12 @@ class WizardImageUpload(
         with transaction.atomic():
             self.object = form.save()
             self._update_image(content_obj, self.object)
-        return HttpResponseRedirect(self._page_design_url(content_obj))
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            url = self._page_design_url(content_obj)
+        elif link_type == Wizard.MULTI:
+            url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        return HttpResponseRedirect(url)
 
 
 class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):

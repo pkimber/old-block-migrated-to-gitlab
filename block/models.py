@@ -780,6 +780,11 @@ reversion.register(HeaderFooter)
 
 class ImageCategoryManager(models.Manager):
 
+    def create_category(self, name):
+        obj = self.model(name=name)
+        obj.save()
+        return obj
+
     def categories(self):
         return self.model.objects.all().exclude(
             deleted=True,

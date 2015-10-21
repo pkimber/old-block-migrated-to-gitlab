@@ -85,13 +85,6 @@ class Title(ContentModel):
 reversion.register(Title)
 
 
-#class TitleImageManager(models.Manager):
-#
-#    def add_image(self, title, image):
-#        obj = self.model(title=title, image=image)
-#        obj.save()
-
-
 class TitleImage(models.Model):
     """Slideshow images for the title.
 
@@ -104,10 +97,8 @@ class TitleImage(models.Model):
     title = models.ForeignKey(Title)
     image = models.ForeignKey(Image)
     order = models.IntegerField()
-    #objects = TitleImageManager()
 
     class Meta:
-        unique_together = ('title', 'image')
         verbose_name = 'Title Image'
         verbose_name_plural = 'Title Images'
 
