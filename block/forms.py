@@ -272,6 +272,15 @@ class ImageMultiSelectForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
     )
 
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            images = self.fields['images']
+            images.queryset = Image.objects.images().filter(
+                category__slug=category_slug
+            )
+
     class Meta:
         fields = (
             'images',
@@ -283,6 +292,7 @@ class ImageSelectForm(forms.Form):
 
     many_to_many = ManyToManyMultipleChoiceField(
         queryset=Image.objects.none(),
+        required=False,
         widget=forms.CheckboxSelectMultiple,
     )
 

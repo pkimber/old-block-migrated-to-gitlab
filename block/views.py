@@ -895,8 +895,29 @@ class WizardMixin:
 class WizardImageChoose(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
 
-    form_class = ImageListForm
+    #form_class = ImageListForm
     template_name = 'block/wizard_image_choose.html'
+
+    def _update_images_many_to_many(self, images):
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            field = self._get_field()
+            class_many_to_many = field.through
+            result = class_many_to_many.objects.filter(
+                content_obj=content_obj
+            ).aggregate(
+                Max('order')
+            )
+            order = result.get('order__max') or 0
+            for image in images:
+                order = order + 1
+                obj = class_many_to_many(
+                    content_obj=content_obj,
+                    image=image,
+                    order=order,
+                )
+                obj.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -907,6 +928,15 @@ class WizardImageChoose(
         context.update(dict(category=category))
         return context
 
+    def get_form_class(self):
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            return ImageListForm
+        elif link_type == Wizard.MULTI:
+            return ImageMultiSelectForm
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         category_slug = self.kwargs.get('category')
@@ -914,14 +944,17 @@ class WizardImageChoose(
         return kwargs
 
     def form_valid(self, form):
-        image = form.cleaned_data['images']
+        images = form.cleaned_data['images']
         content_obj = self._content_obj()
-        self._update_image(content_obj, image)
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
+            self._update_image(content_obj, images)
             url = self._page_design_url(content_obj)
         elif link_type == Wizard.MULTI:
+            self._update_images_many_to_many(images)
             url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return HttpResponseRedirect(url)
 
 
