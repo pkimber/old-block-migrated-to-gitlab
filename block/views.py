@@ -591,13 +591,6 @@ class TemplateUpdateView(
 # -----------------------------------------------------------------------------
 # LinkWizard
 
-def select_image_form(wizard, image_type) :
-    """Return true if user has selected 'image_type'."""
-    data = wizard.get_cleaned_data_for_step(ImageTypeForm.FORM_IMAGE_TYPE)
-    selected = data['image_type'] if data else None
-    return selected == image_type
-
-
 def select_link_form(wizard, link_type) :
     """Return true if user has selected 'link_type'."""
     data = wizard.get_cleaned_data_for_step(LinkTypeForm.FORM_LINK_TYPE)
@@ -608,20 +601,6 @@ def select_link_form(wizard, link_type) :
 def url_existing(wizard):
     """Return true if user opts for existing document link"""
     return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT_LIST)
-
-
-def url_existing_image(wizard):
-    """Return true if user opts for existing image."""
-    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_LIST)
-
-
-def url_form_list_delete(wizard):
-    return select_image_form(wizard, ImageTypeForm.FORM_LIST_DELETE)
-
-
-def url_existing_image_multi(wizard):
-    """Return true if user opts for existing image."""
-    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE_MULTI_SELECT)
 
 
 def url_existing_link_multi(wizard):
@@ -642,157 +621,6 @@ def url_internal_page(wizard):
 def url_upload(wizard):
     """Return true if user opts for upload a document """
     return select_link_form(wizard, LinkTypeForm.FORM_DOCUMENT)
-
-
-def url_upload_image(wizard):
-    """Return true if user opts to upload an image """
-    return select_image_form(wizard, ImageTypeForm.FORM_IMAGE)
-
-
-class ImageWizard(
-        LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
-    """Image Wizard.
-
-    Documentation for the SessionWizardView in
-    http://django-formtools.readthedocs.org/en/latest/
-
-    """
-
-    condition_dict = {
-        ImageTypeForm.FORM_IMAGE: url_upload_image,
-        ImageTypeForm.FORM_IMAGE_LIST: url_existing_image,
-        ImageTypeForm.FORM_IMAGE_MULTI_SELECT: url_existing_image_multi,
-        ImageTypeForm.FORM_LIST_DELETE: url_form_list_delete,
-    }
-
-    temp_dir = 'temp'
-    file_storage = FileSystemStorage(
-        location=os.path.join(settings.MEDIA_ROOT, 'temp/wizard')
-    )
-    # this list of forms must stay in this order!
-    form_list = [
-        (ImageTypeForm.FORM_IMAGE_TYPE, ImageTypeForm),
-        (ImageTypeForm.FORM_IMAGE, ImageForm),
-        (ImageTypeForm.FORM_IMAGE_LIST, ImageListForm),
-        (ImageTypeForm.FORM_IMAGE_MULTI_SELECT, ImageMultiSelectForm),
-        (ImageTypeForm.FORM_LIST_DELETE, ImageListDeleteForm),
-    ]
-
-    template_name = 'block/wizard.html'
-
-    def _get_current_content_instance(self):
-        content_pk = self.kwargs['content']
-        pk = self.kwargs['pk']
-        content_type = ContentType.objects.get(pk=content_pk)
-        content_model = content_type.model_class()
-        return content_model.objects.get(pk=pk)
-
-    def _get_link_field_name(self, content_obj):
-        """Assign the link to the field with this name."""
-        field_name = self.kwargs['field']
-        if hasattr(content_obj, field_name):
-            return field_name
-        else:
-            raise BlockError(
-                "Content object '{}' does not have a field "
-                "named '{}'".format(content_obj.__class__.__name__, field_name)
-            )
-
-    def _get_link_type(self):
-        """Is this a 'single' or a 'multi' link?"""
-        return self.kwargs['type']
-
-    def _save_image(self, form, content_obj):
-        image = form.save()
-        self._update_image(content_obj, image)
-
-    def _update_image(self, content_obj, image):
-        field_name = self._get_link_field_name(content_obj)
-        link_type = self._get_link_type()
-        if link_type == Wizard.SINGLE:
-            setattr(content_obj, field_name, image)
-        elif link_type == Wizard.MULTI:
-            field = getattr(content_obj, field_name)
-            field.add(image)
-
-    def _delete_from_library(self, images):
-        for image in images:
-            image.set_deleted()
-
-    def _update_images(self, content_obj, images):
-        field_name = self._get_link_field_name(content_obj)
-        field = getattr(content_obj, field_name)
-        field.clear()
-        for image in images:
-            field.add(image)
-
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form, **kwargs)
-        multi_column = False
-        if self.steps.current in (
-            ImageTypeForm.FORM_IMAGE_LIST,
-            ImageTypeForm.FORM_IMAGE_MULTI_SELECT,
-            ):
-            multi_column = True
-        context.update(dict(multi_column=multi_column))
-        return context
-
-    def get_form_initial(self, step):
-        result = {}
-        if step == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
-            obj = self._get_current_content_instance()
-            field_name = self._get_link_field_name(obj)
-            field = getattr(obj, field_name)
-            result.update({
-                'images': [item.pk for item in field.all()],
-            })
-        return result
-
-    def get_form_kwargs(self, step):
-        result = {}
-        link_type = self._get_link_type()
-        if step == ImageTypeForm.FORM_IMAGE_TYPE:
-            result.update({
-                'link_type': link_type,
-            })
-        return result
-
-    def done(self, form_list, form_dict, **kwargs):
-        form_image_type = form_dict[ImageTypeForm.FORM_IMAGE_TYPE]
-        form_id = form_image_type.cleaned_data[ImageTypeForm.FORM_IMAGE_TYPE]
-        with transaction.atomic():
-            obj = self._get_current_content_instance()
-            if form_id == ImageTypeForm.REMOVE:
-                self._update_image(obj, None)
-            elif form_id == ImageTypeForm.FORM_LIST_DELETE:
-                form = form_dict[form_id]
-                images = form.cleaned_data['images']
-                self._delete_from_library(images)
-                return self.render_goto_step(ImageTypeForm.FORM_IMAGE_TYPE)
-            elif form_id == ImageTypeForm.FORM_IMAGE_LIST:
-                form = form_dict[form_id]
-                image = form.cleaned_data['images']
-                self._update_image(obj, image)
-            elif form_id == ImageTypeForm.FORM_IMAGE_MULTI_SELECT:
-                form = form_dict[form_id]
-                images = form.cleaned_data['images']
-                self._update_images(obj, images)
-            else:
-                form = form_dict[form_id]
-                if form_id == ImageTypeForm.FORM_IMAGE:
-                    form = form_dict[form_id]
-                    image = form.save()
-                    self._update_image(obj, image)
-                else:
-                    self._save_image(form, obj)
-            obj.set_pending_edit()
-            obj.save()
-        try:
-            url = obj.get_design_url()
-        except:
-            url = obj.block.page_section.page.get_design_url()
-
-        return HttpResponseRedirect(url)
 
 
 class LinkWizard(LoginRequiredMixin, StaffuserRequiredMixin, SessionWizardView):
@@ -1089,7 +917,6 @@ class WizardImageChoose(
         image = form.cleaned_data['images']
         content_obj = self._content_obj()
         self._update_image(content_obj, image)
-        #return HttpResponseRedirect(self._page_design_url(content_obj))
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             url = self._page_design_url(content_obj)
