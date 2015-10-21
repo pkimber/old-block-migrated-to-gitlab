@@ -45,6 +45,7 @@ from .forms import (
     ImageListDeleteForm,
     ImageListForm,
     ImageMultiSelectForm,
+    ImageSelectForm,
     ImageTypeForm,
     ImageUpdateForm,
     LinkMultiSelectForm,
@@ -936,11 +937,14 @@ class WizardMixin:
     def _field_name(self):
         return self.kwargs['field']
 
+    def _get_field(self, content_obj):
+        field_name = self._link_field_name(content_obj)
+        return getattr(content_obj, field_name)
+
     def _get_images(self, content_obj):
         result = []
-        field_name = self._link_field_name(content_obj)
+        field = self._get_field(content_obj)
         link_type = self._link_type()
-        field = getattr(content_obj, field_name)
         if link_type == Wizard.SINGLE:
             result.append(field)
         elif link_type == Wizard.MULTI:
@@ -1009,6 +1013,7 @@ class WizardMixin:
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
             url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
+            url_select=reverse('block.wizard.image.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.image.upload', kwargs=kwargs),
         ))
         return context
@@ -1068,6 +1073,49 @@ class WizardImageRemove(
             image=getattr(self.object, field_name),
         ))
         return context
+
+    def get_object(self):
+        return self._content_obj()
+
+
+class WizardImageSelect(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+    """List the current images in the slideshow and allow the user to remove.
+
+    Allow the user to de-select any of the images.
+
+    """
+
+    form_class = ImageSelectForm
+    template_name = 'block/wizard_image_select.html'
+
+    #def form_invalid(self, form):
+    #    import pdb; pdb.set_trace()
+    #    print(form)
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        images = form.cleaned_data['images']
+        #import pdb; pdb.set_trace()
+        #self._update_image(content_obj, None)
+        return HttpResponseRedirect(
+            reverse('block.wizard.image.option', kwargs=self._kwargs())
+        )
+
+    #def get_context_data(self, **kwargs):
+    #    """Return the current image in the context, so we can display it."""
+    #    context = super().get_context_data(**kwargs)
+    #    field_name = self.kwargs['field']
+    #    context.update(dict(
+    #        images=getattr(self.object, field_name),
+    #    ))
+    #    return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        content_obj = self._content_obj()
+        kwargs.update(dict(field_images=self._get_field(content_obj)))
+        return kwargs
 
     def get_object(self):
         return self._content_obj()

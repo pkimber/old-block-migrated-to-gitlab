@@ -256,6 +256,29 @@ class ImageMultiSelectForm(forms.Form):
         )
 
 
+class ImageSelectForm(forms.Form):
+    """List of current images in the slideshow."""
+
+    images = ImageModelMultipleChoiceField(
+        queryset=Image.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def __init__(self, *args, **kwargs):
+        field_images = kwargs.pop('field_images')
+        super().__init__(*args, **kwargs)
+        images = self.fields['images']
+        images.queryset = field_images.all()
+        # tick every link - so the user can untick the ones they want to remove
+        initial = {item.pk: True for item in field_images.all()}
+        images.initial = initial
+
+    class Meta:
+        fields = (
+            'images',
+        )
+
+
 class ImageUpdateForm(RequiredFieldForm):
 
     def __init__(self, *args, **kwargs):
