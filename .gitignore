@@ -41,6 +41,7 @@ venv-*
 # dev
 .cache/
 *~
+htmlcov/
 
 # private info
 .private
