@@ -42,6 +42,22 @@ def _label_from_instance(obj):
     ))
 
 
+def _label_from_many_to_many_instance(obj):
+    """The label is the image."""
+    #import pdb; pdb.set_trace()
+    thumbnailer = get_thumbnailer(obj.image.image)
+    thumbnail_options = {
+        'crop': True,
+        'size': (100, 100),
+    }
+    thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+    return format_html('{}. {}<br><img src="{}" />'.format(
+        obj.order,
+        obj.image.title,
+        thumbnail.url,
+    ))
+
+
 class ImageModelChoiceField(forms.ModelChoiceField):
     """The label is the image."""
 
@@ -54,6 +70,12 @@ class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
 
     def label_from_instance(self, obj):
         return _label_from_instance(obj)
+
+
+class ManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _label_from_many_to_many_instance(obj)
 
 
 class ContentEmptyForm(forms.ModelForm):
@@ -259,19 +281,25 @@ class ImageMultiSelectForm(forms.Form):
 class ImageSelectForm(forms.Form):
     """List of current images in the slideshow."""
 
-    images = ImageModelMultipleChoiceField(
+    many_to_many = ManyToManyMultipleChoiceField(
         queryset=Image.objects.none(),
         widget=forms.CheckboxSelectMultiple,
     )
 
     def __init__(self, *args, **kwargs):
-        field_images = kwargs.pop('field_images')
+        #field_images = kwargs.pop('field_images')
+        qs_many_to_many = kwargs.pop('many_to_many')
         super().__init__(*args, **kwargs)
-        images = self.fields['images']
-        images.queryset = field_images.all()
+        #images = self.fields['images']
+        #images.queryset = field_images.all()
+        #import pdb; pdb.set_trace()
+        many_to_many = self.fields['many_to_many']
+        many_to_many.queryset = qs_many_to_many
         # tick every link - so the user can untick the ones they want to remove
-        initial = {item.pk: True for item in field_images.all()}
-        images.initial = initial
+        #initial = {item.pk: True for item in field_images.all()}
+        initial = {item.pk: True for item in qs_many_to_many}
+        many_to_many.initial = initial
+        #images.initial = initial
 
     class Meta:
         fields = (

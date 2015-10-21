@@ -937,20 +937,42 @@ class WizardMixin:
     def _field_name(self):
         return self.kwargs['field']
 
-    def _get_field(self, content_obj):
+    def _get_field(self): #, content_obj):
+        content_obj = self._content_obj()
         field_name = self._link_field_name(content_obj)
         return getattr(content_obj, field_name)
 
-    def _get_images(self, content_obj):
-        result = []
-        field = self._get_field(content_obj)
+    def _get_many_to_many(self):
+        link_type = self._link_type()
+        if link_type == Wizard.MULTI:
+            content_obj = self._content_obj()
+            #import pdb; pdb.set_trace()
+            #print(content_obj)
+            #return content_obj.many_to_many()
+            field = self._get_field()
+            return field.through.objects.filter(content_obj=content_obj)
+        else:
+            raise BlockError(
+                "Cannot '_get_many_to_many' for 'link_type': '{}'".format(
+                    link_type
+                )
+            )
+
+    def _get_image(self):
+        #result = []
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
-            result.append(field)
-        elif link_type == Wizard.MULTI:
-            for image in field.all():
-                result.append(image)
-        return result
+            field = self._get_field()
+            return field
+            #result.append(field)
+        else:
+            raise BlockError(
+                "Cannot '_get_image' for 'link_type': '{}'".format(link_type)
+            )
+        #elif link_type == Wizard.MULTI:
+        #    for image in field.all():
+        #        result.append(image)
+        #return result
 
     def _kwargs(self):
         content_type_pk = self.kwargs['content']
@@ -987,7 +1009,17 @@ class WizardMixin:
         if link_type == Wizard.SINGLE:
             setattr(content_obj, field_name, image)
         elif link_type == Wizard.MULTI:
-            content_obj.add_image(image)
+            #import pdb; pdb.set_trace()
+            #content_obj.add_image(image)
+            field = self._get_field()
+            class_many_to_many = field.through
+            # TODO duplicate code
+            obj = class_many_to_many(
+                content_obj=content_obj,
+                image=image,
+                order=1,
+            )
+            obj.save()
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         content_obj.set_pending_edit()
@@ -1007,7 +1039,7 @@ class WizardMixin:
         context.update(dict(
             categories=categories,
             field_name=self._field_name(),
-            images=self._get_images(content_obj),
+            #link_type=self._link_type(),
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
@@ -1016,6 +1048,13 @@ class WizardMixin:
             url_select=reverse('block.wizard.image.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.image.upload', kwargs=kwargs),
         ))
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            context.update(dict(image=self._get_image()))
+        elif link_type == Wizard.MULTI:
+            context.update(dict(many_to_many=self._get_many_to_many()))
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return context
 
 
@@ -1044,7 +1083,13 @@ class WizardImageChoose(
         image = form.cleaned_data['images']
         content_obj = self._content_obj()
         self._update_image(content_obj, image)
-        return HttpResponseRedirect(self._page_design_url(content_obj))
+        #return HttpResponseRedirect(self._page_design_url(content_obj))
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            url = self._page_design_url(content_obj)
+        elif link_type == Wizard.MULTI:
+            url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        return HttpResponseRedirect(url)
 
 
 class WizardImageOption(
@@ -1093,9 +1138,27 @@ class WizardImageSelect(
     #    import pdb; pdb.set_trace()
     #    print(form)
 
+    def _update_many_to_many(self, many_to_many):
+        #import pdb; pdb.set_trace()
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            field = self._get_field()
+            field.clear()
+            class_many_to_many = field.through
+            for item in many_to_many:
+                # TODO duplicate code
+                obj = class_many_to_many(
+                    content_obj=content_obj,
+                    image=item.image,
+                    order=item.order,
+                )
+                obj.save()
+
     def form_valid(self, form):
         content_obj = self._content_obj()
-        images = form.cleaned_data['images']
+        many_to_many = form.cleaned_data['many_to_many']
+        self._update_many_to_many(many_to_many)
         #import pdb; pdb.set_trace()
         #self._update_image(content_obj, None)
         return HttpResponseRedirect(
@@ -1113,8 +1176,9 @@ class WizardImageSelect(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        content_obj = self._content_obj()
-        kwargs.update(dict(field_images=self._get_field(content_obj)))
+        #content_obj = self._content_obj()
+        #kwargs.update(dict(field_images=self._get_field(content_obj)))
+        kwargs.update(dict(many_to_many=self._get_many_to_many()))
         return kwargs
 
     def get_object(self):

@@ -52,18 +52,22 @@ class Title(ContentModel):
             self.title, self.order, self.moderate_state.name
         )
 
-    def add_image(self, image):
-        obj = TitleImage(
-            title=self,
-            image=image,
-            order=1,
-        )
-        obj.save()
+    #def add_image(self, image):
+    #    obj = TitleImage(
+    #        title=self,
+    #        image=image,
+    #        order=1,
+    #    )
+    #    obj.save()
 
     def copy_related_data(self, published_instance):
         """Copy slideshow images."""
         for image in self.slideshow.all():
             published_instance.slideshow.add(image)
+
+    #def many_to_many(self):
+    #    import pdb; pdb.set_trace()
+    #    return TitleImage.objects.filter(title=self)
 
     def url_publish(self):
         return reverse('example.title.publish', kwargs={'pk': self.pk})
@@ -94,7 +98,7 @@ class TitleImage(models.Model):
     https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
 
     """
-    title = models.ForeignKey(Title)
+    content_obj = models.ForeignKey(Title)
     image = models.ForeignKey(Image)
     order = models.IntegerField()
 

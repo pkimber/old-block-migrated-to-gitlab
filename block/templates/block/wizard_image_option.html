@@ -52,14 +52,18 @@
         <i class="fa fa-cloud-upload"></i>
         Upload an image
       </a>
-      <a href="{{ url_remove }}" class="pure-menu-link">
-        <i class="fa fa-times"></i>
-        Remove the image from your page
-      </a>
-      <a href="{{ url_select }}" class="pure-menu-link">
-        <i class="fa fa-times"></i>
-        Remove images from your {{ field_name }}
-      </a>
+      {% if image %}
+        <a href="{{ url_remove }}" class="pure-menu-link">
+          <i class="fa fa-times"></i>
+          Remove the {{ field_name }} from your page
+        </a>
+      {% endif %}
+      {% if many_to_many.count %}
+        <a href="{{ url_select }}" class="pure-menu-link">
+          <i class="fa fa-times"></i>
+          Remove images from your {{ field_name }}
+        </a>
+      {% endif %}
       <br>
       <a href="{{ url_page_design }}" class="pure-button pure-button-primary">
         Finish
@@ -67,10 +71,20 @@
     </div>
     <div class="pure-u-1 pure-u-md-1-2">
       <h3>Current {{ field_name }}:</h3>
-      {% for image in images %}
+      {# Wizard.SINGLE #}
+      {% if image %}
         <img src="{% thumbnail image.image 100x100  crop='center' %}">
         <br>
         {{ image.title }}
+        <br>
+        <br>
+      {% endif %}
+      {# Wizard.MULTI #}
+      {% for item in many_to_many %}
+        <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+        <br>
+        {{ item.order }}.
+        {{ item.image.title }}
         <br>
         <br>
       {% endfor %}
