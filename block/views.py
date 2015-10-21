@@ -873,7 +873,6 @@ class WizardMixin:
         context.update(dict(
             categories=categories,
             field_name=self._field_name(),
-            #link_type=self._link_type(),
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
@@ -895,7 +894,6 @@ class WizardMixin:
 class WizardImageChoose(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
 
-    #form_class = ImageListForm
     template_name = 'block/wizard_image_choose.html'
 
     def _update_images_many_to_many(self, images):
