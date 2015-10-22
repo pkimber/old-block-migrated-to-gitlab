@@ -89,7 +89,36 @@ def test_wizard_image_choose_single(client):
 
 
 @pytest.mark.django_db
-def test_wizard_image_choose_category(client):
+def test_wizard_image_choose_category_multi(client):
+    """Choose from images in the selected category."""
+    content = TitleFactory()
+    category = ImageCategoryFactory()
+    image_1 = ImageFactory()
+    image_2 = ImageFactory(category=category)
+    image_3 = ImageFactory(category=category)
+    image_4 = ImageFactory(category=category)
+    user = UserFactory(is_staff=True)
+    assert content.picture is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_multi(content, 'block.wizard.image.choose', category=category)
+    assert category.slug in url
+    data = {
+        'images': [image_2.pk, image_4.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_multi(content, 'block.wizard.image.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.slideshow.count()
+    # ordering controlled by 'ordering' on 'TitleImage' model
+    qs = content.slideshow.through.objects.all()
+    assert [1, 2] == [item.order for item in qs]
+
+
+@pytest.mark.django_db
+def test_wizard_image_choose_category_single(client):
     """Choose from images in the selected category."""
     content = TitleFactory()
     category = ImageCategoryFactory()
