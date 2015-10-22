@@ -91,6 +91,7 @@ class TitleImage(models.Model):
     order = models.IntegerField()
 
     class Meta:
+        ordering = ['order']
         verbose_name = 'Title Image'
         verbose_name_plural = 'Title Images'
 

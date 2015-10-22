@@ -26,7 +26,7 @@ def _reverse_url(content, url_name, field_name, wizard_type, category):
     kwargs = {
         'content': content_type.pk,
         'pk': content.pk,
-        'field': field_name, field_name,
+        'field': field_name,
         'type': wizard_type,
     }
     if category:
@@ -42,25 +42,30 @@ def url_single(content, url_name, category=None):
     return _reverse_url(content, url_name, 'picture', Wizard.SINGLE, category)
 
 
-#@pytest.mark.django_db
-#def test_wizard_image_choose_multi(client):
-#    content = TitleFactory()
-#    ImageFactory()
-#    image = ImageFactory()
-#    user = UserFactory(is_staff=True)
-#    assert content.picture is None
-#    assert client.login(username=user.username, password=TEST_PASSWORD) is True
-#    url = url_single(content, 'block.wizard.image.choose')
-#    data = {
-#        'images': image.pk,
-#    }
-#    response = client.post(url, data)
-#    # check
-#    assert 302 == response.status_code
-#    expect = content.block.page_section.page.get_design_url()
-#    assert expect in response['Location']
-#    content.refresh_from_db()
-#    assert image == content.picture
+@pytest.mark.django_db
+def test_wizard_image_choose_multi(client):
+    content = TitleFactory()
+    ImageFactory()
+    image_1 = ImageFactory()
+    image_2 = ImageFactory()
+    user = UserFactory(is_staff=True)
+    assert content.picture is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_multi(content, 'block.wizard.image.choose')
+    data = {
+        'images': [image_2.pk, image_1.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_multi(content, 'block.wizard.image.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.slideshow.count()
+    # ordering controlled by 'ordering' on 'TitleImage' model
+    qs = content.slideshow.through.objects.all()
+    assert [1, 2] == [item.order for item in qs]
+
 
 @pytest.mark.django_db
 def test_wizard_image_choose_single(client):
