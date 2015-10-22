@@ -20,29 +20,57 @@ from login.tests.factories import (
 )
 
 
-def reverse_url(content, url_name, category=None):
+def _reverse_url(content, url_name, field_name, wizard_type, category):
     """Get the wizard url for a piece of content."""
     content_type = ContentType.objects.get_for_model(content)
     kwargs = {
         'content': content_type.pk,
         'pk': content.pk,
-        'field': 'picture',
-        'type': Wizard.SINGLE,
+        'field': field_name, field_name,
+        'type': wizard_type,
     }
     if category:
         kwargs.update(category=category.slug)
     return reverse(url_name, kwargs=kwargs)
 
 
+def url_multi(content, url_name, category=None):
+    return _reverse_url(content, url_name, 'slideshow', Wizard.MULTI, category)
+
+
+def url_single(content, url_name, category=None):
+    return _reverse_url(content, url_name, 'picture', Wizard.SINGLE, category)
+
+
+#@pytest.mark.django_db
+#def test_wizard_image_choose_multi(client):
+#    content = TitleFactory()
+#    ImageFactory()
+#    image = ImageFactory()
+#    user = UserFactory(is_staff=True)
+#    assert content.picture is None
+#    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+#    url = url_single(content, 'block.wizard.image.choose')
+#    data = {
+#        'images': image.pk,
+#    }
+#    response = client.post(url, data)
+#    # check
+#    assert 302 == response.status_code
+#    expect = content.block.page_section.page.get_design_url()
+#    assert expect in response['Location']
+#    content.refresh_from_db()
+#    assert image == content.picture
+
 @pytest.mark.django_db
-def test_wizard_image_choose(client):
+def test_wizard_image_choose_single(client):
     content = TitleFactory()
     ImageFactory()
     image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = reverse_url(content, 'block.wizard.image.choose')
+    url = url_single(content, 'block.wizard.image.choose')
     data = {
         'images': image.pk,
     }
@@ -65,7 +93,7 @@ def test_wizard_image_choose_category(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = reverse_url(content, 'block.wizard.image.choose', category=category)
+    url = url_single(content, 'block.wizard.image.choose', category=category)
     assert category.slug in url
     data = {
         'images': image.pk,
@@ -86,7 +114,7 @@ def test_wizard_image_remove(client):
     user = UserFactory(is_staff=True)
     assert content.picture is not None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = reverse_url(content, 'block.wizard.image.remove')
+    url = url_single(content, 'block.wizard.image.remove')
     response = client.post(url)
     # check
     content.refresh_from_db()
@@ -105,7 +133,7 @@ def test_wizard_image_upload(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = reverse_url(content, 'block.wizard.image.upload')
+    url = url_single(content, 'block.wizard.image.upload')
     # create an image ready to upload
     fp = io.BytesIO()
     Image.new('1', (1,1)).save(fp, 'png')
