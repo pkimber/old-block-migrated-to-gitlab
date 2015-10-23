@@ -51,8 +51,7 @@ def test_wizard_image_choose_multi(client):
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
     # ordering controlled by 'ordering' on 'TitleImage' model
-    qs = content.slideshow.through.objects.all()
-    assert [1, 2] == [item.order for item in qs]
+    assert [1, 2] == [item.order for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -101,8 +100,7 @@ def test_wizard_image_choose_category_multi(client):
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
     # ordering controlled by 'ordering' on 'TitleImage' model
-    qs = content.slideshow.through.objects.all()
-    assert [1, 2] == [item.order for item in qs]
+    assert [1, 2] == [item.order for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -158,7 +156,7 @@ def test_wizard_image_order_multi_down_1(client):
     _post_multi_order(client, content, {'down': t1.pk})
     assert [
         t2.pk, t1.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -168,7 +166,7 @@ def test_wizard_image_order_multi_down_2(client):
     _post_multi_order(client, content, {'down': t2.pk})
     assert [
         t1.pk, t3.pk, t2.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -181,7 +179,7 @@ def test_wizard_image_order_multi_down_4(client):
     assert 'Cannot move the last item down' in str(e.value)
     assert [
         t1.pk, t2.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -193,7 +191,7 @@ def test_wizard_image_order_multi_down_invalid(client):
     assert 'Cannot find item' in str(e.value)
     assert [
         t1.pk, t2.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -206,7 +204,7 @@ def test_wizard_image_order_multi_up_1(client):
     assert 'Cannot move the first item up' in str(e.value)
     assert [
         t1.pk, t2.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -216,7 +214,7 @@ def test_wizard_image_order_multi_up_2(client):
     _post_multi_order(client, content, {'up': t2.pk})
     assert [
         t2.pk, t1.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -226,7 +224,7 @@ def test_wizard_image_order_multi_up_4(client):
     _post_multi_order(client, content, {'up': t4.pk})
     assert [
         t1.pk, t2.pk, t4.pk, t3.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -238,7 +236,7 @@ def test_wizard_image_order_multi_up_invalid(client):
     assert 'Cannot find item' in str(e.value)
     assert [
         t1.pk, t2.pk, t3.pk, t4.pk
-    ] == [item.pk for item in content.slideshow.through.objects.all()]
+    ] == [item.pk for item in content.ordered_slideshow()]
 
 
 @pytest.mark.django_db
@@ -284,7 +282,7 @@ def test_wizard_image_select_multi(client):
     assert expect in response['Location']
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
-    qs = content.slideshow.through.objects.all()
+    qs = content.ordered_slideshow()
     result = [item.image.pk for item in qs]
     assert image_1.pk in result and image_3.pk in result
     # ordering controlled by 'ordering' on 'TitleImage' model

@@ -31,13 +31,13 @@
                     <h3>Picture</h3>
                     <img src="{% thumbnail c.picture.image 200x200 crop='center' %}">
                   {% endif %}
-                  {% if c.slideshow.count %}
+                  {% if c.ordered_slideshow.count %}
                     <h3>Slideshow</h3>
-                    {% for item in c.slideshow.all %}
+                    {% for item in c.ordered_slideshow %}
                       <br>
-                      <img src="{% thumbnail item.image 100x100 crop='center' %}">
+                      <img src="{% thumbnail item.image.image 100x100 crop='center' %}">
                       <br>
-                      {{ item.title }}
+                      {{ item.image.title }}
                       <br>
                     {% endfor %}
                   {% endif %}

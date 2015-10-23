@@ -57,6 +57,9 @@ class Title(ContentModel):
         for image in self.slideshow.all():
             published_instance.slideshow.add(image)
 
+    def ordered_slideshow(self):
+        return self.slideshow.through.objects.filter(content=self)
+
     def url_publish(self):
         return reverse('example.title.publish', kwargs={'pk': self.pk})
 
