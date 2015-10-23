@@ -847,7 +847,8 @@ class WizardMixin:
             ).aggregate(
                 Max('order')
             )
-            order = result.get('order__max', 1) + 1
+            order = result.get('order__max') or 0
+            order = order + 1
             obj = class_many_to_many(
                 content=content_obj,
                 image=image,

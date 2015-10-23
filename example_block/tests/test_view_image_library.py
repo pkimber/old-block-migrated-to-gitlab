@@ -1,14 +1,16 @@
 # -*- encoding: utf-8 -*-
 import io
+import PIL
 import pytest
-
-from PIL import Image
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
-from block.models import Wizard
+from block.models import (
+    Image,
+    Wizard,
+)
 from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
@@ -146,6 +148,7 @@ def test_wizard_image_choose_category_single(client):
 
 @pytest.mark.django_db
 def test_wizard_image_remove_single(client):
+    """The multi test for removing is ``test_wizard_image_select_multi``."""
     image = ImageFactory()
     content = TitleFactory(picture=image)
     user = UserFactory(is_staff=True)
@@ -163,6 +166,7 @@ def test_wizard_image_remove_single(client):
 
 @pytest.mark.django_db
 def test_wizard_image_select_multi(client):
+    """The single test for removing is ``test_wizard_image_remove_single``."""
     image_1 = ImageFactory()
     image_2 = ImageFactory()
     image_3 = ImageFactory()
@@ -193,7 +197,44 @@ def test_wizard_image_select_multi(client):
 
 
 @pytest.mark.django_db
-def test_wizard_image_upload(client):
+def test_wizard_image_upload_multi(client):
+    content = TitleFactory()
+    category = ImageCategoryFactory()
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_multi(content, 'block.wizard.image.upload')
+    # create an image ready to upload
+    fp = io.BytesIO()
+    PIL.Image.new('1', (1,1)).save(fp, 'png')
+    fp.seek(0)
+    image_file = SimpleUploadedFile(
+        'file.png',
+        fp.read(),
+        content_type='image/png'
+    )
+    data = {
+        'add_to_library': True,
+        'category': category.pk,
+        'image': image_file,
+        'title': 'Cricket',
+    }
+    response = client.post(url, data)
+    # check
+    content.refresh_from_db()
+    assert 302 == response.status_code
+    expect = url_multi(content, 'block.wizard.image.option')
+    assert expect in response['Location']
+    assert 1 == content.slideshow.count()
+    image = content.slideshow.first()
+    assert 'Cricket' == image.title
+    assert image.category == category
+    assert image.deleted is False
+    # check an image has been added to the database
+    assert 1 == Image.objects.count()
+
+
+@pytest.mark.django_db
+def test_wizard_image_upload_single(client):
     content = TitleFactory()
     category = ImageCategoryFactory()
     ImageFactory()
@@ -204,7 +245,7 @@ def test_wizard_image_upload(client):
     url = url_single(content, 'block.wizard.image.upload')
     # create an image ready to upload
     fp = io.BytesIO()
-    Image.new('1', (1,1)).save(fp, 'png')
+    PIL.Image.new('1', (1,1)).save(fp, 'png')
     fp.seek(0)
     image_file = SimpleUploadedFile(
         'file.png',
@@ -227,3 +268,5 @@ def test_wizard_image_upload(client):
     assert content.picture is not None
     assert content.picture.category == category
     assert content.picture.deleted is False
+    # check an image has been added to the database
+    assert 2 == Image.objects.count()
