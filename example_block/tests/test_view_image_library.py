@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from block.models import (
+    BlockError,
     Image,
     Wizard,
 )
@@ -126,6 +127,118 @@ def test_wizard_image_choose_category_single(client):
     assert expect in response['Location']
     content.refresh_from_db()
     assert image == content.picture
+
+
+def _set_up_order_multi(content):
+    image_1 = ImageFactory()
+    image_2 = ImageFactory()
+    image_3 = ImageFactory()
+    image_4 = ImageFactory()
+    t1 = TitleImageFactory(content=content, image=image_1, order=1)
+    t2 = TitleImageFactory(content=content, image=image_2, order=2)
+    t3 = TitleImageFactory(content=content, image=image_3, order=3)
+    t4 = TitleImageFactory(content=content, image=image_4, order=4)
+    return t1, t2, t3, t4
+
+
+def _post_multi_order(client, content, data):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_multi(content, 'block.wizard.image.order')
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    assert url in response['Location']
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_down_1(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'down': t1.pk})
+    assert [
+        t2.pk, t1.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_down_2(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'down': t2.pk})
+    assert [
+        t1.pk, t3.pk, t2.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_down_4(client):
+    """Trying to move the last item down, should raise an exception."""
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'down': t4.pk})
+    assert 'Cannot move the last item down' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_down_invalid(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'down': t1.pk+t2.pk+t3.pk+t4.pk})
+    assert 'Cannot find item' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_up_1(client):
+    """Trying to move the first item up, should raise an exception."""
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'up': t1.pk})
+    assert 'Cannot move the first item up' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_up_2(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'up': t2.pk})
+    assert [
+        t2.pk, t1.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_up_4(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'up': t4.pk})
+    assert [
+        t1.pk, t2.pk, t4.pk, t3.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
+
+
+@pytest.mark.django_db
+def test_wizard_image_order_multi_up_invalid(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'up': t1.pk+t2.pk+t3.pk+t4.pk})
+    assert 'Cannot find item' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.slideshow.through.objects.all()]
 
 
 @pytest.mark.django_db
