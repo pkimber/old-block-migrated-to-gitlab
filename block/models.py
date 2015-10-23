@@ -64,7 +64,7 @@ class Wizard:
         if self.wizard_type == self.IMAGE:
             result = 'block.wizard.image.option'
         elif self.wizard_type == self.LINK:
-            result = 'block.link.wizard'
+            result = 'block.wizard.link.option'
         else:
             raise BlockError(
                 "Unknown wizard type: '{}'".format(self.wizard_type)

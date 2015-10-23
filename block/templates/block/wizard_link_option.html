@@ -1,0 +1,101 @@
+{% extends 'dash/base.html' %}
+
+{% load thumbnail %}
+
+{% block sub_title %}
+  Link Wizard
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Link Wizard
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+          <a href="{{ url_page_design }}" class="pure-menu-link">
+            <i class="fa fa-reply"></i>
+          </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1 pure-u-md-1-2">
+      <h3>What would you like to do?</h3>
+      <p>
+        Link to another site
+        <i class="fa fa-external-link"></i>
+      </p>
+      <p>
+        Link to a page on this site
+        <i class="fa fa-file-text-o"></i>
+      </p>
+      <a href="{{ url_upload }}" class="pure-menu-link">
+        <i class="fa fa-cloud-upload"></i>
+        Upload a document and link to it
+      </a>
+      <p>
+        Use an existing document
+      </p>
+      <p>
+        Or:
+      </p>
+      {% if link %}
+        <p>
+          Maintenance:
+        </p>
+        <a href="{{ url_remove }}" class="pure-menu-link">
+          <i class="fa fa-times"></i>
+          Remove the {{ field_name }} from your page
+        </a>
+      {% endif %}
+      {# Wizard.MULTI #}
+      {% if many_to_many.count %}
+        <p>
+          Maintenance:
+        </p>
+        <a href="{{ url_order }}" class="pure-menu-link">
+          <i class="fa fa-arrow-up"></i>
+          Order links in your {{ field_name }}
+        </a>
+        <a href="{{ url_select }}" class="pure-menu-link">
+          <i class="fa fa-times"></i>
+          Remove links from your {{ field_name }}
+        </a>
+      {% endif %}
+      <br>
+      <a href="{{ url_page_design }}" class="pure-button pure-button-primary">
+        <i class="fa fa-reply"></i>
+        Finish
+      </a>
+    </div>
+    <div class="pure-u-1 pure-u-md-1-2">
+      {# Wizard.SINGLE #}
+      {% if image %}
+        <h3>Current {{ field_name }}:</h3>
+        <img src="{% thumbnail image.image 100x100  crop='center' %}">
+        <br>
+        {{ image.title }}
+        <br>
+        <br>
+      {% endif %}
+      {# Wizard.MULTI #}
+      {% if many_to_many.count %}
+        <h3>Current {{ field_name }}:</h3>
+        {% for item in many_to_many %}
+          <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+          <br>
+          {{ item.order }}.
+          {{ item.image.title }}
+          <br>
+          <br>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock content %}

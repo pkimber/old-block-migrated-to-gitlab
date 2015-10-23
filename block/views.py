@@ -785,16 +785,6 @@ class WizardMixin:
                 )
             )
 
-    def _get_image(self):
-        link_type = self._link_type()
-        if link_type == Wizard.SINGLE:
-            field = self._get_field()
-            return field
-        else:
-            raise BlockError(
-                "Cannot '_get_image' for 'link_type': '{}'".format(link_type)
-            )
-
     def _kwargs(self):
         content_type_pk = self.kwargs['content']
         wizard_type = self.kwargs['type']
@@ -823,6 +813,19 @@ class WizardMixin:
 
     def _page_design_url(self, content_obj):
         return content_obj.block.page_section.page.get_design_url()
+
+
+class WizardImageMixin(WizardMixin):
+
+    def _get_image(self):
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            field = self._get_field()
+            return field
+        else:
+            raise BlockError(
+                "Cannot '_get_image' for 'link_type': '{}'".format(link_type)
+            )
 
     def _update_image(self, content_obj, image):
         field_name = self._link_field_name(content_obj)
@@ -884,7 +887,7 @@ class WizardMixin:
 
 
 class WizardImageChoose(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
 
     template_name = 'block/wizard_image_choose.html'
 
@@ -949,13 +952,13 @@ class WizardImageChoose(
 
 
 class WizardImageOption(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, TemplateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, TemplateView):
 
     template_name = 'block/wizard_image_option.html'
 
 
 class WizardImageOrder(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
 
     form_class = EmptyForm
     template_name = 'block/wizard_image_order.html'
@@ -1004,7 +1007,7 @@ class WizardImageOrder(
 
 
 class WizardImageRemove(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, UpdateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, UpdateView):
 
     form_class = EmptyForm
     template_name = 'block/wizard_image_remove.html'
@@ -1029,7 +1032,7 @@ class WizardImageRemove(
 
 
 class WizardImageSelect(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
     """List the current images in the slideshow and allow the user to remove.
 
     Allow the user to de-select any of the images.
@@ -1071,7 +1074,7 @@ class WizardImageSelect(
 
 
 class WizardImageUpload(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, CreateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, CreateView):
 
     form_class = ImageForm
     template_name = 'block/wizard_image_upload.html'
@@ -1087,6 +1090,12 @@ class WizardImageUpload(
         elif link_type == Wizard.MULTI:
             url = reverse('block.wizard.image.option', kwargs=self._kwargs())
         return HttpResponseRedirect(url)
+
+
+class WizardLinkOption(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, TemplateView):
+
+    template_name = 'block/wizard_link_option.html'
 
 
 class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):

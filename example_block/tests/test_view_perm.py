@@ -87,3 +87,10 @@ def test_wizard_image_upload(perm_check):
     content = TitleFactory()
     url = url_single(content, 'block.wizard.image.upload')
     perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_link_option(perm_check):
+    content = TitleFactory()
+    url = url_single(content, 'block.wizard.link.option')
+    perm_check.staff(url)

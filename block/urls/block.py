@@ -115,8 +115,4 @@ urlpatterns = patterns(
         view=TemplateSectionRemoveView.as_view(),
         name='block.template.section.remove'
         ),
-    url(regex=r'^wizard/link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/$',
-        view=LinkWizard.as_view(),
-        name='block.link.wizard'
-        ),
 )

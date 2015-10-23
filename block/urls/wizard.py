@@ -12,11 +12,13 @@ from block.views import (
     WizardImageRemove,
     WizardImageSelect,
     WizardImageUpload,
+    WizardLinkOption,
 )
 
 
 urlpatterns = patterns(
     '',
+    # image wizard
     url(regex=r'^image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/choose/$',
         view=WizardImageChoose.as_view(),
         name='block.wizard.image.choose'
@@ -45,8 +47,9 @@ urlpatterns = patterns(
         view=WizardImageUpload.as_view(),
         name='block.wizard.image.upload'
         ),
-    #url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/$',
-    #    view=ImageWizard.as_view(),
-    #    name='block.image.wizard'
-    #    ),
+    # link wizard
+    url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/option/$',
+        view=WizardLinkOption.as_view(),
+        name='block.wizard.link.option'
+        ),
 )
