@@ -886,6 +886,77 @@ class WizardImageMixin(WizardMixin):
         return context
 
 
+class WizardLinkMixin(WizardMixin):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        kwargs = self._kwargs()
+        # categories
+        #categories = []
+        #for category in ImageCategory.objects.categories():
+        #    kw = kwargs.copy()
+        #    kw.update({'category': category.slug})
+        #    url = reverse('block.wizard.image.choose', kwargs=kw)
+        #    categories.append(dict(name=category.name, url=url))
+        content_obj = self._content_obj()
+        context.update(dict(
+            #categories=categories,
+            field_name=self._field_name(),
+            object=content_obj,
+            url_page_design=self._page_design_url(content_obj),
+            #url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
+            url_option=reverse('block.wizard.link.option', kwargs=kwargs),
+            #url_order=reverse('block.wizard.image.order', kwargs=kwargs),
+            #url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
+            #url_select=reverse('block.wizard.image.select', kwargs=kwargs),
+            url_upload=reverse('block.wizard.link.upload', kwargs=kwargs),
+        ))
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            context.update(dict(link=self._get_link()))
+        #elif link_type == Wizard.MULTI:
+        #    context.update(dict(many_to_many=self._get_many_to_many()))
+        #else:
+        #    raise BlockError("Unknown 'link_type': '{}'".format(link_type))
+        return context
+
+    def _get_link(self):
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            field = self._get_field()
+            return field
+        else:
+            raise BlockError(
+                "Cannot '_get_link' for 'link_type': '{}'".format(link_type)
+            )
+
+    def _update_link(self, content_obj, document):
+        field_name = self._link_field_name(content_obj)
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            setattr(content_obj, field_name, document)
+        elif link_type == Wizard.MULTI:
+            field = self._get_field()
+            class_many_to_many = field.through
+            result = class_many_to_many.objects.filter(
+                content=content_obj
+            ).aggregate(
+                Max('order')
+            )
+            order = result.get('order__max') or 0
+            order = order + 1
+            obj = class_many_to_many(
+                content=content_obj,
+                image=image,
+                order=order,
+            )
+            obj.save()
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
+        content_obj.set_pending_edit()
+        content_obj.save()
+
+
 class WizardImageChoose(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
 
@@ -1093,9 +1164,31 @@ class WizardImageUpload(
 
 
 class WizardLinkOption(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, TemplateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, TemplateView):
 
     template_name = 'block/wizard_link_option.html'
+
+
+class WizardLinkUpload(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
+
+    form_class = DocumentForm
+    template_name = 'block/wizard_link_upload.html'
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        with transaction.atomic():
+            self.object = form.save()
+            self._update_link(
+                content_obj,
+                Link.objects.create_document_link(self.object)
+            )
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            url = self._page_design_url(content_obj)
+        elif link_type == Wizard.MULTI:
+            url = reverse('block.wizard.link.option', kwargs=self._kwargs())
+        return HttpResponseRedirect(url)
 
 
 class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):

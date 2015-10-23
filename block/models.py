@@ -751,7 +751,8 @@ class Document(models.Model) :
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
-        self.original_file_name = os.path.basename(self.document.name)
+        if self.document.name:
+            self.original_file_name = os.path.basename(self.document.name)
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 

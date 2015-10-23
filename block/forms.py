@@ -83,6 +83,12 @@ class ContentEmptyForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     """Allow the user to upload a document (for the form wizard)."""
 
+    add_to_library = forms.BooleanField(
+        help_text='tick this box to add the document to the library',
+        initial=True,
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         title = self.fields['title']
@@ -92,8 +98,9 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = (
-            'title',
             'document',
+            'title',
+            'add_to_library',
         )
         widgets = {
             'document': forms.FileInput,

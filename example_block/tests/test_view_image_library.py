@@ -27,6 +27,18 @@ from login.tests.factories import (
 )
 
 
+def test_file():
+    """create an (image) file ready to upload."""
+    fp = io.BytesIO()
+    PIL.Image.new('1', (1,1)).save(fp, 'png')
+    fp.seek(0)
+    return SimpleUploadedFile(
+        'file.png',
+        fp.read(),
+        content_type='image/png'
+    )
+
+
 @pytest.mark.django_db
 def test_wizard_image_choose_multi(client):
     content = TitleFactory()
@@ -293,19 +305,10 @@ def test_wizard_image_upload_multi(client):
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     url = url_multi(content, 'block.wizard.image.upload')
-    # create an image ready to upload
-    fp = io.BytesIO()
-    PIL.Image.new('1', (1,1)).save(fp, 'png')
-    fp.seek(0)
-    image_file = SimpleUploadedFile(
-        'file.png',
-        fp.read(),
-        content_type='image/png'
-    )
     data = {
         'add_to_library': True,
         'category': category.pk,
-        'image': image_file,
+        'image': test_file(),
         'title': 'Cricket',
     }
     response = client.post(url, data)
@@ -333,19 +336,10 @@ def test_wizard_image_upload_single(client):
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     url = url_single(content, 'block.wizard.image.upload')
-    # create an image ready to upload
-    fp = io.BytesIO()
-    PIL.Image.new('1', (1,1)).save(fp, 'png')
-    fp.seek(0)
-    image_file = SimpleUploadedFile(
-        'file.png',
-        fp.read(),
-        content_type='image/png'
-    )
     data = {
         'add_to_library': True,
         'category': category.pk,
-        'image': image_file,
+        'image': test_file(),
         'title': 'Cricket',
     }
     response = client.post(url, data)

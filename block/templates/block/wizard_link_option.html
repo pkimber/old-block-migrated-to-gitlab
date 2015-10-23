@@ -76,13 +76,16 @@
     </div>
     <div class="pure-u-1 pure-u-md-1-2">
       {# Wizard.SINGLE #}
-      {% if image %}
+      {% if link %}
         <h3>Current {{ field_name }}:</h3>
-        <img src="{% thumbnail image.image 100x100  crop='center' %}">
-        <br>
-        {{ image.title }}
-        <br>
-        <br>
+        {% if link.is_document %}
+          <strong>Document</strong>:
+        {% endif %}
+        {{ link.title }}
+        {% if link.is_document %}
+          <br>
+          <small>(Filename: {{ link.document.original_file_name }})</small>
+        {% endif %}
       {% endif %}
       {# Wizard.MULTI #}
       {% if many_to_many.count %}

@@ -10,7 +10,7 @@ from example_block.tests.factories import TitleFactory
 from login.tests.fixture import perm_check
 
 
-def _reverse_url(content, url_name, field_name, wizard_type, category):
+def reverse_wizard_url(content, url_name, field_name, wizard_type, category):
     """Get the wizard url for a piece of content."""
     content_type = ContentType.objects.get_for_model(content)
     kwargs = {
@@ -25,11 +25,15 @@ def _reverse_url(content, url_name, field_name, wizard_type, category):
 
 
 def url_multi(content, url_name, category=None):
-    return _reverse_url(content, url_name, 'slideshow', Wizard.MULTI, category)
+    return reverse_wizard_url(
+        content, url_name, 'slideshow', Wizard.MULTI, category
+    )
 
 
 def url_single(content, url_name, category=None):
-    return _reverse_url(content, url_name, 'picture', Wizard.SINGLE, category)
+    return reverse_wizard_url(
+        content, url_name, 'picture', Wizard.SINGLE, category
+    )
 
 
 @pytest.mark.django_db
@@ -93,4 +97,11 @@ def test_wizard_image_upload(perm_check):
 def test_wizard_link_option(perm_check):
     content = TitleFactory()
     url = url_single(content, 'block.wizard.link.option')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_link_upload(perm_check):
+    content = TitleFactory()
+    url = url_single(content, 'block.wizard.link.upload')
     perm_check.staff(url)
