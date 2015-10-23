@@ -86,7 +86,7 @@ class TitleImage(models.Model):
     https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
 
     """
-    content_obj = models.ForeignKey(Title)
+    content = models.ForeignKey(Title)
     image = models.ForeignKey(Image)
     order = models.IntegerField()
 

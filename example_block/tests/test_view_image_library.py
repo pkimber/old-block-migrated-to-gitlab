@@ -13,7 +13,10 @@ from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
 )
-from example_block.tests.factories import TitleFactory
+from example_block.tests.factories import (
+    TitleFactory,
+    TitleImageFactory,
+)
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
@@ -142,7 +145,7 @@ def test_wizard_image_choose_category_single(client):
 
 
 @pytest.mark.django_db
-def test_wizard_image_remove(client):
+def test_wizard_image_remove_single(client):
     image = ImageFactory()
     content = TitleFactory(picture=image)
     user = UserFactory(is_staff=True)
@@ -156,6 +159,37 @@ def test_wizard_image_remove(client):
     assert 302 == response.status_code
     assert expect in response['Location']
     assert content.picture is None
+
+
+@pytest.mark.django_db
+def test_wizard_image_select_multi(client):
+    image_1 = ImageFactory()
+    image_2 = ImageFactory()
+    image_3 = ImageFactory()
+    image_4 = ImageFactory()
+    content = TitleFactory()
+    through_1 = TitleImageFactory(content=content, image=image_1, order=4)
+    through_2 = TitleImageFactory(content=content, image=image_2, order=3)
+    through_3 = TitleImageFactory(content=content, image=image_3, order=2)
+    through_4 = TitleImageFactory(content=content, image=image_4, order=1)
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_multi(content, 'block.wizard.image.select')
+    data = {
+        'many_to_many': [through_1.pk, through_3.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_multi(content, 'block.wizard.image.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.slideshow.count()
+    qs = content.slideshow.through.objects.all()
+    result = [item.image.pk for item in qs]
+    assert image_1.pk in result and image_3.pk in result
+    # ordering controlled by 'ordering' on 'TitleImage' model
+    assert [1, 2] == [item.order for item in qs]
 
 
 @pytest.mark.django_db

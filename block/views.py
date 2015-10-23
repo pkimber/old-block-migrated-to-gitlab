@@ -781,7 +781,7 @@ class WizardMixin:
             #print(content_obj)
             #return content_obj.many_to_many()
             field = self._get_field()
-            return field.through.objects.filter(content_obj=content_obj)
+            return field.through.objects.filter(content=content_obj)
         else:
             raise BlockError(
                 "Cannot '_get_many_to_many' for 'link_type': '{}'".format(
@@ -843,13 +843,13 @@ class WizardMixin:
             field = self._get_field()
             class_many_to_many = field.through
             result = class_many_to_many.objects.filter(
-                content_obj=content_obj
+                content=content_obj
             ).aggregate(
                 Max('order')
             )
             order = result.get('order__max', 1) + 1
             obj = class_many_to_many(
-                content_obj=content_obj,
+                content=content_obj,
                 image=image,
                 order=order,
             )
@@ -903,7 +903,7 @@ class WizardImageChoose(
             field = self._get_field()
             class_many_to_many = field.through
             result = class_many_to_many.objects.filter(
-                content_obj=content_obj
+                content=content_obj
             ).aggregate(
                 Max('order')
             )
@@ -911,7 +911,7 @@ class WizardImageChoose(
             for image in images:
                 order = order + 1
                 obj = class_many_to_many(
-                    content_obj=content_obj,
+                    content=content_obj,
                     image=image,
                     order=order,
                 )
@@ -1009,7 +1009,7 @@ class WizardImageSelect(
             for item in many_to_many:
                 order = order + 1
                 obj = class_many_to_many(
-                    content_obj=content_obj,
+                    content=content_obj,
                     image=item.image,
                     order=order,
                 )
@@ -1018,6 +1018,7 @@ class WizardImageSelect(
     def form_valid(self, form):
         content_obj = self._content_obj()
         many_to_many = form.cleaned_data['many_to_many']
+        #import pdb; pdb.set_trace()
         self._update_many_to_many(many_to_many)
         return HttpResponseRedirect(
             reverse('block.wizard.image.option', kwargs=self._kwargs())

@@ -290,6 +290,7 @@ class ImageMultiSelectForm(forms.Form):
 class ImageSelectForm(forms.Form):
     """List of current images in the slideshow."""
 
+    # Note: The ``queryset`` will not contain ``Image`` records.
     many_to_many = ManyToManyMultipleChoiceField(
         queryset=Image.objects.none(),
         required=False,
@@ -305,10 +306,10 @@ class ImageSelectForm(forms.Form):
         initial = {item.pk: True for item in qs_many_to_many}
         many_to_many.initial = initial
 
-    class Meta:
-        fields = (
-            'images',
-        )
+    #class Meta:
+    #    fields = (
+    #        'many_to_many',
+    #    )
 
 
 class ImageUpdateForm(RequiredFieldForm):
