@@ -19,32 +19,14 @@ from example_block.tests.factories import (
     TitleFactory,
     TitleImageFactory,
 )
+from example_block.tests.test_view_perm import (
+    url_multi,
+    url_single,
+)
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
 )
-
-
-def _reverse_url(content, url_name, field_name, wizard_type, category):
-    """Get the wizard url for a piece of content."""
-    content_type = ContentType.objects.get_for_model(content)
-    kwargs = {
-        'content': content_type.pk,
-        'pk': content.pk,
-        'field': field_name,
-        'type': wizard_type,
-    }
-    if category:
-        kwargs.update(category=category.slug)
-    return reverse(url_name, kwargs=kwargs)
-
-
-def url_multi(content, url_name, category=None):
-    return _reverse_url(content, url_name, 'slideshow', Wizard.MULTI, category)
-
-
-def url_single(content, url_name, category=None):
-    return _reverse_url(content, url_name, 'picture', Wizard.SINGLE, category)
 
 
 @pytest.mark.django_db

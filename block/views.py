@@ -878,6 +878,7 @@ class WizardMixin:
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
+            url_order=reverse('block.wizard.image.order', kwargs=kwargs),
             url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
             url_select=reverse('block.wizard.image.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.image.upload', kwargs=kwargs),
@@ -961,6 +962,50 @@ class WizardImageOption(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, TemplateView):
 
     template_name = 'block/wizard_image_option.html'
+
+
+class WizardImageOrder(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardMixin, FormView):
+
+    form_class = EmptyForm
+    template_name = 'block/wizard_image_order.html'
+
+    def form_invalid(self, form):
+        import pdb
+        pdb.set_trace()
+        print(form)
+
+    def form_valid(self, form):
+        #import pdb; pdb.set_trace()
+        #print(form)
+        #print(form.cleaned_data)
+        #print(self.request.POST)
+        print('down: {}'.format(self.request.POST.get('down')))
+        print('up  : {}'.format(self.request.POST.get('up')))
+        content_obj = self._content_obj()
+        #many_to_many = form.cleaned_data['many_to_many']
+        #self._update_many_to_many(many_to_many)
+        return HttpResponseRedirect(
+            reverse('block.wizard.image.order', kwargs=self._kwargs())
+        )
+
+
+#from django.forms.models import modelform_factory
+#BookForm = modelform_factory(, fields=("author", "title"))
+#
+#def wizard_image_order(request):
+#    ArticleFormSet = formset_factory(ArticleForm)
+#    if request.method == 'POST':
+#        formset = ArticleFormSet(request.POST, request.FILES)
+#        if formset.is_valid():
+#            # do something with the formset.cleaned_data
+#            pass
+#        else:
+#            formset = ArticleFormSet()
+#    return render_to_response(
+#        'block/wizard_image_order.html',
+#        {'formset': formset}
+#    )
 
 
 class WizardImageRemove(

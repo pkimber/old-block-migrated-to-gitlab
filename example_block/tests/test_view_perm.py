@@ -10,24 +10,32 @@ from example_block.tests.factories import TitleFactory
 from login.tests.fixture import perm_check
 
 
-def reverse_url(content, url_name, category=None):
+def _reverse_url(content, url_name, field_name, wizard_type, category):
     """Get the wizard url for a piece of content."""
     content_type = ContentType.objects.get_for_model(content)
     kwargs = {
         'content': content_type.pk,
         'pk': content.pk,
-        'field': 'picture',
-        'type': Wizard.SINGLE,
+        'field': field_name,
+        'type': wizard_type,
     }
     if category:
         kwargs.update(category=category.slug)
     return reverse(url_name, kwargs=kwargs)
 
 
+def url_multi(content, url_name, category=None):
+    return _reverse_url(content, url_name, 'slideshow', Wizard.MULTI, category)
+
+
+def url_single(content, url_name, category=None):
+    return _reverse_url(content, url_name, 'picture', Wizard.SINGLE, category)
+
+
 @pytest.mark.django_db
 def test_wizard_image_choose(perm_check):
     content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.choose')
+    url = url_single(content, 'block.wizard.image.choose')
     perm_check.staff(url)
 
 
@@ -35,26 +43,47 @@ def test_wizard_image_choose(perm_check):
 def test_wizard_image_choose_category(perm_check):
     category = ImageCategoryFactory()
     content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.choose', category=category)
+    url = url_single(content, 'block.wizard.image.choose', category=category)
     perm_check.staff(url)
 
 
 @pytest.mark.django_db
 def test_wizard_image_option(perm_check):
     content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.option')
+    url = url_single(content, 'block.wizard.image.option')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_image_order(perm_check):
+    content = TitleFactory()
+    url = url_multi(content, 'block.wizard.image.order')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_image_select(perm_check):
+    content = TitleFactory()
+    url = url_single(content, 'block.wizard.image.order')
     perm_check.staff(url)
 
 
 @pytest.mark.django_db
 def test_wizard_image_remove(perm_check):
     content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.remove')
+    url = url_single(content, 'block.wizard.image.remove')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_image_select(perm_check):
+    content = TitleFactory()
+    url = url_multi(content, 'block.wizard.image.select')
     perm_check.staff(url)
 
 
 @pytest.mark.django_db
 def test_wizard_image_upload(perm_check):
     content = TitleFactory()
-    url = reverse_url(content, 'block.wizard.image.upload')
+    url = url_single(content, 'block.wizard.image.upload')
     perm_check.staff(url)
