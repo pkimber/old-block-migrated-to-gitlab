@@ -970,42 +970,47 @@ class WizardImageOrder(
     form_class = EmptyForm
     template_name = 'block/wizard_image_order.html'
 
-    def form_invalid(self, form):
-        import pdb
-        pdb.set_trace()
-        print(form)
+    def _move_up_down(self, up, down):
+        pk = int(up) if up else int(down)
+        idx = None
+        ordered = []
+        many_to_many = self._get_many_to_many()
+        for count, item in enumerate(many_to_many):
+            if item.pk == pk:
+                idx = count
+            ordered.append(item.pk)
+            count = count + 1
+        if idx is None:
+            raise BlockError("Cannot find item {} in {}".format(pk, ordered))
+        if down:
+            if idx == len(ordered) - 1:
+                raise BlockError("Cannot move the last item down")
+            ordered[idx], ordered[idx+1] = ordered[idx+1], ordered[idx]
+        elif up: # up
+            if idx == 0:
+                raise BlockError("Cannot move the first item up")
+            ordered[idx], ordered[idx-1] = ordered[idx-1], ordered[idx]
+        else:
+            raise BlockError("No 'up' or 'down' (why?)")
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            for order, pk in enumerate(ordered, start=1):
+                obj = field.through.objects.get(
+                    pk=pk,
+                    content=content_obj,
+                )
+                obj.order = order
+                obj.save()
 
     def form_valid(self, form):
-        #import pdb; pdb.set_trace()
-        #print(form)
-        #print(form.cleaned_data)
-        #print(self.request.POST)
-        print('down: {}'.format(self.request.POST.get('down')))
-        print('up  : {}'.format(self.request.POST.get('up')))
-        content_obj = self._content_obj()
-        #many_to_many = form.cleaned_data['many_to_many']
-        #self._update_many_to_many(many_to_many)
+        up = self.request.POST.get('up')
+        down = self.request.POST.get('down')
+        if up or down:
+            self._move_up_down(up, down)
         return HttpResponseRedirect(
             reverse('block.wizard.image.order', kwargs=self._kwargs())
         )
-
-
-#from django.forms.models import modelform_factory
-#BookForm = modelform_factory(, fields=("author", "title"))
-#
-#def wizard_image_order(request):
-#    ArticleFormSet = formset_factory(ArticleForm)
-#    if request.method == 'POST':
-#        formset = ArticleFormSet(request.POST, request.FILES)
-#        if formset.is_valid():
-#            # do something with the formset.cleaned_data
-#            pass
-#        else:
-#            formset = ArticleFormSet()
-#    return render_to_response(
-#        'block/wizard_image_order.html',
-#        {'formset': formset}
-#    )
 
 
 class WizardImageRemove(
