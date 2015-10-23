@@ -49,7 +49,6 @@ from .forms import (
     ImageListForm,
     ImageMultiSelectForm,
     ImageSelectForm,
-    ImageTypeForm,
     ImageUpdateForm,
     LinkMultiSelectForm,
     LinkTypeForm,
@@ -768,7 +767,7 @@ class WizardMixin:
     def _field_name(self):
         return self.kwargs['field']
 
-    def _get_field(self): #, content_obj):
+    def _get_field(self):
         content_obj = self._content_obj()
         field_name = self._link_field_name(content_obj)
         return getattr(content_obj, field_name)
@@ -777,9 +776,6 @@ class WizardMixin:
         link_type = self._link_type()
         if link_type == Wizard.MULTI:
             content_obj = self._content_obj()
-            #import pdb; pdb.set_trace()
-            #print(content_obj)
-            #return content_obj.many_to_many()
             field = self._get_field()
             return field.through.objects.filter(content=content_obj)
         else:
@@ -790,20 +786,14 @@ class WizardMixin:
             )
 
     def _get_image(self):
-        #result = []
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             field = self._get_field()
             return field
-            #result.append(field)
         else:
             raise BlockError(
                 "Cannot '_get_image' for 'link_type': '{}'".format(link_type)
             )
-        #elif link_type == Wizard.MULTI:
-        #    for image in field.all():
-        #        result.append(image)
-        #return result
 
     def _kwargs(self):
         content_type_pk = self.kwargs['content']
@@ -1069,7 +1059,6 @@ class WizardImageSelect(
     def form_valid(self, form):
         content_obj = self._content_obj()
         many_to_many = form.cleaned_data['many_to_many']
-        #import pdb; pdb.set_trace()
         self._update_many_to_many(many_to_many)
         return HttpResponseRedirect(
             reverse('block.wizard.image.option', kwargs=self._kwargs())
@@ -1079,9 +1068,6 @@ class WizardImageSelect(
         kwargs = super().get_form_kwargs()
         kwargs.update(dict(many_to_many=self._get_many_to_many()))
         return kwargs
-
-    def get_object(self):
-        return self._content_obj()
 
 
 class WizardImageUpload(

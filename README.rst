@@ -3,9 +3,14 @@ block
 
 To Do
 
-- Ordering images in a slideshow
-- Multi-select
 - Link wizard
+
+  - Link to another site
+  - Page on this site
+  - Upload a document and link to it
+  - Use an existing document
+  - Remove link
+
 - Other tickets (to minimise migrations)
   - SEO
 

@@ -301,11 +301,6 @@ class ImageSelectForm(forms.Form):
         initial = {item.pk: True for item in qs_many_to_many}
         many_to_many.initial = initial
 
-    #class Meta:
-    #    fields = (
-    #        'many_to_many',
-    #    )
-
 
 class ImageUpdateForm(RequiredFieldForm):
 
@@ -345,67 +340,6 @@ class LinkMultiSelectForm(forms.Form):
     class Meta:
         fields = (
             'links',
-        )
-
-
-class ImageTypeForm(forms.Form):
-    """Allow the user to select the image type (for the form wizard)."""
-
-    FORM_IMAGE = 'i'
-    FORM_IMAGE_LIST = 'a'
-    FORM_IMAGE_MULTI_SELECT = 'c'
-    FORM_LIST_DELETE = 'list_delete'
-    # this form :)
-    FORM_IMAGE_TYPE = 'image_type'
-    # remove does not have a form
-    REMOVE = 'r'
-
-    OPTION_CAPTION = {
-        FORM_IMAGE: 'Upload an image',
-        FORM_IMAGE_LIST: 'Use an existing image',
-        FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
-        REMOVE: 'Remove {} from the page',
-        FORM_LIST_DELETE: 'Maintenance (delete images from the library)'
-    }
-
-    image_type = forms.ChoiceField(label="Choose the type of image")
-
-    def __init__(self, *args, **kwargs):
-        link_type = kwargs.pop('link_type')
-        super ().__init__(*args,**kwargs)
-        image_count = Image.objects.images().count()
-        # get the list of items (in the order displayed)
-        items = []
-        if link_type == Wizard.SINGLE:
-            if image_count:
-                items.append(self.FORM_IMAGE_LIST)
-        else:
-            if image_count:
-                items.append(self.FORM_IMAGE_MULTI_SELECT)
-        items.append(self.FORM_IMAGE)
-        items.append(self.REMOVE)
-        # only allow images to be deleted if there are any
-        if image_count:
-            items.append(self.FORM_LIST_DELETE)
-        # build the list of choices - adding the description
-        choices = []
-        for item in items:
-            description = self.OPTION_CAPTION[item]
-            if item == self.REMOVE:
-                if link_type == Wizard.MULTI:
-                    description = description.format('images')
-                else:
-                    description = description.format('image')
-            choices.append((item, description))
-        self.fields['image_type'].choices = choices
-        if image_count:
-            self.initial['image_type'] = self.FORM_IMAGE_LIST
-        else:
-            self.initial['image_type'] = self.FORM_IMAGE
-
-    class Meta:
-        fields = (
-            'image_type',
         )
 
 
