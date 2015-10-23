@@ -1,11 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django import forms
-from django.conf import settings
-from django.forms.widgets import RadioFieldRenderer
-from django.utils.html import (
-    format_html,
-    format_html_join,
-)
+from django.utils.html import format_html
 
 from easy_thumbnails.files import get_thumbnailer
 

@@ -26,12 +26,6 @@ from block.views import (
     TemplateSectionCreateView,
     TemplateSectionRemoveView,
     TemplateUpdateView,
-    WizardImageChoose,
-    WizardImageOption,
-    WizardImageOrder,
-    WizardImageRemove,
-    WizardImageSelect,
-    WizardImageUpload,
 )
 
 

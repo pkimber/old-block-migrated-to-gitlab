@@ -53,7 +53,9 @@ class Wizard:
         elif self.wizard_type == self.LINK:
             result = 'fa fa-globe'
         else:
-            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+            raise BlockError(
+                "Unknown wizard type: '{}'".format(self.wizard_type)
+            )
         return result
 
     @property
@@ -64,7 +66,9 @@ class Wizard:
         elif self.wizard_type == self.LINK:
             result = 'block.link.wizard'
         else:
-            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+            raise BlockError(
+                "Unknown wizard type: '{}'".format(self.wizard_type)
+            )
         return result
 
 

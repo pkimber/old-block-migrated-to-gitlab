@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from django.core.urlresolvers import reverse
-
 from example_block.tests.factories import TitleFactory
 from login.tests.fixture import perm_check
 

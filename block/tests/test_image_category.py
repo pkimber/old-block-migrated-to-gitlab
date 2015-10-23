@@ -9,7 +9,7 @@ from block.tests.factories import ImageFactory
 @pytest.mark.django_db
 def test_categories():
     c1 = ImageCategoryFactory(slug='a')
-    c2 = ImageCategoryFactory(slug='b', deleted=True)
+    ImageCategoryFactory(slug='b', deleted=True)
     c3 = ImageCategoryFactory(slug='c')
     result = [c.slug for c in ImageCategory.objects.categories()]
     assert [c1.slug, c3.slug] == result
@@ -18,14 +18,14 @@ def test_categories():
 @pytest.mark.django_db
 def test_in_use():
     c = ImageCategoryFactory()
-    image = ImageFactory(category=c)
+    ImageFactory(category=c)
     assert c.in_use is True
 
 
 @pytest.mark.django_db
 def test_in_use_deleted():
     c = ImageCategoryFactory()
-    image = ImageFactory(category=c, deleted=True)
+    ImageFactory(category=c, deleted=True)
     assert c.in_use is False
 
 

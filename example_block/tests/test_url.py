@@ -2,7 +2,6 @@
 import pytest
 
 from django.core.urlresolvers import NoReverseMatch
-from django.db.utils import IntegrityError
 
 from block.tests.factories import PageFactory
 from block.models import (
