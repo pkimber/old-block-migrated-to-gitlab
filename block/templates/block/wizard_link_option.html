@@ -33,7 +33,7 @@
         </p>
         {% for category in categories %}
             <a href="{{ category.url }}" class="pure-menu-link">
-              <i class="fa fa-picture-o"></i>
+              <i class="fa fa-link"></i>
               {{ category.name }}
             </a>
         {% endfor %}
@@ -42,6 +42,7 @@
         Choose from the whole library:
       </p>
       <a href="{{ url_choose }}" class="pure-menu-link">
+        <i class="fa fa-link"></i>
         Link Library
       </a>
       <p>
@@ -92,13 +93,11 @@
       {# Wizard.SINGLE #}
       {% if link %}
         <h3>Current {{ field_name }}:</h3>
-        {% if link.is_document %}
-          <strong>Document</strong>:
-        {% endif %}
+        <i class="fa fa-link"></i>
+        {{ link.link_type_description }}:
         {{ link.title }}
-        {% if link.is_document %}
-          <br>
-          <small>(Filename: {{ link.document.original_file_name }})</small>
+        {% if link.category.name %}
+          <small>({{ link.category.name }})</small>
         {% endif %}
       {% endif %}
       {# Wizard.MULTI #}

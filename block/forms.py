@@ -149,6 +149,7 @@ class ExternalLinkForm(forms.ModelForm):
         fields = (
             'title',
             'url_external',
+            'category',
         )
 
 
@@ -494,6 +495,7 @@ class PageListForm(forms.ModelForm):
         fields = (
             'title',
             'url_internal',
+            'category',
         )
 
 

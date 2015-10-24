@@ -1156,6 +1156,20 @@ class Link(TimeStampedModel):
         return bool(self.link_type == self.DOCUMENT)
 
     @property
+    def link_type_description(self):
+        if self.link_type == self.DOCUMENT:
+            return 'Document'
+        elif self.link_type == self.URL_EXTERNAL:
+            return 'Web Site'
+        elif self.link_type == self.URL_INTERNAL:
+            return 'Page'
+        else:
+            raise BlockError(
+                "'Link' {} does not have a 'link_type' (or is an "
+                "unknown link type: '{}')".format(self.pk, self.link_type)
+            )
+
+    @property
     def url(self):
         result = None
         if self.link_type == self.DOCUMENT:

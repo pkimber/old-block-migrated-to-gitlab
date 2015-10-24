@@ -29,9 +29,13 @@
                   {% if c.link %}
                     <br>
                     <h3>Link</h3>
-                    <a href="{{ c.link.url }}">
-                      <i class="fa fa-external-link"></i>
+                    <a href="{{ c.link.url }}" target="_blank">
+                      <i class="fa fa-link"></i>
+                      {{ c.link.link_type_description }}:
                       {{ c.link.title }}
+                      {% if c.link.category.name %}
+                        <small>({{ c.link.category.name }})</small>
+                      {% endif %}
                     </a>
                   {% endif %}
                   {% if c.picture %}
