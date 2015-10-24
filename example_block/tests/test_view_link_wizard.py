@@ -7,10 +7,12 @@ from block.models import (
     Document,
     Wizard,
 )
-from block.tests.factories import DocumentFactory
+from block.tests.factories import (
+    DocumentFactory,
+    LinkFactory,
+)
 from example_block.tests.factories import TitleFactory
-from example_block.tests.test_view_perm import reverse_wizard_url
-#from example_block.tests.test_view_image_library import test_file
+from example_block.tests.test_view_perm import url_link_single
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
@@ -25,18 +27,32 @@ def test_file():
     )
 
 
-def url_single(content, url_name, category=None):
-    return reverse_wizard_url(
-        content, url_name, 'link', Wizard.SINGLE, category
-    )
-
-
-
 @pytest.mark.django_db
 def test_perm(perm_check):
     urls = TitleFactory().wizard_urls
     url = next(x['url'] for x in urls if 'Link' in x['caption'])
     perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_choose_single(client):
+    content = TitleFactory()
+    LinkFactory()
+    link = LinkFactory()
+    user = UserFactory(is_staff=True)
+    assert content.link is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_single(content, 'block.wizard.link.choose')
+    data = {
+        'links': link.pk,
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = content.block.page_section.page.get_design_url()
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert link == content.link
 
 
 @pytest.mark.django_db
@@ -48,7 +64,7 @@ def test_upload_single(client):
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_single(content, 'block.wizard.link.upload')
+    url = url_link_single(content, 'block.wizard.link.upload')
     # create a document ready to upload
     data = {
         'add_to_library': True,
@@ -64,7 +80,7 @@ def test_upload_single(client):
     assert expect in response['Location']
     assert 'Cricket' == content.link.title
     assert content.link is not None
-    #assert content.picture.category == category
+    #assert content.link.category == category
     assert content.link.document.deleted is False
-    # check an image has been added to the database
+    # check a document has been added to the database
     assert 2 == Document.objects.count()

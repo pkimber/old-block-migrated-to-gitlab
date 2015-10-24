@@ -1065,6 +1065,15 @@ class LinkManager(models.Manager):
         obj.save()
         return obj
 
+    def links(self):
+        """List of links."""
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'category__slug',
+            'title',
+        )
+
 
 class Link(TimeStampedModel):
     """A link to something.

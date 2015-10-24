@@ -348,6 +348,31 @@ class LinkCategoryForm(RequiredFieldForm):
         )
 
 
+class LinkListForm(forms.Form):
+    """List of links (for the form wizard)."""
+
+    links = forms.ModelChoiceField(
+        queryset=Link.objects.links(),
+        empty_label=None,
+        widget=forms.RadioSelect,
+    )
+
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            links = self.fields['links']
+            links.queryset = Link.objects.links().filter(
+                category__slug=category_slug
+            )
+
+    class Meta:
+        model = Link
+        fields = (
+            'links',
+        )
+
+
 class LinkMultiSelectForm(forms.Form):
     """List of links (for the form wizard)."""
 

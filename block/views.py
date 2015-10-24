@@ -52,6 +52,7 @@ from .forms import (
     ImageUpdateForm,
     LinkCategoryEmptyForm,
     LinkCategoryForm,
+    LinkListForm,
     LinkMultiSelectForm,
     LinkTypeForm,
     PageEmptyForm,
@@ -907,7 +908,7 @@ class WizardLinkMixin(WizardMixin):
             field_name=self._field_name(),
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
-            #url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
+            url_choose=reverse('block.wizard.link.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.link.option', kwargs=kwargs),
             #url_order=reverse('block.wizard.image.order', kwargs=kwargs),
             #url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
@@ -1163,6 +1164,71 @@ class WizardImageUpload(
             url = self._page_design_url(content_obj)
         elif link_type == Wizard.MULTI:
             url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        return HttpResponseRedirect(url)
+
+
+class WizardLinkChoose(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+
+    template_name = 'block/wizard_link_choose.html'
+
+    #def _update_images_many_to_many(self, images):
+    #    content_obj = self._content_obj()
+    #    field = self._get_field()
+    #    with transaction.atomic():
+    #        field = self._get_field()
+    #        class_many_to_many = field.through
+    #        result = class_many_to_many.objects.filter(
+    #            content=content_obj
+    #        ).aggregate(
+    #            Max('order')
+    #        )
+    #        order = result.get('order__max') or 0
+    #        for image in images:
+    #            order = order + 1
+    #            obj = class_many_to_many(
+    #                content=content_obj,
+    #                image=image,
+    #                order=order,
+    #            )
+    #            obj.save()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category_slug = self.kwargs.get('category')
+        category = None
+        if category_slug:
+            category = LinkCategory.objects.get(slug=category_slug)
+        context.update(dict(category=category))
+        return context
+
+    def get_form_class(self):
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            return LinkListForm
+        #elif link_type == Wizard.MULTI:
+        #    return ImageMultiSelectForm
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        category_slug = self.kwargs.get('category')
+        kwargs.update(dict(category_slug=category_slug))
+        return kwargs
+
+    def form_valid(self, form):
+        images = form.cleaned_data['links']
+        content_obj = self._content_obj()
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            self._update_link(content_obj, images)
+            url = self._page_design_url(content_obj)
+        #elif link_type == Wizard.MULTI:
+        #    self._update_images_many_to_many(images)
+        #    url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return HttpResponseRedirect(url)
 
 

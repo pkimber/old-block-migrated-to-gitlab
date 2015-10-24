@@ -18,8 +18,8 @@ from example_block.tests.factories import (
     TitleImageFactory,
 )
 from example_block.tests.test_view_perm import (
-    url_multi,
-    url_single,
+    url_image_multi,
+    url_image_single,
 )
 from login.tests.factories import (
     TEST_PASSWORD,
@@ -48,14 +48,14 @@ def test_wizard_image_choose_multi(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_multi(content, 'block.wizard.image.choose')
+    url = url_image_multi(content, 'block.wizard.image.choose')
     data = {
         'images': [image_2.pk, image_1.pk],
     }
     response = client.post(url, data)
     # check
     assert 302 == response.status_code
-    expect = url_multi(content, 'block.wizard.image.option')
+    expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
@@ -71,7 +71,7 @@ def test_wizard_image_choose_single(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_single(content, 'block.wizard.image.choose')
+    url = url_image_single(content, 'block.wizard.image.choose')
     data = {
         'images': image.pk,
     }
@@ -96,7 +96,7 @@ def test_wizard_image_choose_category_multi(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_multi(content, 'block.wizard.image.choose', category=category)
+    url = url_image_multi(content, 'block.wizard.image.choose', category=category)
     assert category.slug in url
     data = {
         'images': [image_2.pk, image_4.pk],
@@ -104,7 +104,7 @@ def test_wizard_image_choose_category_multi(client):
     response = client.post(url, data)
     # check
     assert 302 == response.status_code
-    expect = url_multi(content, 'block.wizard.image.option')
+    expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
@@ -122,7 +122,7 @@ def test_wizard_image_choose_category_single(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_single(content, 'block.wizard.image.choose', category=category)
+    url = url_image_single(content, 'block.wizard.image.choose', category=category)
     assert category.slug in url
     data = {
         'images': image.pk,
@@ -151,7 +151,7 @@ def _set_up_order_multi(content):
 def _post_multi_order(client, content, data):
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_multi(content, 'block.wizard.image.order')
+    url = url_image_multi(content, 'block.wizard.image.order')
     response = client.post(url, data)
     # check
     assert 302 == response.status_code
@@ -256,7 +256,7 @@ def test_wizard_image_remove_single(client):
     user = UserFactory(is_staff=True)
     assert content.picture is not None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_single(content, 'block.wizard.image.remove')
+    url = url_image_single(content, 'block.wizard.image.remove')
     response = client.post(url)
     # check
     content.refresh_from_db()
@@ -280,14 +280,14 @@ def test_wizard_image_select_multi(client):
     TitleImageFactory(content=content, image=image_4, order=1)
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_multi(content, 'block.wizard.image.select')
+    url = url_image_multi(content, 'block.wizard.image.select')
     data = {
         'many_to_many': [through_1.pk, through_3.pk],
     }
     response = client.post(url, data)
     # check
     assert 302 == response.status_code
-    expect = url_multi(content, 'block.wizard.image.option')
+    expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     content.refresh_from_db()
     assert 2 == content.slideshow.count()
@@ -304,7 +304,7 @@ def test_wizard_image_upload_multi(client):
     category = ImageCategoryFactory()
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_multi(content, 'block.wizard.image.upload')
+    url = url_image_multi(content, 'block.wizard.image.upload')
     data = {
         'add_to_library': True,
         'category': category.pk,
@@ -315,7 +315,7 @@ def test_wizard_image_upload_multi(client):
     # check
     content.refresh_from_db()
     assert 302 == response.status_code
-    expect = url_multi(content, 'block.wizard.image.option')
+    expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     assert 1 == content.slideshow.count()
     image = content.slideshow.first()
@@ -335,7 +335,7 @@ def test_wizard_image_upload_single(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_single(content, 'block.wizard.image.upload')
+    url = url_image_single(content, 'block.wizard.image.upload')
     data = {
         'add_to_library': True,
         'category': category.pk,
