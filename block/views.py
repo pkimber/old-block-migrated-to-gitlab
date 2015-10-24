@@ -909,6 +909,7 @@ class WizardLinkMixin(WizardMixin):
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.link.choose', kwargs=kwargs),
+            url_external=reverse('block.wizard.link.external', kwargs=kwargs),
             url_option=reverse('block.wizard.link.option', kwargs=kwargs),
             url_page=reverse('block.wizard.link.page', kwargs=kwargs),
             #url_order=reverse('block.wizard.image.order', kwargs=kwargs),
@@ -1233,6 +1234,30 @@ class WizardLinkChoose(
         return HttpResponseRedirect(url)
 
 
+class WizardLinkExternal(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
+
+    form_class = ExternalLinkForm
+    template_name = 'block/wizard_link_external.html'
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+            self.object.link_type = Link.URL_EXTERNAL
+            self.object.save()
+            self._update_link(
+                content_obj,
+                self.object,
+            )
+        link_type = self._link_type()
+        if link_type == Wizard.SINGLE:
+            url = self._page_design_url(content_obj)
+        elif link_type == Wizard.MULTI:
+            url = reverse('block.wizard.link.option', kwargs=self._kwargs())
+        return HttpResponseRedirect(url)
+
+
 class WizardLinkOption(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, TemplateView):
 
@@ -1248,7 +1273,9 @@ class WizardLinkPage(
     def form_valid(self, form):
         content_obj = self._content_obj()
         with transaction.atomic():
-            self.object = form.save()
+            self.object = form.save(commit=False)
+            self.object.link_type = Link.URL_INTERNAL
+            self.object.save()
             self._update_link(
                 content_obj,
                 self.object,

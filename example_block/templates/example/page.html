@@ -29,7 +29,10 @@
                   {% if c.link %}
                     <br>
                     <h3>Link</h3>
-                    {{ c.link.title }}
+                    <a href="{{ c.link.url }}">
+                      <i class="fa fa-external-link"></i>
+                      {{ c.link.title }}
+                    </a>
                   {% endif %}
                   {% if c.picture %}
                     <br>

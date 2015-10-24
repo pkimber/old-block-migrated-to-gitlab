@@ -13,6 +13,7 @@ from block.views import (
     WizardImageSelect,
     WizardImageUpload,
     WizardLinkChoose,
+    WizardLinkExternal,
     WizardLinkOption,
     WizardLinkPage,
     WizardLinkUpload,
@@ -58,6 +59,10 @@ urlpatterns = patterns(
     url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/(?P<category>[-\w\d]+)/choose/$',
         view=WizardLinkChoose.as_view(),
         name='block.wizard.link.choose'
+        ),
+    url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/external/$',
+        view=WizardLinkExternal.as_view(),
+        name='block.wizard.link.external'
         ),
     url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/option/$',
         view=WizardLinkOption.as_view(),

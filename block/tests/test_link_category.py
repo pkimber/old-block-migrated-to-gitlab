@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from block.models import LinkCategory
+from block.models import (
+    Link,
+    LinkCategory,
+)
 from block.tests.factories import LinkCategoryFactory
 from block.tests.factories import LinkFactory
 
@@ -18,14 +21,14 @@ def test_categories():
 @pytest.mark.django_db
 def test_in_use():
     c = LinkCategoryFactory()
-    LinkFactory(category=c)
+    LinkFactory(category=c, link_type=Link.URL_EXTERNAL)
     assert c.in_use is True
 
 
 @pytest.mark.django_db
 def test_in_use_deleted():
     c = LinkCategoryFactory()
-    LinkFactory(category=c, deleted=True)
+    LinkFactory(category=c, deleted=True, link_type=Link.URL_EXTERNAL)
     assert c.in_use is False
 
 

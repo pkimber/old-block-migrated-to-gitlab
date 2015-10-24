@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from block.models import (
     Document,
+    Link,
     Url,
     Wizard,
 )
@@ -40,8 +41,8 @@ def test_perm(perm_check):
 @pytest.mark.django_db
 def test_choose_single(client):
     content = TitleFactory()
-    LinkFactory()
-    link = LinkFactory()
+    LinkFactory(link_type=Link.URL_EXTERNAL)
+    link = LinkFactory(link_type=Link.URL_EXTERNAL)
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -83,6 +84,38 @@ def test_page_single(client):
     assert expect in response['Location']
     assert 'Cricket' == content.link.title
     assert url_internal == content.link.url_internal
+
+
+@pytest.mark.django_db
+def test_external_single(client):
+    content = TitleFactory()
+    #category = ImageCategoryFactory()
+    #DocumentFactory()
+    #image = ImageFactory()
+    user = UserFactory(is_staff=True)
+    assert content.link is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_single(content, 'block.wizard.link.external')
+    # create a document ready to upload
+    data = {
+        'add_to_library': True,
+        #'category': category.pk,
+        'url_external': 'https://www.pkimber.net',
+        'title': 'Rugby',
+    }
+    response = client.post(url, data)
+    # check
+    content.refresh_from_db()
+    expect = content.block.page_section.page.get_design_url()
+    assert 302 == response.status_code
+    assert expect in response['Location']
+    assert 'Rugby' == content.link.title
+    assert content.link is not None
+    assert 'https://www.pkimber.net' == content.link.url_external
+    #assert content.link.category == category
+    #assert content.link.document.deleted is False
+    # check a document has been added to the database
+    #assert 2 == Document.objects.count()
 
 
 @pytest.mark.django_db

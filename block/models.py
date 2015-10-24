@@ -1128,6 +1128,20 @@ class Link(TimeStampedModel):
     )
     objects = LinkManager()
 
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+    def save(self, *args, **kwargs):
+        if self.link_type:
+            # Call the "real" save() method.
+            super().save(*args, **kwargs)
+        else:
+            raise BlockError("'Link' records must have a 'link_type'")
+
     @property
     def file_name(self):
         result = None
@@ -1155,13 +1169,6 @@ class Link(TimeStampedModel):
             )
         return result
 
-    class Meta:
-        verbose_name = 'Link'
-        verbose_name_plural = 'Links'
-
-    def __str__(self):
-        return '{}'.format(self.title)
-
 reversion.register(Link)
 
 
@@ -1172,6 +1179,13 @@ class TemplateManager(models.Manager):
         template = self.model(template_name=template_name)
         template.save()
         return template
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
 
     def init_template(self, template_name):
         templates = self.model.objects.filter(template_name=template_name)
