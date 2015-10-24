@@ -41,24 +41,24 @@
       <p>
         Choose from the whole library:
       </p>
+      <a href="{{ url_choose }}" class="pure-menu-link">
+        Link Library
+      </a>
+      <p>
+        Or:
+      </p>
       <a href="{{ url_external }}" class="pure-menu-link">
         <i class="fa fa-external-link"></i>
-        Link to another site
+        Create a link to a site on the internet
       </a>
       <a href="{{ url_page }}" class="pure-menu-link">
         <i class="fa fa-file-text-o"></i>
-        Link to a page on this site
+        Create a link to a page on this site
       </a>
       <a href="{{ url_upload }}" class="pure-menu-link">
         <i class="fa fa-cloud-upload"></i>
         Upload a document and link to it
       </a>
-      <a href="{{ url_choose }}" class="pure-menu-link">
-        Link to an existing document
-      </a>
-      <p>
-        Or:
-      </p>
       {% if link %}
         <p>
           Maintenance:
