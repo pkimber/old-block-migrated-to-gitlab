@@ -50,6 +50,8 @@ from .forms import (
     ImageMultiSelectForm,
     ImageSelectForm,
     ImageUpdateForm,
+    LinkCategoryEmptyForm,
+    LinkCategoryForm,
     LinkMultiSelectForm,
     LinkTypeForm,
     PageEmptyForm,
@@ -66,6 +68,7 @@ from .models import (
     Image,
     ImageCategory,
     Link,
+    LinkCategory,
     Menu,
     MenuItem,
     Page,
@@ -1274,3 +1277,50 @@ class ImageCategoryUpdateView(
 
     def get_success_url(self):
         return reverse('block.image.category.list')
+
+
+class LinkCategoryCreateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, CreateView):
+
+    form_class = LinkCategoryForm
+    model = LinkCategory
+
+    def get_success_url(self):
+        return reverse('block.link.category.list')
+
+
+class LinkCategoryDeleteView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
+
+    form_class = LinkCategoryEmptyForm
+    model = LinkCategory
+    template_name = 'block/linkcategory_delete_form.html'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if self.object.in_use:
+            raise BlockError(
+                "Cannot delete a link category which is "
+                "in use: '{}'".format(self.object.slug)
+            )
+        self.object.deleted = True
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('block.link.category.list')
+
+
+class LinkCategoryListView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
+
+    model = LinkCategory
+
+
+class LinkCategoryUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
+
+    form_class = LinkCategoryForm
+    model = LinkCategory
+
+    def get_success_url(self):
+        return reverse('block.link.category.list')

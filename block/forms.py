@@ -15,6 +15,7 @@ from block.models import (
     Image,
     ImageCategory,
     Link,
+    LinkCategory,
     Page,
     Section,
     Template,
@@ -324,6 +325,26 @@ class ImageUpdateForm(RequiredFieldForm):
         fields = (
             'title',
             'category',
+        )
+
+
+class LinkCategoryEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = LinkCategory
+        fields = ()
+
+
+class LinkCategoryForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = LinkCategory
+        fields = (
+            'name',
         )
 
 

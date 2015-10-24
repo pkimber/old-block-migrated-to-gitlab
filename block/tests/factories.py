@@ -7,6 +7,7 @@ from block.models import (
     Image,
     ImageCategory,
     Link,
+    LinkCategory,
     ModerateState,
     Page,
     PageSection,
@@ -47,6 +48,16 @@ class ImageFactory(factory.django.DjangoModelFactory):
         model = Image
 
     image = factory.django.ImageField()
+
+
+class LinkCategoryFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = LinkCategory
+
+    @factory.sequence
+    def name(n):
+        return 'name_{}'.format(n)
 
 
 class LinkFactory(factory.django.DjangoModelFactory):

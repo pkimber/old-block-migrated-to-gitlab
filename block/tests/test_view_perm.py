@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
+    LinkCategoryFactory,
     PageFactory,
 )
 from login.tests.fixture import perm_check
@@ -80,3 +81,25 @@ def test_image_category_delete(perm_check):
 def test_image_category_update(perm_check):
     obj = ImageCategoryFactory()
     perm_check.staff(reverse('block.image.category.update', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_category(perm_check):
+    perm_check.staff(reverse('block.link.category.list'))
+
+
+@pytest.mark.django_db
+def test_link_category_create(perm_check):
+    perm_check.staff(reverse('block.link.category.create'))
+
+
+@pytest.mark.django_db
+def test_link_category_delete(perm_check):
+    obj = LinkCategoryFactory()
+    perm_check.staff(reverse('block.link.category.delete', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_category_update(perm_check):
+    obj = LinkCategoryFactory()
+    perm_check.staff(reverse('block.link.category.update', args=[obj.pk]))

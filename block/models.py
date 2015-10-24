@@ -879,6 +879,44 @@ class Image(TimeStampedModel):
 reversion.register(Image)
 
 
+class LinkCategoryManager(models.Manager):
+
+    def create_category(self, name):
+        obj = self.model(name=name)
+        obj.save()
+        return obj
+
+    def categories(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'slug',
+        )
+
+
+class LinkCategory(models.Model):
+
+    name = models.CharField(max_length=100)
+    slug = AutoSlugField(max_length=100, unique=True, populate_from=('name',))
+    deleted = models.BooleanField(default=False)
+    objects = LinkCategoryManager()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Link Category'
+        verbose_name_plural = 'Link Categories'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    @property
+    def in_use(self):
+        links = Link.objects.filter(category=self, deleted=False)
+        return links.count() > 0
+
+reversion.register(LinkCategory)
+
+
 class UrlManager(models.Manager):
 
     def init_page_url(self, page):
@@ -1058,6 +1096,8 @@ class Link(TimeStampedModel):
 
     title = models.CharField(max_length=250)
     link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
+    category = models.ForeignKey(LinkCategory, blank=True, null=True)
+    deleted = models.BooleanField(default=False)
 
     document = models.ForeignKey(
         Document,

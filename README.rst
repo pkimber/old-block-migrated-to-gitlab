@@ -10,6 +10,8 @@ To Do
   - Upload a document and link to it
   - Use an existing document
   - Remove link
+  - Should the category be for links... or documents?
+  - Can you delete a document, a link... or both?
 
 - Other tickets (to minimise migrations)
   - SEO
