@@ -896,15 +896,15 @@ class WizardLinkMixin(WizardMixin):
         context = super().get_context_data(**kwargs)
         kwargs = self._kwargs()
         # categories
-        #categories = []
-        #for category in ImageCategory.objects.categories():
-        #    kw = kwargs.copy()
-        #    kw.update({'category': category.slug})
-        #    url = reverse('block.wizard.image.choose', kwargs=kw)
-        #    categories.append(dict(name=category.name, url=url))
+        categories = []
+        for category in LinkCategory.objects.categories():
+            kw = kwargs.copy()
+            kw.update({'category': category.slug})
+            url = reverse('block.wizard.link.choose', kwargs=kw)
+            categories.append(dict(name=category.name, url=url))
         content_obj = self._content_obj()
         context.update(dict(
-            #categories=categories,
+            categories=categories,
             field_name=self._field_name(),
             object=content_obj,
             url_page_design=self._page_design_url(content_obj),
@@ -922,8 +922,8 @@ class WizardLinkMixin(WizardMixin):
             context.update(dict(link=self._get_link()))
         #elif link_type == Wizard.MULTI:
         #    context.update(dict(many_to_many=self._get_many_to_many()))
-        #else:
-        #    raise BlockError("Unknown 'link_type': '{}'".format(link_type))
+        else:
+            raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return context
 
     def _get_link(self):
@@ -1296,12 +1296,13 @@ class WizardLinkUpload(
     template_name = 'block/wizard_link_upload.html'
 
     def form_valid(self, form):
+        category = form.cleaned_data['category']
         content_obj = self._content_obj()
         with transaction.atomic():
             self.object = form.save()
             self._update_link(
                 content_obj,
-                Link.objects.create_document_link(self.object)
+                Link.objects.create_document_link(self.object, category)
             )
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:

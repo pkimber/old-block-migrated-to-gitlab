@@ -89,6 +89,10 @@ class DocumentForm(forms.ModelForm):
         initial=True,
         required=False,
     )
+    category = forms.ModelChoiceField(
+        queryset=LinkCategory.objects.categories(),
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -101,6 +105,7 @@ class DocumentForm(forms.ModelForm):
         fields = (
             'document',
             'title',
+            'category',
             'add_to_library',
         )
         widgets = {

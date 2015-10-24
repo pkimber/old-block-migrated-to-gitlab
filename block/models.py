@@ -1047,12 +1047,14 @@ reversion.register(Url)
 
 class LinkManager(models.Manager):
 
-    def create_document_link(self, document):
+    def create_document_link(self, document, category=None):
         obj = self.model(
             document=document,
             link_type=self.model.DOCUMENT,
             title=document.title,
         )
+        if category:
+            obj.category = category
         obj.save()
         return obj
 

@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from block.models import (
     ImageCategory,
+    LinkCategory,
     Page,
     PageSection,
     Section,
@@ -69,3 +70,5 @@ def default_scenario_block():
     PageSection.objects.init_page_section(calendar, body)
     ImageCategory.objects.create_category('Computers')
     ImageCategory.objects.create_category('Fruit')
+    LinkCategory.objects.create_category('Contract')
+    LinkCategory.objects.create_category('User Guide')

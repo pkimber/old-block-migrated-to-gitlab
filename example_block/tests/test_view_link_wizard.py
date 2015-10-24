@@ -11,6 +11,7 @@ from block.models import (
 )
 from block.tests.factories import (
     DocumentFactory,
+    LinkCategoryFactory,
     LinkFactory,
     PageFactory,
     UrlFactory,
@@ -47,6 +48,30 @@ def test_choose_single(client):
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     url = url_link_single(content, 'block.wizard.link.choose')
+    data = {
+        'links': link.pk,
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = content.block.page_section.page.get_design_url()
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert link == content.link
+
+
+@pytest.mark.django_db
+def test_choose_single_category(client):
+    """Choose from links in the selected category."""
+    content = TitleFactory()
+    category = LinkCategoryFactory()
+    LinkFactory(link_type=Link.URL_EXTERNAL)
+    link = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    user = UserFactory(is_staff=True)
+    assert content.link is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_single(content, 'block.wizard.link.choose', category=category)
+    assert category.slug in url
     data = {
         'links': link.pk,
     }
@@ -121,7 +146,7 @@ def test_external_single(client):
 @pytest.mark.django_db
 def test_upload_single(client):
     content = TitleFactory()
-    #category = ImageCategoryFactory()
+    category = LinkCategoryFactory()
     DocumentFactory()
     #image = ImageFactory()
     user = UserFactory(is_staff=True)
@@ -131,7 +156,7 @@ def test_upload_single(client):
     # create a document ready to upload
     data = {
         'add_to_library': True,
-        #'category': category.pk,
+        'category': category.pk,
         'image': test_file(),
         'title': 'Cricket',
     }
@@ -143,7 +168,7 @@ def test_upload_single(client):
     assert expect in response['Location']
     assert 'Cricket' == content.link.title
     assert content.link is not None
-    #assert content.link.category == category
+    assert category == content.link.category
     assert content.link.document.deleted is False
     # check a document has been added to the database
     assert 2 == Document.objects.count()
