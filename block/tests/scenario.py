@@ -68,7 +68,7 @@ def default_scenario_block():
         is_custom=True
     )
     PageSection.objects.init_page_section(calendar, body)
-    ImageCategory.objects.create_category('Computers')
-    ImageCategory.objects.create_category('Fruit')
-    LinkCategory.objects.create_category('Contract')
-    LinkCategory.objects.create_category('User Guide')
+    ImageCategory.objects.init_category('Computers')
+    ImageCategory.objects.init_category('Fruit')
+    LinkCategory.objects.init_category('Contract')
+    LinkCategory.objects.init_category('User Guide')

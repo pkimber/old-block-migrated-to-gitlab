@@ -54,6 +54,13 @@ def _label_from_many_to_many_instance(obj):
     ))
 
 
+def _link_label_from_instance(obj):
+    return format_html('{} (<small>{}</small>)'.format(
+        obj.title,
+        obj.link_type_description,
+    ))
+
+
 class ImageModelChoiceField(forms.ModelChoiceField):
     """The label is the image."""
 
@@ -66,6 +73,12 @@ class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
 
     def label_from_instance(self, obj):
         return _label_from_instance(obj)
+
+
+class LinkModelChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_instance(obj)
 
 
 class ManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -357,7 +370,7 @@ class LinkCategoryForm(RequiredFieldForm):
 class LinkListForm(forms.Form):
     """List of links (for the form wizard)."""
 
-    links = forms.ModelChoiceField(
+    links = LinkModelChoiceField(
         queryset=Link.objects.links(),
         empty_label=None,
         widget=forms.RadioSelect,

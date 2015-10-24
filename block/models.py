@@ -797,6 +797,11 @@ class ImageCategoryManager(models.Manager):
             'slug',
         )
 
+    def init_category(self, name):
+        count = self.model.objects.filter(name=name).count()
+        if not count:
+            self.create_category(name)
+
 
 class ImageCategory(models.Model):
 
@@ -892,6 +897,11 @@ class LinkCategoryManager(models.Manager):
         ).order_by(
             'slug',
         )
+
+    def init_category(self, name):
+        count = self.model.objects.filter(name=name).count()
+        if not count:
+            self.create_category(name)
 
 
 class LinkCategory(models.Model):
