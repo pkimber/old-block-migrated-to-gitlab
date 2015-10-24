@@ -114,6 +114,13 @@ def test_wizard_link_option(perm_check):
 
 
 @pytest.mark.django_db
+def test_wizard_link_page(perm_check):
+    content = TitleFactory()
+    url = url_link_single(content, 'block.wizard.link.page')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
 def test_wizard_link_upload(perm_check):
     content = TitleFactory()
     url = url_link_single(content, 'block.wizard.link.upload')

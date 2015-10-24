@@ -5,6 +5,7 @@ from block.models import (
     Page,
     Template,
     TemplateSection,
+    Url,
 )
 
 
@@ -21,4 +22,6 @@ class Command(BaseCommand):
                     template,
                     page_section.section,
                 )
+            if not page.is_custom:
+                Url.objects.init_page_url(page)
         print("Initialised 'block' app...")

@@ -5,11 +5,14 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from block.models import (
     Document,
+    Url,
     Wizard,
 )
 from block.tests.factories import (
     DocumentFactory,
     LinkFactory,
+    PageFactory,
+    UrlFactory,
 )
 from example_block.tests.factories import TitleFactory
 from example_block.tests.test_view_perm import url_link_single
@@ -53,6 +56,33 @@ def test_choose_single(client):
     assert expect in response['Location']
     content.refresh_from_db()
     assert link == content.link
+
+
+@pytest.mark.django_db
+def test_page_single(client):
+    content = TitleFactory()
+    #category = ImageCategoryFactory()
+    page = PageFactory(name='Information', slug='info', slug_menu='')
+    url_internal = Url.objects.init_page_url(page)
+    user = UserFactory(is_staff=True)
+    assert content.link is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_single(content, 'block.wizard.link.page')
+    # create a document ready to upload
+    data = {
+        #'add_to_library': True,
+        #'category': category.pk,
+        'url_internal': url_internal.pk,
+        'title': 'Cricket',
+    }
+    response = client.post(url, data)
+    # check
+    content.refresh_from_db()
+    expect = content.block.page_section.page.get_design_url()
+    assert 302 == response.status_code
+    assert expect in response['Location']
+    assert 'Cricket' == content.link.title
+    assert url_internal == content.link.url_internal
 
 
 @pytest.mark.django_db

@@ -14,6 +14,7 @@ from block.views import (
     WizardImageUpload,
     WizardLinkChoose,
     WizardLinkOption,
+    WizardLinkPage,
     WizardLinkUpload,
 )
 
@@ -65,5 +66,9 @@ urlpatterns = patterns(
     url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/upload/$',
         view=WizardLinkUpload.as_view(),
         name='block.wizard.link.upload'
+        ),
+    url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/page/$',
+        view=WizardLinkPage.as_view(),
+        name='block.wizard.link.page'
         ),
 )

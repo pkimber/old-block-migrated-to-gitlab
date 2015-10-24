@@ -1018,6 +1018,14 @@ class Url(models.Model):
     deleted = models.BooleanField(default=False)
     objects = UrlManager()
 
+    class Meta:
+        unique_together = ('page', 'name', 'arg1', 'arg2', 'arg3')
+        verbose_name = 'URL'
+        verbose_name_plural = 'URLs'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
     @property
     def url(self):
         result = None
@@ -1033,14 +1041,6 @@ class Url(models.Model):
                 params.append(self.arg3)
             result = reverse(self.name, args=params)
         return result
-
-    class Meta:
-        unique_together = ('page', 'name', 'arg1', 'arg2', 'arg3')
-        verbose_name = 'URL'
-        verbose_name_plural = 'URLs'
-
-    def __str__(self):
-        return '{}'.format(self.title)
 
 reversion.register(Url)
 
