@@ -913,7 +913,7 @@ class WizardLinkMixin(WizardMixin):
             url_option=reverse('block.wizard.link.option', kwargs=kwargs),
             url_page=reverse('block.wizard.link.page', kwargs=kwargs),
             #url_order=reverse('block.wizard.image.order', kwargs=kwargs),
-            #url_remove=reverse('block.wizard.image.remove', kwargs=kwargs),
+            url_remove=reverse('block.wizard.link.remove', kwargs=kwargs),
             #url_select=reverse('block.wizard.image.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.link.upload', kwargs=kwargs),
         ))
@@ -1287,6 +1287,31 @@ class WizardLinkPage(
         elif link_type == Wizard.MULTI:
             url = reverse('block.wizard.link.option', kwargs=self._kwargs())
         return HttpResponseRedirect(url)
+
+
+class WizardLinkRemove(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, UpdateView):
+
+    form_class = EmptyForm
+    template_name = 'block/wizard_link_remove.html'
+
+    def form_valid(self, form):
+        """Set the link on the content object to ``None`` (remove it)."""
+        content_obj = self._content_obj()
+        self._update_link(content_obj, None)
+        return HttpResponseRedirect(self._page_design_url(content_obj))
+
+    def get_context_data(self, **kwargs):
+        """Return the current image in the context, so we can display it."""
+        context = super().get_context_data(**kwargs)
+        field_name = self.kwargs['field']
+        context.update(dict(
+            link=getattr(self.object, field_name),
+        ))
+        return context
+
+    def get_object(self):
+        return self._content_obj()
 
 
 class WizardLinkUpload(

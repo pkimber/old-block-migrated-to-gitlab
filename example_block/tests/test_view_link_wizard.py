@@ -144,6 +144,24 @@ def test_external_single(client):
 
 
 @pytest.mark.django_db
+def test_remove_single(client):
+    """The multi test for removing is ````."""
+    link = LinkFactory(link_type=Link.URL_EXTERNAL)
+    content = TitleFactory(link=link)
+    user = UserFactory(is_staff=True)
+    assert content.link is not None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_single(content, 'block.wizard.link.remove')
+    response = client.post(url)
+    # check
+    content.refresh_from_db()
+    expect = content.block.page_section.page.get_design_url()
+    assert 302 == response.status_code
+    assert expect in response['Location']
+    assert content.link is None
+
+
+@pytest.mark.django_db
 def test_upload_single(client):
     content = TitleFactory()
     category = LinkCategoryFactory()
