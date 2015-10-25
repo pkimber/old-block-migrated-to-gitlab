@@ -920,8 +920,8 @@ class WizardLinkMixin(WizardMixin):
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             context.update(dict(link=self._get_link()))
-        #elif link_type == Wizard.MULTI:
-        #    context.update(dict(many_to_many=self._get_many_to_many()))
+        elif link_type == Wizard.MULTI:
+            context.update(dict(many_to_many=self._get_many_to_many()))
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return context
@@ -936,11 +936,11 @@ class WizardLinkMixin(WizardMixin):
                 "Cannot '_get_link' for 'link_type': '{}'".format(link_type)
             )
 
-    def _update_link(self, content_obj, document):
+    def _update_link(self, content_obj, link):
         field_name = self._link_field_name(content_obj)
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
-            setattr(content_obj, field_name, document)
+            setattr(content_obj, field_name, link)
         elif link_type == Wizard.MULTI:
             field = self._get_field()
             class_many_to_many = field.through
@@ -953,7 +953,7 @@ class WizardLinkMixin(WizardMixin):
             order = order + 1
             obj = class_many_to_many(
                 content=content_obj,
-                image=image,
+                link=link,
                 order=order,
             )
             obj.save()
@@ -1174,26 +1174,26 @@ class WizardLinkChoose(
 
     template_name = 'block/wizard_link_choose.html'
 
-    #def _update_images_many_to_many(self, images):
-    #    content_obj = self._content_obj()
-    #    field = self._get_field()
-    #    with transaction.atomic():
-    #        field = self._get_field()
-    #        class_many_to_many = field.through
-    #        result = class_many_to_many.objects.filter(
-    #            content=content_obj
-    #        ).aggregate(
-    #            Max('order')
-    #        )
-    #        order = result.get('order__max') or 0
-    #        for image in images:
-    #            order = order + 1
-    #            obj = class_many_to_many(
-    #                content=content_obj,
-    #                image=image,
-    #                order=order,
-    #            )
-    #            obj.save()
+    def _update_links_many_to_many(self, links):
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            field = self._get_field()
+            class_many_to_many = field.through
+            result = class_many_to_many.objects.filter(
+                content=content_obj
+            ).aggregate(
+                Max('order')
+            )
+            order = result.get('order__max') or 0
+            for link in links:
+                order = order + 1
+                obj = class_many_to_many(
+                    content=content_obj,
+                    link=link,
+                    order=order,
+                )
+                obj.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1208,8 +1208,8 @@ class WizardLinkChoose(
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             return LinkListForm
-        #elif link_type == Wizard.MULTI:
-        #    return ImageMultiSelectForm
+        elif link_type == Wizard.MULTI:
+            return LinkMultiSelectForm
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
 
@@ -1226,9 +1226,9 @@ class WizardLinkChoose(
         if link_type == Wizard.SINGLE:
             self._update_link(content_obj, images)
             url = self._page_design_url(content_obj)
-        #elif link_type == Wizard.MULTI:
-        #    self._update_images_many_to_many(images)
-        #    url = reverse('block.wizard.image.option', kwargs=self._kwargs())
+        elif link_type == Wizard.MULTI:
+            self._update_links_many_to_many(images)
+            url = reverse('block.wizard.link.option', kwargs=self._kwargs())
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
         return HttpResponseRedirect(url)

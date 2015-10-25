@@ -24,12 +24,6 @@ def _reverse_wizard_url(content, url_name, field_name, wizard_type, category):
     return reverse(url_name, kwargs=kwargs)
 
 
-def url_link_single(content, url_name, category=None):
-    return _reverse_wizard_url(
-        content, url_name, 'link', Wizard.SINGLE, category
-    )
-
-
 def url_image_multi(content, url_name, category=None):
     return _reverse_wizard_url(
         content, url_name, 'slideshow', Wizard.MULTI, category
@@ -39,6 +33,17 @@ def url_image_multi(content, url_name, category=None):
 def url_image_single(content, url_name, category=None):
     return _reverse_wizard_url(
         content, url_name, 'picture', Wizard.SINGLE, category
+    )
+
+
+def url_link_multi(content, url_name, category=None):
+    return _reverse_wizard_url(
+        content, url_name, 'references', Wizard.MULTI, category
+    )
+
+def url_link_single(content, url_name, category=None):
+    return _reverse_wizard_url(
+        content, url_name, 'link', Wizard.SINGLE, category
     )
 
 

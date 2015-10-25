@@ -104,11 +104,12 @@
       {% if many_to_many.count %}
         <h3>Current {{ field_name }}:</h3>
         {% for item in many_to_many %}
-          <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
-          <br>
           {{ item.order }}.
-          {{ item.image.title }}
-          <br>
+          {{ item.link.link_type_description }}:
+          {{ item.link.title }}
+          {% if item.link.category.name %}
+            <small>({{ item.link.category.name }})</small>
+          {% endif %}
           <br>
         {% endfor %}
       {% endif %}

@@ -396,18 +396,27 @@ class LinkMultiSelectForm(forms.Form):
     """List of links (for the form wizard)."""
 
     links = forms.ModelMultipleChoiceField(
-        queryset=Link.objects.none(),
+        queryset=Link.objects.links(),
         widget=forms.CheckboxSelectMultiple,
     )
 
     def __init__(self, *args, **kwargs):
-        links = kwargs.pop('links')
-        super ().__init__(*args,**kwargs)
-        links_field = self.fields['links']
-        links_field.queryset = links
-        # tick every link - so the user can untick the ones they want to remove
-        initial = {item.pk: True for item in links}
-        links_field.initial = initial
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            links = self.fields['links']
+            links.queryset = Link.objects.links().filter(
+                category__slug=category_slug
+            )
+
+    #def __init__(self, *args, **kwargs):
+    #    links = kwargs.pop('links')
+    #    super ().__init__(*args,**kwargs)
+    #    links_field = self.fields['links']
+    #    links_field.queryset = links
+    #    # tick every link - so the user can untick the ones they want to remove
+    #    initial = {item.pk: True for item in links}
+    #    links_field.initial = initial
 
     class Meta:
         fields = (

@@ -39,6 +39,11 @@ class Title(ContentModel):
         related_name='slideshow',
         through='TitleImage'
     )
+    references = models.ManyToManyField(
+        Link,
+        related_name='references',
+        through='TitleReference'
+    )
 
     class Meta:
         # cannot put 'unique_together' on abstract base class
@@ -57,6 +62,9 @@ class Title(ContentModel):
         for image in self.slideshow.all():
             published_instance.slideshow.add(image)
 
+    def ordered_references(self):
+        return self.references.through.objects.filter(content=self)
+
     def ordered_slideshow(self):
         return self.slideshow.through.objects.filter(content=self)
 
@@ -73,8 +81,9 @@ class Title(ContentModel):
     def wizard_fields(self):
         return [
             Wizard('picture', Wizard.IMAGE, Wizard.SINGLE),
-            Wizard('link', Wizard.LINK, Wizard.SINGLE),
             Wizard('slideshow', Wizard.IMAGE, Wizard.MULTI),
+            Wizard('link', Wizard.LINK, Wizard.SINGLE),
+            Wizard('references', Wizard.LINK, Wizard.MULTI),
         ]
 
 reversion.register(Title)
@@ -99,3 +108,24 @@ class TitleImage(models.Model):
         verbose_name_plural = 'Title Images'
 
 reversion.register(TitleImage)
+
+
+class TitleReference(models.Model):
+    """Reference links for the title.
+
+    This is the model that is used to govern the many-to-many relationship
+    between ``Title`` and ``Link``.
+
+    https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
+
+    """
+    content = models.ForeignKey(Title)
+    link = models.ForeignKey(Link)
+    order = models.IntegerField()
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Title Reference'
+        verbose_name_plural = 'Title References'
+
+reversion.register(TitleReference)

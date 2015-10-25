@@ -17,7 +17,10 @@ from block.tests.factories import (
     UrlFactory,
 )
 from example_block.tests.factories import TitleFactory
-from example_block.tests.test_view_perm import url_link_single
+from example_block.tests.test_view_perm import (
+    url_link_multi,
+    url_link_single,
+)
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
@@ -37,6 +40,29 @@ def test_perm(perm_check):
     urls = TitleFactory().wizard_urls
     url = next(x['url'] for x in urls if 'Link' in x['caption'])
     perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_choose_multi(client):
+    content = TitleFactory()
+    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    user = UserFactory(is_staff=True)
+    assert 0 == content.references.count()
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_multi(content, 'block.wizard.link.choose')
+    data = {
+        'links': [link_2.pk, link_1.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_link_multi(content, 'block.wizard.link.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.references.count()
+    # ordering controlled by 'ordering' on 'TitleReference' model
+    assert [1, 2] == [item.order for item in content.ordered_references()]
 
 
 @pytest.mark.django_db
