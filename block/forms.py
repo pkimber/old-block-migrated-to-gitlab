@@ -81,6 +81,12 @@ class LinkModelChoiceField(forms.ModelChoiceField):
         return _link_label_from_instance(obj)
 
 
+class LinkModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_instance(obj)
+
+
 class ManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
 
     def label_from_instance(self, obj):
@@ -395,7 +401,7 @@ class LinkListForm(forms.Form):
 class LinkMultiSelectForm(forms.Form):
     """List of links (for the form wizard)."""
 
-    links = forms.ModelMultipleChoiceField(
+    links = LinkModelMultipleChoiceField(
         queryset=Link.objects.links(),
         widget=forms.CheckboxSelectMultiple,
     )
