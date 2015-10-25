@@ -37,6 +37,19 @@
                       {% endif %}
                     </a>
                   {% endif %}
+                  {% if c.references %}
+                    {% for item in c.ordered_references %}
+                      <br>
+                      <a href="{{ item.link.url }}" target="_blank">
+                        {{ item.order }}.
+                        {{ item.link.link_type_description }}:
+                        {{ item.link.title }}
+                        {% if item.link.category.name %}
+                          <small>({{ item.link.category.name }})</small>
+                        {% endif %}
+                      </a>
+                    {% endfor %}
+                  {% endif %}
                   {% if c.picture %}
                     <br>
                     <h3>Picture</h3>
