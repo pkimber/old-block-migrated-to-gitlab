@@ -66,6 +66,34 @@ def test_choose_multi(client):
 
 
 @pytest.mark.django_db
+def test_choose_category_multi(client):
+    """Choose from links in the selected category."""
+    content = TitleFactory()
+    category = LinkCategoryFactory()
+    LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_2 = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_4 = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    user = UserFactory(is_staff=True)
+    assert 0 == content.references.count()
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_multi(content, 'block.wizard.link.choose', category=category)
+    assert category.slug in url
+    data = {
+        'links': [link_2.pk, link_4.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_link_multi(content, 'block.wizard.link.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.references.count()
+    # ordering controlled by 'ordering' on 'TitleReference' model
+    assert [1, 2] == [item.order for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
 def test_choose_single(client):
     content = TitleFactory()
     LinkFactory(link_type=Link.URL_EXTERNAL)
