@@ -4,6 +4,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from block.models import (
+    BlockError,
     Document,
     Link,
     Url,
@@ -16,7 +17,10 @@ from block.tests.factories import (
     PageFactory,
     UrlFactory,
 )
-from example_block.tests.factories import TitleFactory
+from example_block.tests.factories import (
+    TitleFactory,
+    TitleLinkFactory,
+)
 from example_block.tests.test_view_perm import (
     url_link_multi,
     url_link_single,
@@ -244,3 +248,115 @@ def test_upload_single(client):
     assert content.link.document.deleted is False
     # check a document has been added to the database
     assert 2 == Document.objects.count()
+
+
+def _set_up_order_multi(content):
+    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_3 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_4 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    t1 = TitleLinkFactory(content=content, link=link_1, order=1)
+    t2 = TitleLinkFactory(content=content, link=link_2, order=2)
+    t3 = TitleLinkFactory(content=content, link=link_3, order=3)
+    t4 = TitleLinkFactory(content=content, link=link_4, order=4)
+    return t1, t2, t3, t4
+
+
+def _post_multi_order(client, content, data):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_multi(content, 'block.wizard.link.order')
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    assert url in response['Location']
+
+
+@pytest.mark.django_db
+def test_order_multi_down_1(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'down': t1.pk})
+    assert [
+        t2.pk, t1.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_down_2(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'down': t2.pk})
+    assert [
+        t1.pk, t3.pk, t2.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_down_4(client):
+    """Trying to move the last item down, should raise an exception."""
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'down': t4.pk})
+    assert 'Cannot move the last item down' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_down_invalid(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'down': t1.pk+t2.pk+t3.pk+t4.pk})
+    assert 'Cannot find item' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_up_1(client):
+    """Trying to move the first item up, should raise an exception."""
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'up': t1.pk})
+    assert 'Cannot move the first item up' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_up_2(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'up': t2.pk})
+    assert [
+        t2.pk, t1.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_up_4(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    _post_multi_order(client, content, {'up': t4.pk})
+    assert [
+        t1.pk, t2.pk, t4.pk, t3.pk
+    ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_order_multi_up_invalid(client):
+    content = TitleFactory()
+    t1, t2, t3, t4 = _set_up_order_multi(content)
+    with pytest.raises(BlockError) as e:
+        _post_multi_order(client, content, {'up': t1.pk+t2.pk+t3.pk+t4.pk})
+    assert 'Cannot find item' in str(e.value)
+    assert [
+        t1.pk, t2.pk, t3.pk, t4.pk
+    ] == [item.pk for item in content.ordered_references()]

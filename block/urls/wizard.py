@@ -15,6 +15,7 @@ from block.views import (
     WizardLinkChoose,
     WizardLinkExternal,
     WizardLinkOption,
+    WizardLinkOrder,
     WizardLinkPage,
     WizardLinkRemove,
     WizardLinkUpload,
@@ -68,6 +69,10 @@ urlpatterns = patterns(
     url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/option/$',
         view=WizardLinkOption.as_view(),
         name='block.wizard.link.option'
+        ),
+    url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/order/$',
+        view=WizardLinkOrder.as_view(),
+        name='block.wizard.link.order'
         ),
     url(regex=r'^link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/remove/$',
         view=WizardLinkRemove.as_view(),

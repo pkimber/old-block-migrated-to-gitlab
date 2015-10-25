@@ -1264,6 +1264,55 @@ class WizardLinkOption(
     template_name = 'block/wizard_link_option.html'
 
 
+class WizardLinkOrder(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+
+    form_class = EmptyForm
+    template_name = 'block/wizard_link_order.html'
+
+    def _move_up_down(self, up, down):
+        pk = int(up) if up else int(down)
+        idx = None
+        ordered = []
+        many_to_many = self._get_many_to_many()
+        for count, item in enumerate(many_to_many):
+            if item.pk == pk:
+                idx = count
+            ordered.append(item.pk)
+            count = count + 1
+        if idx is None:
+            raise BlockError("Cannot find item {} in {}".format(pk, ordered))
+        if down:
+            if idx == len(ordered) - 1:
+                raise BlockError("Cannot move the last item down")
+            ordered[idx], ordered[idx+1] = ordered[idx+1], ordered[idx]
+        elif up: # up
+            if idx == 0:
+                raise BlockError("Cannot move the first item up")
+            ordered[idx], ordered[idx-1] = ordered[idx-1], ordered[idx]
+        else:
+            raise BlockError("No 'up' or 'down' (why?)")
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            for order, pk in enumerate(ordered, start=1):
+                obj = field.through.objects.get(
+                    pk=pk,
+                    content=content_obj,
+                )
+                obj.order = order
+                obj.save()
+
+    def form_valid(self, form):
+        up = self.request.POST.get('up')
+        down = self.request.POST.get('down')
+        if up or down:
+            self._move_up_down(up, down)
+        return HttpResponseRedirect(
+            reverse('block.wizard.link.order', kwargs=self._kwargs())
+        )
+
+
 class WizardLinkPage(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
 

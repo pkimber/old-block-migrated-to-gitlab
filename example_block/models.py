@@ -42,7 +42,7 @@ class Title(ContentModel):
     references = models.ManyToManyField(
         Link,
         related_name='references',
-        through='TitleReference'
+        through='TitleLink'
     )
 
     class Meta:
@@ -110,7 +110,7 @@ class TitleImage(models.Model):
 reversion.register(TitleImage)
 
 
-class TitleReference(models.Model):
+class TitleLink(models.Model):
     """Reference links for the title.
 
     This is the model that is used to govern the many-to-many relationship
@@ -125,7 +125,7 @@ class TitleReference(models.Model):
 
     class Meta:
         ordering = ['order']
-        verbose_name = 'Title Reference'
-        verbose_name_plural = 'Title References'
+        verbose_name = 'Title Link'
+        verbose_name_plural = 'Title Links'
 
-reversion.register(TitleReference)
+reversion.register(TitleLink)
