@@ -360,3 +360,34 @@ def test_order_multi_up_invalid(client):
     assert [
         t1.pk, t2.pk, t3.pk, t4.pk
     ] == [item.pk for item in content.ordered_references()]
+
+
+@pytest.mark.django_db
+def test_select_multi(client):
+    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_3 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_4 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    content = TitleFactory()
+    through_1 = TitleLinkFactory(content=content, link=link_1, order=4)
+    TitleLinkFactory(content=content, link=link_2, order=3)
+    through_3 = TitleLinkFactory(content=content, link=link_3, order=2)
+    TitleLinkFactory(content=content, link=link_4, order=1)
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = url_link_multi(content, 'block.wizard.link.select')
+    data = {
+        'many_to_many': [through_1.pk, through_3.pk],
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = url_link_multi(content, 'block.wizard.link.option')
+    assert expect in response['Location']
+    content.refresh_from_db()
+    assert 2 == content.references.count()
+    qs = content.ordered_references()
+    result = [item.link.pk for item in qs]
+    assert link_1.pk in result and link_3.pk in result
+    # ordering controlled by 'ordering' on 'TitleLink' model
+    assert [1, 2] == [item.order for item in qs]

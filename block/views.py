@@ -54,6 +54,7 @@ from .forms import (
     LinkCategoryForm,
     LinkListForm,
     LinkMultiSelectForm,
+    LinkSelectForm,
     LinkTypeForm,
     PageEmptyForm,
     PageForm,
@@ -1516,3 +1517,45 @@ class LinkCategoryUpdateView(
 
     def get_success_url(self):
         return reverse('block.link.category.list')
+
+
+class WizardLinkSelect(
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+    """List the current links in the slideshow and allow the user to remove.
+
+    Allow the user to de-select any of the images.
+
+    """
+
+    form_class = LinkSelectForm
+    template_name = 'block/wizard_link_select.html'
+
+    def _update_many_to_many(self, many_to_many):
+        content_obj = self._content_obj()
+        field = self._get_field()
+        with transaction.atomic():
+            field = self._get_field()
+            field.clear()
+            class_many_to_many = field.through
+            order = 0
+            for item in many_to_many:
+                order = order + 1
+                obj = class_many_to_many(
+                    content=content_obj,
+                    link=item.link,
+                    order=order,
+                )
+                obj.save()
+
+    def form_valid(self, form):
+        content_obj = self._content_obj()
+        many_to_many = form.cleaned_data['many_to_many']
+        self._update_many_to_many(many_to_many)
+        return HttpResponseRedirect(
+            reverse('block.wizard.link.option', kwargs=self._kwargs())
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(dict(many_to_many=self._get_many_to_many()))
+        return kwargs

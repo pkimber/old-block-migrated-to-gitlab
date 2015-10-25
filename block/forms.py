@@ -430,6 +430,26 @@ class LinkMultiSelectForm(forms.Form):
         )
 
 
+class LinkSelectForm(forms.Form):
+    """List of current images in the slideshow."""
+
+    # Note: The ``queryset`` will not contain ``Link`` records.
+    many_to_many = ManyToManyMultipleChoiceField(
+        queryset=Link.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def __init__(self, *args, **kwargs):
+        qs_many_to_many = kwargs.pop('many_to_many')
+        super().__init__(*args, **kwargs)
+        many_to_many = self.fields['many_to_many']
+        many_to_many.queryset = qs_many_to_many.order_by('order')
+        # tick every link - so the user can untick the ones they want to remove
+        initial = {item.pk: True for item in qs_many_to_many}
+        many_to_many.initial = initial
+
+
 class LinkTypeForm(forms.Form):
     """Allow the user to select the link type (for the form wizard)."""
 
