@@ -40,7 +40,6 @@ def _label_from_instance(obj):
 
 def _label_from_many_to_many_instance(obj):
     """The label is the image."""
-    #import pdb; pdb.set_trace()
     thumbnailer = get_thumbnailer(obj.image.image)
     thumbnail_options = {
         'crop': True,
@@ -58,6 +57,13 @@ def _link_label_from_instance(obj):
     return format_html('{} (<small>{}</small>)'.format(
         obj.title,
         obj.link_type_description,
+    ))
+
+
+def _link_label_from_many_to_many_instance(obj):
+    return format_html('{} (<small>{}</small>)'.format(
+        obj.link.title,
+        obj.link.link_type_description,
     ))
 
 
@@ -85,6 +91,12 @@ class LinkModelMultipleChoiceField(forms.ModelMultipleChoiceField):
 
     def label_from_instance(self, obj):
         return _link_label_from_instance(obj)
+
+
+class LinkManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_many_to_many_instance(obj)
 
 
 class ManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -434,7 +446,7 @@ class LinkSelectForm(forms.Form):
     """List of current images in the slideshow."""
 
     # Note: The ``queryset`` will not contain ``Link`` records.
-    many_to_many = ManyToManyMultipleChoiceField(
+    many_to_many = LinkManyToManyMultipleChoiceField(
         queryset=Link.objects.none(),
         required=False,
         widget=forms.CheckboxSelectMultiple,

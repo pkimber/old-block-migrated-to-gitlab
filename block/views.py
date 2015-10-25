@@ -915,7 +915,7 @@ class WizardLinkMixin(WizardMixin):
             url_page=reverse('block.wizard.link.page', kwargs=kwargs),
             url_order=reverse('block.wizard.link.order', kwargs=kwargs),
             url_remove=reverse('block.wizard.link.remove', kwargs=kwargs),
-            #url_select=reverse('block.wizard.image.select', kwargs=kwargs),
+            url_select=reverse('block.wizard.link.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.link.upload', kwargs=kwargs),
         ))
         link_type = self._link_type()
