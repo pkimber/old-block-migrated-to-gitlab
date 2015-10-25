@@ -912,7 +912,7 @@ class WizardLinkMixin(WizardMixin):
             url_external=reverse('block.wizard.link.external', kwargs=kwargs),
             url_option=reverse('block.wizard.link.option', kwargs=kwargs),
             url_page=reverse('block.wizard.link.page', kwargs=kwargs),
-            #url_order=reverse('block.wizard.image.order', kwargs=kwargs),
+            url_order=reverse('block.wizard.link.order', kwargs=kwargs),
             url_remove=reverse('block.wizard.link.remove', kwargs=kwargs),
             #url_select=reverse('block.wizard.image.select', kwargs=kwargs),
             url_upload=reverse('block.wizard.link.upload', kwargs=kwargs),
