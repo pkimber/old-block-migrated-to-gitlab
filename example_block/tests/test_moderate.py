@@ -6,12 +6,16 @@ from block.models import (
     BlockError,
     ModerateState,
 )
-from block.tests.factories import PageSectionFactory
+from block.tests.factories import (
+    ImageFactory,
+    PageSectionFactory,
+)
 from login.tests.factories import UserFactory
 
 from example_block.models import Title
 from example_block.tests.factories import (
     TitleBlockFactory,
+    TitleImageFactory,
     TitleFactory,
 )
 
@@ -99,7 +103,12 @@ class TestModerate(TestCase):
     def test_publish(self):
         page_section = PageSectionFactory()
         block = TitleBlockFactory(page_section=page_section)
-        TitleFactory(block=block, title='content_1')
+        title = TitleFactory(
+            block=block,
+            title='content_1'
+        )
+        TitleImageFactory(content=title, image=ImageFactory(), order=1)
+        TitleImageFactory(content=title, image=ImageFactory(), order=2)
         # check the content is pending
         self.assertListEqual(
             ['content_1',],
@@ -112,11 +121,15 @@ class TestModerate(TestCase):
         )
         # publish the content
         block.publish(UserFactory())
-        # check the content is not published
-        self.assertListEqual(
-            ['content_1',],
-            [c.title for c in Title.objects.published(page_section)],
-        )
+        # check the content is published
+        published = Title.objects.published(page_section)
+        self.assertEqual(1, len(published))
+        obj = published[0]
+        self.assertEqual('content_1', obj.title)
+        #self.assertListEqual(
+        #    ['content_1',],
+        #    [c.title for c in Title.objects.published(page_section)],
+        #)
 
     def test_remove_already(self):
         """content has already been removed and cannot be removed again."""

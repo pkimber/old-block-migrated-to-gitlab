@@ -59,8 +59,13 @@ class Title(ContentModel):
 
     def copy_related_data(self, published_instance):
         """Copy slideshow images."""
-        for image in self.slideshow.all():
-            published_instance.slideshow.add(image)
+        for item in self.ordered_slideshow():
+            obj = self.slideshow.through(
+                content=published_instance,
+                image=item.image,
+                order=item.order,
+            )
+            obj.save()
 
     def ordered_references(self):
         return self.references.through.objects.filter(content=self)
