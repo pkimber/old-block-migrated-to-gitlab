@@ -129,6 +129,8 @@ def test_publish():
     # check the images were published
     obj = published[0]
     assert [1, 2] == [item.order for item in obj.ordered_slideshow()]
+    # check the links were published
+    assert [1, 2] == [item.order for item in obj.ordered_references()]
 
 
 @pytest.mark.django_db
