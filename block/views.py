@@ -809,6 +809,8 @@ class WizardImageChoose(
                     order=order,
                 )
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -956,6 +958,8 @@ class WizardImageSelect(
                     order=order,
                 )
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def form_valid(self, form):
         many_to_many = form.cleaned_data['many_to_many']
@@ -1014,6 +1018,8 @@ class WizardLinkChoose(
                     order=order,
                 )
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1122,6 +1128,8 @@ class WizardLinkOrder(
                 )
                 obj.order = order
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def form_valid(self, form):
         up = self.request.POST.get('up')
@@ -1365,6 +1373,8 @@ class WizardLinkSelect(
                     order=order,
                 )
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def form_valid(self, form):
         many_to_many = form.cleaned_data['many_to_many']
