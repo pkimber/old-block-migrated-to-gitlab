@@ -1,11 +1,7 @@
 # -*- encoding: utf-8 -*-
-import os
-
 from django.apps import apps
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.core.files.storage import FileSystemStorage
 from django.core.paginator import (
     EmptyPage,
     PageNotAnInteger,
@@ -13,10 +9,7 @@ from django.core.paginator import (
 )
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.models import (
-    get_model,
-    Max,
-)
+from django.db.models import Max
 from django.http import HttpResponseRedirect
 from django.views.generic import (
     CreateView,
@@ -33,12 +26,9 @@ from braces.views import (
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
 )
-from formtools.wizard.views import SessionWizardView
-
 from base.view_utils import BaseMixin
 from .forms import (
     DocumentForm,
-    DocumentListForm,
     EmptyForm,
     ExternalLinkForm,
     HeaderFooterForm,
@@ -55,7 +45,6 @@ from .forms import (
     LinkListForm,
     LinkMultiSelectForm,
     LinkSelectForm,
-    LinkTypeForm,
     PageEmptyForm,
     PageForm,
     PageListForm,
@@ -71,7 +60,6 @@ from .models import (
     ImageCategory,
     Link,
     LinkCategory,
-    Menu,
     MenuItem,
     Page,
     PageSection,
@@ -970,7 +958,6 @@ class WizardImageSelect(
                 obj.save()
 
     def form_valid(self, form):
-        content_obj = self._content_obj()
         many_to_many = form.cleaned_data['many_to_many']
         self._update_many_to_many(many_to_many)
         return HttpResponseRedirect(
@@ -1380,7 +1367,6 @@ class WizardLinkSelect(
                 obj.save()
 
     def form_valid(self, form):
-        content_obj = self._content_obj()
         many_to_many = form.cleaned_data['many_to_many']
         self._update_many_to_many(many_to_many)
         return HttpResponseRedirect(

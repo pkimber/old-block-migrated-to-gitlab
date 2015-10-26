@@ -59,7 +59,7 @@ def test_category_delete_exception(client):
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     category = LinkCategoryFactory()
-    link = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
     assert category.deleted is False
     # test
     url = reverse('block.link.category.delete', args=[category.pk])

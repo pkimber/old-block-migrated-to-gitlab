@@ -59,7 +59,7 @@ def test_category_delete_exception(client):
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
     category = ImageCategoryFactory()
-    image = ImageFactory(category=category)
+    ImageFactory(category=category)
     assert category.deleted is False
     # test
     url = reverse('block.image.category.delete', args=[category.pk])

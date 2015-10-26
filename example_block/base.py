@@ -129,7 +129,6 @@ THIRD_PARTY_APPS = (
     'compressor',
     'debug_toolbar',
     'easy_thumbnails',
-    'formtools',
     'reversion',
 )
 

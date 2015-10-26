@@ -8,14 +8,12 @@ from block.models import (
     Document,
     Link,
     Url,
-    Wizard,
 )
 from block.tests.factories import (
     DocumentFactory,
     LinkCategoryFactory,
     LinkFactory,
     PageFactory,
-    UrlFactory,
 )
 from example_block.tests.factories import (
     TitleFactory,
@@ -29,7 +27,6 @@ from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
 )
-from login.tests.fixture import perm_check
 
 
 def test_file():
@@ -37,13 +34,6 @@ def test_file():
     return SimpleUploadedFile.from_dict(
         dict(filename='test.txt', content=bytes('abc', 'UTF-8'))
     )
-
-
-@pytest.mark.django_db
-def test_perm(perm_check):
-    urls = TitleFactory().wizard_urls
-    url = next(x['url'] for x in urls if 'Link' in x['caption'])
-    perm_check.staff(url)
 
 
 @pytest.mark.django_db

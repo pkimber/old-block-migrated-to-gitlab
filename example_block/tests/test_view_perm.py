@@ -130,3 +130,10 @@ def test_wizard_link_upload(perm_check):
     content = TitleFactory()
     url = url_link_single(content, 'block.wizard.link.upload')
     perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_wizard_urls(perm_check):
+    urls = TitleFactory().wizard_urls
+    url = next(x['url'] for x in urls if 'Link' in x['caption'])
+    perm_check.staff(url)

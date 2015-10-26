@@ -20,7 +20,6 @@ from block.models import (
     Section,
     Template,
     TemplateSection,
-    Wizard,
 )
 
 
@@ -142,22 +141,6 @@ class DocumentForm(forms.ModelForm):
         widgets = {
             'document': forms.FileInput,
         }
-
-
-class DocumentListForm(forms.ModelForm):
-    """List of documents (for the form wizard)."""
-
-    def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
-        for name in ('title', 'document'):
-            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
-
-    class Meta:
-        model = Link
-        fields = (
-            'title',
-            'document',
-        )
 
 
 class EmptyForm(forms.ModelForm):
@@ -427,15 +410,6 @@ class LinkMultiSelectForm(forms.Form):
                 category__slug=category_slug
             )
 
-    #def __init__(self, *args, **kwargs):
-    #    links = kwargs.pop('links')
-    #    super ().__init__(*args,**kwargs)
-    #    links_field = self.fields['links']
-    #    links_field.queryset = links
-    #    # tick every link - so the user can untick the ones they want to remove
-    #    initial = {item.pk: True for item in links}
-    #    links_field.initial = initial
-
     class Meta:
         fields = (
             'links',
@@ -460,63 +434,6 @@ class LinkSelectForm(forms.Form):
         # tick every link - so the user can untick the ones they want to remove
         initial = {item.pk: True for item in qs_many_to_many}
         many_to_many.initial = initial
-
-
-class LinkTypeForm(forms.Form):
-    """Allow the user to select the link type (for the form wizard)."""
-
-    FORM_DOCUMENT = 'u'
-    FORM_DOCUMENT_LIST = 'e'
-    FORM_EXTERNAL_URL = 'l'
-    FORM_PAGE_URL = 'p'
-    # this form :)
-    FORM_LINK_TYPE = 'link_type'
-    FORM_LINK_MULTI_REMOVE = 'x'
-    # remove does not have a form
-    REMOVE = 'r'
-
-    FORM_CHOICES = {
-        FORM_EXTERNAL_URL: 'Link to another site',
-        FORM_PAGE_URL: 'Page on this site',
-        FORM_DOCUMENT: 'Upload a document and link to it',
-        FORM_DOCUMENT_LIST: 'Use an existing document',
-        FORM_LINK_MULTI_REMOVE: 'Remove one or more links',
-        REMOVE: 'Remove Link',
-    }
-
-    link_type = forms.ChoiceField(label="Choose the type of link")
-
-    def __init__(self, *args, **kwargs):
-        link_type = kwargs.pop('link_type')
-        super ().__init__(*args,**kwargs)
-        # get the list of items (in the order displayed)
-        # I don't think we are handling multi-links yet.
-        if link_type == Wizard.SINGLE:
-            items = [
-                self.FORM_EXTERNAL_URL,
-                self.FORM_PAGE_URL,
-                self.FORM_DOCUMENT,
-                self.FORM_DOCUMENT_LIST,
-                self.REMOVE,
-            ]
-        else:
-            items = [
-                self.FORM_EXTERNAL_URL,
-                self.FORM_PAGE_URL,
-                self.FORM_DOCUMENT,
-                self.FORM_DOCUMENT_LIST,
-                self.FORM_LINK_MULTI_REMOVE,
-            ]
-        # build the list of choices - adding the description
-        choices = []
-        for item in items:
-            choices.append((item, self.FORM_CHOICES[item]))
-        self.fields['link_type'].choices = choices
-
-    class Meta:
-        fields = (
-            'link_type',
-        )
 
 
 class PageEmptyForm(forms.ModelForm):
