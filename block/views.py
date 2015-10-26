@@ -10,7 +10,10 @@ from django.core.paginator import (
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Max
-from django.http import HttpResponseRedirect
+from django.http import (
+    Http404,
+    HttpResponseRedirect,
+)
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -125,7 +128,7 @@ class ContentPageMixin(BaseMixin):
             else:
                 return Page.objects.get(slug=page, slug_menu='')
         except Page.DoesNotExist:
-            raise BlockError(
+            raise Http404(
                 "Page '{}', menu '{}' does not exist".format(page, menu)
             )
 
