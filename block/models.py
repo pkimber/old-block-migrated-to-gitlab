@@ -952,6 +952,12 @@ class UrlManager(models.Manager):
         obj.save()
         return obj
 
+    def init_pages(self):
+        """Add non-custom pages to the list of URLs."""
+        for page in Page.objects.pages():
+            if not page.is_custom:
+                self.init_page_url(page)
+
     def init_reverse_url(self, title, name, arg1=None, arg2=None, arg3=None):
         arg1 = arg1 or ''
         arg2 = arg2 or ''

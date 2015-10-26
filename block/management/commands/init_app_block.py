@@ -22,6 +22,5 @@ class Command(BaseCommand):
                     template,
                     page_section.section,
                 )
-            if not page.is_custom:
-                Url.objects.init_page_url(page)
+        Url.objects.init_pages()
         print("Initialised 'block' app...")

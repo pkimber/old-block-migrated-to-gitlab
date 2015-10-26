@@ -84,6 +84,16 @@ def test_init_reverse_url_invalid():
 
 
 @pytest.mark.django_db
+def test_init_reverse_url_is_custom():
+    page = PageFactory(slug=Page.CUSTOM, slug_menu='calendar', is_custom=True)
+    url = Url.objects.init_reverse_url(
+        'Calendar',
+        'calendar.information',
+    )
+    assert '/calendar/information/' == url.url
+
+
+@pytest.mark.django_db
 def test_init_reverse_url_slug():
     url = Url.objects.init_reverse_url(
         'Design', 'project.page.design', 'info'
