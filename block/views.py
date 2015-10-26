@@ -1290,6 +1290,9 @@ class ImageCategoryListView(
 
     model = ImageCategory
 
+    def get_queryset(self):
+        return ImageCategory.objects.categories()
+
 
 class ImageCategoryUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
@@ -1336,6 +1339,9 @@ class LinkCategoryListView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
 
     model = LinkCategory
+
+    def get_queryset(self):
+        return LinkCategory.objects.categories()
 
 
 class LinkCategoryUpdateView(

@@ -35,16 +35,20 @@
   <div class="pure-g">
     {% for image in image_list %}
       {% ifchanged image.category %}
-        {% if image.category %}
           </div>
             <div class="pure-g">
               <div class="pure-u-1">
                 <br>
-                <h3>{{ image.category.name }}</h3>
+                <h3>
+                  {% if image.category %}
+                    {{ image.category.name }}
+                  {% else %}
+                    No Category
+                  {% endif %}
+                </h3>
               </div>
             </div>
           <div class="pure-g">
-        {% endif %}
       {% endifchanged %}
       <div class="pure-u-1-2 pure-u-md-1-4">
         <img src="{% thumbnail image.image 100x100  crop='center' %}">
