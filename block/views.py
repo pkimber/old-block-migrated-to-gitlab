@@ -895,6 +895,8 @@ class WizardImageOrder(
                 )
                 obj.order = order
                 obj.save()
+            content_obj.set_pending_edit()
+            content_obj.save()
 
     def form_valid(self, form):
         up = self.request.POST.get('up')
