@@ -39,8 +39,8 @@ def test_file():
 @pytest.mark.django_db
 def test_choose_multi(client):
     content = TitleFactory()
-    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_1 = LinkFactory()
+    link_2 = LinkFactory()
     user = UserFactory(is_staff=True)
     assert 0 == content.references.count()
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -64,10 +64,10 @@ def test_choose_category_multi(client):
     """Choose from links in the selected category."""
     content = TitleFactory()
     category = LinkCategoryFactory()
-    LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_2 = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
-    LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_4 = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    LinkFactory()
+    link_2 = LinkFactory(category=category)
+    LinkFactory()
+    link_4 = LinkFactory(category=category)
     user = UserFactory(is_staff=True)
     assert 0 == content.references.count()
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -90,8 +90,8 @@ def test_choose_category_multi(client):
 @pytest.mark.django_db
 def test_choose_single(client):
     content = TitleFactory()
-    LinkFactory(link_type=Link.URL_EXTERNAL)
-    link = LinkFactory(link_type=Link.URL_EXTERNAL)
+    LinkFactory()
+    link = LinkFactory()
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -113,8 +113,8 @@ def test_choose_single_category(client):
     """Choose from links in the selected category."""
     content = TitleFactory()
     category = LinkCategoryFactory()
-    LinkFactory(link_type=Link.URL_EXTERNAL)
-    link = LinkFactory(category=category, link_type=Link.URL_EXTERNAL)
+    LinkFactory()
+    link = LinkFactory(category=category)
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -194,7 +194,7 @@ def test_external_single(client):
 @pytest.mark.django_db
 def test_remove_single(client):
     """The multi test for removing is ````."""
-    link = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link = LinkFactory()
     content = TitleFactory(link=link)
     user = UserFactory(is_staff=True)
     assert content.link is not None
@@ -241,10 +241,10 @@ def test_upload_single(client):
 
 
 def _set_up_order_multi(content):
-    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_3 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_4 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_1 = LinkFactory()
+    link_2 = LinkFactory()
+    link_3 = LinkFactory()
+    link_4 = LinkFactory()
     t1 = TitleLinkFactory(content=content, link=link_1, order=1)
     t2 = TitleLinkFactory(content=content, link=link_2, order=2)
     t3 = TitleLinkFactory(content=content, link=link_3, order=3)
@@ -354,10 +354,10 @@ def test_order_multi_up_invalid(client):
 
 @pytest.mark.django_db
 def test_select_multi(client):
-    link_1 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_2 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_3 = LinkFactory(link_type=Link.URL_EXTERNAL)
-    link_4 = LinkFactory(link_type=Link.URL_EXTERNAL)
+    link_1 = LinkFactory()
+    link_2 = LinkFactory()
+    link_3 = LinkFactory()
+    link_4 = LinkFactory()
     content = TitleFactory()
     through_1 = TitleLinkFactory(content=content, link=link_1, order=4)
     TitleLinkFactory(content=content, link=link_2, order=3)

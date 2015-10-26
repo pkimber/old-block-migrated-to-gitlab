@@ -65,6 +65,8 @@ class LinkFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Link
 
+    link_type = Link.URL_EXTERNAL
+
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):
 

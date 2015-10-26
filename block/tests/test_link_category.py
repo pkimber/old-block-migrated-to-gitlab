@@ -21,14 +21,14 @@ def test_categories():
 @pytest.mark.django_db
 def test_in_use():
     c = LinkCategoryFactory()
-    LinkFactory(category=c, link_type=Link.URL_EXTERNAL)
+    LinkFactory(category=c)
     assert c.in_use is True
 
 
 @pytest.mark.django_db
 def test_in_use_deleted():
     c = LinkCategoryFactory()
-    LinkFactory(category=c, deleted=True, link_type=Link.URL_EXTERNAL)
+    LinkFactory(category=c, deleted=True)
     assert c.in_use is False
 
 

@@ -10,6 +10,7 @@ from block.models import (
 )
 from block.tests.factories import (
     ImageFactory,
+    LinkFactory,
     PageSectionFactory,
 )
 from login.tests.factories import UserFactory
@@ -17,8 +18,9 @@ from login.tests.factories import UserFactory
 from example_block.models import Title
 from example_block.tests.factories import (
     TitleBlockFactory,
-    TitleImageFactory,
     TitleFactory,
+    TitleImageFactory,
+    TitleLinkFactory,
 )
 
 
@@ -111,6 +113,8 @@ def test_publish():
     )
     TitleImageFactory(content=title, image=ImageFactory(), order=1)
     TitleImageFactory(content=title, image=ImageFactory(), order=2)
+    TitleLinkFactory(content=title, link=LinkFactory(), order=2)
+    TitleLinkFactory(content=title, link=LinkFactory(), order=1)
     # check the content is pending
     assert [
         'content_1'
@@ -122,9 +126,9 @@ def test_publish():
     # check the content is published
     published = Title.objects.published(page_section)
     assert ['content_1'] == [c.title for c in published]
-    assert 1 == len(published)
+    # check the images were published
     obj = published[0]
-    assert 'content_1' == obj.title
+    assert [1, 2] == [item.order for item in obj.ordered_slideshow()]
 
 
 @pytest.mark.django_db

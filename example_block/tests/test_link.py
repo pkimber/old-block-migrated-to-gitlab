@@ -8,5 +8,5 @@ from block.tests.factories import LinkFactory
 @pytest.mark.django_db
 def test_link_str():
     """This value is used for the select drop down in the form."""
-    link = LinkFactory(title='Cricket', link_type=Link.URL_EXTERNAL)
+    link = LinkFactory(title='Cricket')
     assert 'Cricket' == str(link)
