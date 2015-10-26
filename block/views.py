@@ -118,15 +118,12 @@ class ContentPageMixin(BaseMixin):
         return context
 
     def get_page(self):
-        menu = self.kwargs.get('menu', None)
-        page = self.kwargs.get('page', None)
+        menu = self.kwargs.get('menu', '')
+        page = self.kwargs.get('page', '')
         if not page:
             raise BlockError("no 'page' parameter in url")
         try:
-            if menu:
-                return Page.objects.get(slug=page, slug_menu=menu)
-            else:
-                return Page.objects.get(slug=page, slug_menu='')
+            return Page.objects.get(slug=page, slug_menu=menu)
         except Page.DoesNotExist:
             raise Http404(
                 "Page '{}', menu '{}' does not exist".format(page, menu)
