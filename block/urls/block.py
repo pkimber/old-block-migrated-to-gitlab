@@ -17,7 +17,6 @@ from block.views import (
     LinkCategoryDeleteView,
     LinkCategoryListView,
     LinkCategoryUpdateView,
-    LinkWizard,
     PageCreateView,
     PageDeleteView,
     PageListView,
