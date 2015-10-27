@@ -637,7 +637,11 @@ class WizardMixin:
         return self.kwargs['type']
 
     def _page_design_url(self, content_obj):
-        return content_obj.block.page_section.page.get_design_url()
+        try:
+            result = content_obj.get_design_url()
+        except AttributeError:
+            result = content_obj.block.page_section.page.get_design_url()
+        return result
 
 
 class WizardImageMixin(WizardMixin):
