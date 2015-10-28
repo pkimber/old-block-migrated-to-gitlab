@@ -454,6 +454,8 @@ class PageForm(RequiredFieldForm):
             'slug',
             'slug_menu',
             'order',
+            'meta_description',
+            'meta_keywords',
             'is_home',
             'template',
         )

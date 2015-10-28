@@ -258,8 +258,17 @@ class Page(TimeStampedModel):
     template_name = models.CharField(max_length=150)
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
-    meta_description = models.TextField(blank=True)
-    meta_keywords = models.TextField(blank=True)
+    meta_description = models.TextField(
+        blank=True,
+        help_text=(
+            'Concise explanation of the contents of this page '
+            '(used by search engines - optimal length 155 characters).'
+        ),
+    )
+    meta_keywords = models.TextField(
+        blank=True,
+        help_text='keywords for search engines',
+    )
     objects = PageManager()
 
     class Meta:

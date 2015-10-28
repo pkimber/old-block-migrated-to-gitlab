@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='page',
             name='meta_description',
-            field=models.TextField(blank=True),
+            field=models.TextField(help_text='Concise explanation of the contents of this page (used by search engines - optimal length 155 characters).', blank=True),
         ),
         migrations.AddField(
             model_name='page',
             name='meta_keywords',
-            field=models.TextField(blank=True),
+            field=models.TextField(help_text='keywords for search engines', blank=True),
         ),
     ]
