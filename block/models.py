@@ -258,6 +258,8 @@ class Page(TimeStampedModel):
     template_name = models.CharField(max_length=150)
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
+    meta_description = models.TextField(blank=True)
+    meta_keywords = models.TextField(blank=True)
     objects = PageManager()
 
     class Meta:
