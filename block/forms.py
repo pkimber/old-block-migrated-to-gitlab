@@ -447,6 +447,12 @@ class PageForm(RequiredFieldForm):
 
     template = forms.ModelChoiceField(queryset=Template.objects.all())
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('meta_description', 'meta_keywords'):
+            field = self.fields[name]
+            field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
+
     class Meta:
         model = Page
         fields = (
