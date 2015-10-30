@@ -443,7 +443,7 @@ class PageEmptyForm(forms.ModelForm):
         fields = ()
 
 
-class PageForm(RequiredFieldForm):
+class PageBaseForm(RequiredFieldForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -452,6 +452,9 @@ class PageForm(RequiredFieldForm):
             field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
         template = self.fields['template']
         template.queryset = Template.objects.templates()
+
+
+class PageForm(PageBaseForm):
 
     class Meta:
         model = Page
@@ -467,13 +470,15 @@ class PageForm(RequiredFieldForm):
         )
 
 
-class PageFormSimple(RequiredFieldForm):
+class PageFormSimple(PageBaseForm):
 
     class Meta:
         model = Page
         fields = (
             'name',
             'template',
+            'meta_description',
+            'meta_keywords',
         )
 
 
