@@ -166,24 +166,77 @@ class ModerateState(models.Model):
 reversion.register(ModerateState)
 
 
+class TemplateManager(models.Manager):
+    """Move to ``block``?"""
+
+    def create_template(self, name, template_name):
+        template = self.model(name=name, template_name=template_name)
+        template.save()
+        return template
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+    def init_template(self, name, template_name):
+        try:
+            obj = self.model.objects.get(template_name=template_name)
+            obj.name = name
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_template(name, template_name)
+        return obj
+
+    def templates(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'name'
+        )
+
+
+class Template(TimeStampedModel):
+
+    name = models.CharField(max_length=100)
+    template_name = models.CharField(
+        max_length=150,
+        help_text="File name e.g. 'compose/page_article.html'",
+        unique=True,
+    )
+    deleted = models.BooleanField(default=False)
+    objects = TemplateManager()
+
+    class Meta:
+        ordering = ('template_name',)
+        verbose_name = 'Template'
+        verbose_name_plural = 'Templates'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+reversion.register(Template)
+
+
 class PageManager(models.Manager):
 
     def create_page(
-            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+            self, slug_page, slug_menu, name, order, template, **kwargs):
         obj = self.model(
             name=name,
             slug=slug_page,
             slug_menu=slug_menu,
             order=order,
-            template_name=template_name,
+            template=template,
             is_custom=kwargs.get('is_custom', False),
             is_home=kwargs.get('is_home', False),
         )
         obj.save()
         return obj
 
-    def init_page(
-            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+    def init_page(self, slug_page, slug_menu, name, order, template, **kwargs):
         if not slug_menu:
             slug_menu = ''
         try:
@@ -192,7 +245,7 @@ class PageManager(models.Manager):
             obj.slug = slug_page
             obj.slug_menu = slug_menu
             obj.order = order
-            obj.template_name = template_name
+            obj.template = template
             obj.is_custom = kwargs.get('is_custom', False)
             obj.is_home = kwargs.get('is_home', False)
             obj.save()
@@ -202,10 +255,18 @@ class PageManager(models.Manager):
                 slug_menu,
                 name,
                 order,
-                template_name,
+                template,
                 **kwargs
             )
         return obj
+
+    def next_order(self):
+        result = self.model.objects.aggregate(max_order=Max('order'))
+        max_order = result.get('max_order', 0)
+        if max_order:
+            return max_order + 1
+        else:
+            return 1
 
     def menu(self):
         """Return page objects for a menu."""
@@ -223,6 +284,10 @@ class PageManager(models.Manager):
         return self.page_list().exclude(
             is_custom=True,
         )
+
+    def refresh_sections_from_template(self, template):
+        for p in self.model.objects.filter(template=template):
+            p.refresh_sections_from_template()
 
 
 class Page(TimeStampedModel):
@@ -253,9 +318,16 @@ class Page(TimeStampedModel):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     slug_menu = models.SlugField(max_length=100, blank=True)
-    order = models.IntegerField(default=0)
+    order = models.IntegerField(help_text="Menu order (set to 0 to hide)")
     is_home = models.BooleanField(default=False)
-    template_name = models.CharField(max_length=150)
+    template = models.ForeignKey(
+        Template,
+        #blank=True, null=True
+    )
+
+    #template_name = models.CharField(max_length=150)
+
+
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
     meta_description = models.TextField(
@@ -280,6 +352,13 @@ class Page(TimeStampedModel):
     def __str__(self):
         return '{}'.format(self.name)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            raise BlockError("Cannot save a page with no slug.")
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
     def get_absolute_url(self):
         name = self.url_name
         if self.is_home:
@@ -295,6 +374,37 @@ class Page(TimeStampedModel):
         if self.slug_menu:
             result.update(dict(menu=self.slug_menu,))
         return result
+
+    def refresh_sections_from_template(self):
+        """Update page sections by comparing to the template sections."""
+        # iterate through existing sections in the page
+        section_slugs = [s.section.slug for s in self.pagesection_set.all()]
+        for slug in section_slugs:
+            try:
+                # if the section is still used on the page, then keep it.
+                template_section = self.template.templatesection_set.get(
+                    section__slug=slug
+                )
+            except TemplateSection.DoesNotExist:
+                # pass
+                # PJK 30/10/2015
+                # Am I too scared to leave this in!!
+                # if the section is not used on the page, then delete it.
+                PageSection.objects.get(page=self, section__slug=slug).delete()
+        # iterate through the new sections
+        for template_section in self.template.templatesection_set.all():
+            try:
+                # if the section exists on the page, then keep it.
+                PageSection.objects.get(
+                    page=self, section=template_section.section
+                )
+            except PageSection.DoesNotExist:
+                # if the section is not on the page, then add it.
+                page_section = PageSection(
+                    page=self,
+                    section=template_section.section,
+                )
+                page_section.save()
 
     @property
     def url_name(self):
@@ -1215,87 +1325,6 @@ class Link(TimeStampedModel):
 reversion.register(Link)
 
 
-class TemplateManager(models.Manager):
-    """Move to ``block``?"""
-
-    def create_template(self, template_name):
-        template = self.model(template_name=template_name)
-        template.save()
-        return template
-
-    class Meta:
-        verbose_name = 'Link'
-        verbose_name_plural = 'Links'
-
-    def __str__(self):
-        return '{}'.format(self.title)
-
-    def init_template(self, template_name):
-        templates = self.model.objects.filter(template_name=template_name)
-        if templates:
-            result = templates[0]
-        else:
-            result = self.create_template(template_name)
-        return result
-
-
-class Template(TimeStampedModel):
-    """Move to ``block``?"""
-
-    template_name = models.CharField(
-        max_length=150,
-        help_text="File name e.g. 'compose/page_article.html'",
-    )
-    objects = TemplateManager()
-
-    class Meta:
-        ordering = ('template_name',)
-        verbose_name = 'Template'
-        verbose_name_plural = 'Templates'
-
-    def __str__(self):
-        return '{}'.format(self.template_name)
-
-    def update_page(self, page):
-        # iterate through existing sections in the page
-        section_slugs = [s.section.slug for s in page.pagesection_set.all()]
-        for slug in section_slugs:
-            try:
-                # if the section is still used on the page, then keep it.
-                template_section = self.templatesection_set.get(
-                    section__slug=slug
-                )
-            except TemplateSection.DoesNotExist:
-                # if the section is not used on the page, then delete it.
-                PageSection.objects.get(page=page, section__slug=slug).delete()
-        # iterate through the new sections
-        for template_section in self.templatesection_set.all():
-            try:
-                # if the section exists on the page, then keep it.
-                PageSection.objects.get(
-                    page=page, section=template_section.section
-                )
-            except PageSection.DoesNotExist:
-                # if the section is not on the page, then add it.
-                page_section = PageSection(
-                    page=page,
-                    section=template_section.section,
-                )
-                page_section.save()
-        # update the page template name (if it has changed)
-        if page.template_name == self.template_name:
-            pass
-        else:
-            page.template_name = self.template_name
-            page.save()
-
-    def update_pages(self):
-        for p in Page.objects.filter(template_name=self.template_name):
-            self.update_page(p)
-
-reversion.register(Template)
-
-
 class TemplateSectionManager(models.Manager):
     """Move to ``block``?"""
 
@@ -1316,7 +1345,6 @@ class TemplateSectionManager(models.Manager):
 
 
 class TemplateSection(TimeStampedModel):
-    """Move to ``block``?"""
 
     template = models.ForeignKey(Template)
     section = models.ForeignKey(Section)
@@ -1386,7 +1414,7 @@ class ViewUrl(models.Model):
 reversion.register(ViewUrl)
 
 
-class Menu (models.Model):
+class Menu(models.Model):
     slug = models.SlugField(max_length=100)
     title = models.CharField(max_length=100)
     navigation = models.BooleanField(default=True)
@@ -1402,7 +1430,7 @@ class Menu (models.Model):
 reversion.register(Menu)
 
 
-class MenuItem (models.Model):
+class MenuItem(models.Model):
     menu = models.ForeignKey(Menu, blank=False, null=True)
     slug = models.SlugField(max_length=100)
     parent = models.ForeignKey('self', blank=True, null=True)

@@ -74,10 +74,26 @@ class ModerateStateFactory(factory.django.DjangoModelFactory):
         model = ModerateState
 
 
+class TemplateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Template
+
+    @factory.sequence
+    def name(n):
+        return 'name_{:02d}'.format(n)
+
+    @factory.sequence
+    def template_name(n):
+        return 'example/template_{:02d}.html'.format(n)
+
+
 class PageFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Page
+
+    template = factory.SubFactory(TemplateFactory)
 
     @factory.sequence
     def order(n):
@@ -91,10 +107,6 @@ class PageFactory(factory.django.DjangoModelFactory):
     @factory.sequence
     def slug_menu(n):
         return 'menu_{:02d}'.format(n)
-
-    @factory.sequence
-    def template_name(n):
-        return 'example/template_{:02d}.html'.format(n)
 
 
 class SectionFactory(factory.django.DjangoModelFactory):
@@ -114,12 +126,6 @@ class PageSectionFactory(factory.django.DjangoModelFactory):
 
     page = factory.SubFactory(PageFactory)
     section = factory.SubFactory(SectionFactory)
-
-
-class TemplateFactory(factory.django.DjangoModelFactory):
-
-    class Meta:
-        model = Template
 
 
 class TemplateSectionFactory(factory.django.DjangoModelFactory):

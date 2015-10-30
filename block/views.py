@@ -14,6 +14,7 @@ from django.http import (
     Http404,
     HttpResponseRedirect,
 )
+from django.utils.text import slugify
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -50,6 +51,7 @@ from .forms import (
     LinkSelectForm,
     PageEmptyForm,
     PageForm,
+    PageFormSimple,
     PageListForm,
     SectionForm,
     TemplateForm,
@@ -280,15 +282,24 @@ class HeaderFooterUpdateView(
 class PageCreateView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, CreateView):
 
-    form_class = PageForm
     model = Page
 
     def form_valid(self, form):
         template = form.cleaned_data.get('template')
         with transaction.atomic():
-            self.object = form.save()
-            template.update_page(self.object)
+            self.object = form.save(commit=False)
+            if not self.request.user.is_superuser:
+                self.object.slug = slugify(self.object.name)
+                self.object.order = Page.objects.next_order()
+            self.object.save()
+            self.object.refresh_sections_from_template()
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_form_class(self):
+        if self.request.user.is_superuser:
+            return PageForm
+        else:
+            return PageFormSimple
 
     def get_success_url(self):
         return reverse('block.page.list')
@@ -324,13 +335,7 @@ class PageTemplateMixin(object):
 
     def get_template_names(self) :
         page = self.get_page()
-        if page.template_name:
-            template_name = page.template_name
-        else:
-            raise BlockError(
-                "Page '{}' has no 'template_name'".format(page.slug)
-            )
-        return [template_name,]
+        return [page.template.template_name,]
 
 
 class PageDesignMixin(object):
@@ -427,24 +432,18 @@ class PageTemplateView(PageFormMixin, TemplateView):
 class PageUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
 
-    form_class = PageForm
     model = Page
 
-    def get_initial(self):
-        """Returns the initial data to use for forms on this view."""
-        try:
-            template = Template.objects.get(
-                template_name=self.object.template_name
-            )
-            return dict(template=template)
-        except Template.DoesNotExist:
-            return dict()
+    def get_form_class(self):
+        if self.request.user.is_superuser:
+            return PageForm
+        else:
+            return PageFormSimple
 
     def form_valid(self, form):
-        template = form.cleaned_data.get('template')
         with transaction.atomic():
             self.object = form.save()
-            template.update_page(self.object)
+            self.object.refresh_sections_from_template()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
