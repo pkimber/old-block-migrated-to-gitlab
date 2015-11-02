@@ -42,6 +42,10 @@ def init_pages(apps, schema_editor):
         template = init_template(page, template_model, template_section_model)
         page.template = template
         page.save()
+    # mark un-used templates as deleted
+    pages = page_model.objects.exclude(deleted=True).exclude(is_custom=True)
+    template_pks = list(set([item.template.pk for item in pages]))
+    template_model.objects.exclude(pk__in=template_pks).update(deleted=True)
 
 
 class Migration(migrations.Migration):
