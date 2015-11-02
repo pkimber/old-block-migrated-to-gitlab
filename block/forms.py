@@ -518,6 +518,7 @@ class TemplateForm(RequiredFieldForm):
     class Meta:
         model = Template
         fields = (
+            'name',
             'template_name',
         )
 

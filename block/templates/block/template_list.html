@@ -40,6 +40,7 @@
       <table class="pure-table pure-table-bordered">
         <thead>
           <tr>
+            <th>Name</th>
             <th>Template</th>
             <th>Sections</th>
           </tr>
@@ -50,8 +51,11 @@
               <td>
                 <a href="{% url 'block.template.update' object.pk %}">
                   <i class="fa fa-edit"></i>
-                  {{ object.template_name }}
+                  {{ object.name }}
                 </a>
+              </td>
+              <td>
+                {{ object.template_name }}
               </td>
               <td>
                 {% for template_section in object.templatesection_set.all %}
