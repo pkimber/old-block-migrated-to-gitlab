@@ -4,7 +4,6 @@ from django.conf.urls import (
     url,
 )
 
-
 from block.views import (
     WizardImageChoose,
     WizardImageOption,
