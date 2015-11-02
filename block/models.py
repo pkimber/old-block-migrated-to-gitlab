@@ -1307,6 +1307,14 @@ class Link(TimeStampedModel):
             )
 
     @property
+    def open_in_tab(self):
+        """Should this link be opened in a new tab in the browser?"""
+        result = True
+        if self.link_type == self.URL_INTERNAL:
+            result = False
+        return result
+
+    @property
     def url(self):
         result = None
         if self.link_type == self.DOCUMENT:

@@ -67,6 +67,10 @@ class LinkFactory(factory.django.DjangoModelFactory):
 
     link_type = Link.URL_EXTERNAL
 
+    @factory.sequence
+    def title(n):
+        return 'title_{}'.format(n)
+
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):
 
