@@ -482,6 +482,19 @@ class PageFormSimple(PageBaseForm):
         )
 
 
+class PageFormSimpleUpdate(PageBaseForm):
+
+    class Meta:
+        model = Page
+        fields = (
+            'name',
+            'template',
+            'order',
+            'meta_description',
+            'meta_keywords',
+        )
+
+
 class PageListForm(forms.ModelForm):
     """Select a page from this web site (for the form wizard)."""
 

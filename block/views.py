@@ -52,6 +52,7 @@ from .forms import (
     PageEmptyForm,
     PageForm,
     PageFormSimple,
+    PageFormSimpleUpdate,
     PageListForm,
     SectionForm,
     TemplateForm,
@@ -438,7 +439,7 @@ class PageUpdateView(
         if self.request.user.is_superuser:
             return PageForm
         else:
-            return PageFormSimple
+            return PageFormSimpleUpdate
 
     def form_valid(self, form):
         with transaction.atomic():
