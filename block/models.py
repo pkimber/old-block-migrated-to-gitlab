@@ -276,7 +276,8 @@ class PageManager(models.Manager):
         return self.model.objects.all().exclude(
             deleted=True,
         ).order_by(
-            'order'
+            '-is_custom',
+            'order',
         )
 
     def pages(self):

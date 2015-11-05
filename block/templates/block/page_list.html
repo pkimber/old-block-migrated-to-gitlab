@@ -45,7 +45,7 @@
                 <a href="{{ object.get_absolute_url }}">
                 {% endif %}
                   {% if object.deleted %}<del>{% endif %}
-                  {% if object.order %}
+                  {% if object.order and not object.is_custom %}
                     {{ object.order }})
                   {% endif %}
                   {{ object.name }}
