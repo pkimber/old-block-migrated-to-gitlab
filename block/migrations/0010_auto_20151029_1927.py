@@ -12,7 +12,7 @@ def init_page_section(page, template, template_section_model):
                 template=template,
                 section=page_section.section,
             )
-        except model.DoesNotExist:
+        except template_section_model.DoesNotExist:
             instance = template_section_model(**dict(
                 template=template,
                 section=page_section.section,
@@ -24,8 +24,11 @@ def init_page_section(page, template, template_section_model):
 def init_template(page, template_model, template_section_model):
     try:
         template = template_model.objects.get(template_name=page.template_name)
-    except model.DoesNotExist:
-        template = template_model(**dict(template_name=page.template_name))
+    except template_model.DoesNotExist:
+        template = template_model(**dict(
+            name='Our Template',
+            template_name=page.template_name,
+        ))
         template.save()
         template.full_clean()
     init_page_section(page, template, template_section_model)
