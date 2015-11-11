@@ -9,34 +9,32 @@
 {% endblock sub_heading %}
 
 {% block content %}
-  {% if user.is_staff %}
-    <div class="pure-menu pure-menu-horizontal">
-      <ul class="pure-menu-list">
+  <div class="pure-menu pure-menu-horizontal">
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item">
+        <a href="{% url 'project.settings' %}" class="pure-menu-link">
+          <i class="fa fa-reply"></i>
+        </a>
+      </li>
+      {% include 'base/_paginate.html' %}
+      {% if user.is_superuser %}
         <li class="pure-menu-item">
-          <a href="{% url 'project.settings' %}" class="pure-menu-link">
-            <i class="fa fa-reply"></i>
+          <a href="{% url 'block.template.create' %}" class="pure-menu-link">
+            <i class="fa fa-file-code-o"></i>
+            Create template
           </a>
         </li>
-        {% if user.is_superuser %}
-          <li class="pure-menu-item">
-            <a href="{% url 'block.template.create' %}" class="pure-menu-link">
-              <i class="fa fa-file-code-o"></i>
-              Create template
-            </a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="{% url 'block.section.list' %}" class="pure-menu-link">
-              <i class="fa fa-file-code-o"></i>
-              Sections
-            </a>
-          </li>
-        {% endif %}
-      </ul>
-    </div>
-  {% endif %}
+        <li class="pure-menu-item">
+          <a href="{% url 'block.section.list' %}" class="pure-menu-link">
+            <i class="fa fa-file-code-o"></i>
+            Sections
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
   <div class="pure-g">
     <div class="pure-u-1">
-      {% include 'base/_paginate.html' %}
       <table class="pure-table pure-table-bordered">
         <thead>
           <tr>
@@ -75,7 +73,11 @@
           {% endfor %}
         </tbody>
       </table>
-      {% include 'base/_paginate.html' %}
     </div>
+  </div>
+  <div class="pure-menu pure-menu-horizontal">
+    <ul class="pure-menu-list">
+      {% include 'base/_paginate.html' %}
+    </ul>
   </div>
 {% endblock content %}

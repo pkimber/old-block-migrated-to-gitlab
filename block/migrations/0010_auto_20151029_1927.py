@@ -4,6 +4,17 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
+def _template_name(file_name):
+    result = 'Our Template'
+    pos_dot = file_name.rfind('.')
+    pos_div = file_name.rfind('/')
+    if pos_dot >= 0 and pos_div >=0 and (pos_dot > pos_div):
+        result = file_name[pos_div+1: pos_dot]
+        result = result.replace('_', ' ')
+        result = result.title()
+    return result
+
+
 def init_page_section(page, template, template_section_model):
     """Add the sections to the template."""
     for page_section in page.pagesection_set.all():
@@ -26,7 +37,7 @@ def init_template(page, template_model, template_section_model):
         template = template_model.objects.get(template_name=page.template_name)
     except template_model.DoesNotExist:
         template = template_model(**dict(
-            name='Our Template',
+            name=_template_name(page.template_name),
             template_name=page.template_name,
         ))
         template.save()

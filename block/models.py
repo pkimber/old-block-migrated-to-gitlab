@@ -325,10 +325,6 @@ class Page(TimeStampedModel):
         Template,
         #blank=True, null=True
     )
-
-    #template_name = models.CharField(max_length=150)
-
-
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
     meta_description = models.TextField(
