@@ -341,6 +341,15 @@ class PageTemplateMixin(object):
 
 class PageDesignMixin(object):
 
+    def get_section_queryset(self, page_section, page_number):
+        block_model = _get_block_model(page_section)
+        qs = _paginate_section(
+            block_model.objects.pending(page_section),
+            page_number,
+            page_section.section
+        )
+        return qs
+
     def get_context_data(self, **kwargs):
         context = super(PageDesignMixin, self).get_context_data(**kwargs)
         page = self.get_page()
@@ -353,12 +362,13 @@ class PageDesignMixin(object):
             view_url=view_url,
         ))
         for e in PageSection.objects.filter(page=page) :
-            block_model = _get_block_model(e)
-            qs = _paginate_section(
-                block_model.objects.pending(e),
-                self.request.GET.get('page'),
-                e.section
-            )
+            qs = self.get_section_queryset(e, self.request.GET.get('page'))
+            # block_model = _get_block_model(e)
+            # qs = _paginate_section(
+            #     block_model.objects.pending(e),
+            #     self.request.GET.get('page'),
+            #     e.section
+            # )
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
