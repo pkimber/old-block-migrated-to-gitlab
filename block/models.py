@@ -654,13 +654,15 @@ class BlockModel(TimeStampedModel):
 
 class ContentManager(models.Manager):
 
-    def next_order(self):
-        result = self.model.objects.aggregate(max_order=Max('order'))
-        max_order = result.get('max_order', 0)
-        if max_order:
-            return max_order + 1
-        else:
-            return 1
+    def next_order(self, block):
+        rtn = self.model.objects.filter(
+                    block__page_section=block.page_section
+                    ).exclude(
+                        moderate_state__slug='removed'
+                        ).aggregate(Max('order'))['order__max']
+        if rtn is None:
+            rtn = -1
+        return rtn + 1
 
     def pending(self, page_section, kwargs=None):
         """Return a list of pending content for a section.

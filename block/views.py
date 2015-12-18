@@ -160,6 +160,9 @@ class ContentPageMixin(BaseMixin):
 
 class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
 
+    def get_next_order(self, block):
+        return self.model.objects.next_order(block)
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         try:
@@ -171,7 +174,7 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
             )
         block.save()
         self.object.block = block
-        self.object.order = self.model.objects.next_order()
+        self.object.order = self.get_next_order(block)
         return super(ContentCreateView, self).form_valid(form)
 
 
