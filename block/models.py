@@ -414,11 +414,32 @@ class Page(TimeStampedModel):
 reversion.register(Page)
 
 
+class PaginatedSectionManager(models.Manager):
+
+    def create_paginated_section(self, items_per_page, order_by_field):
+        obj = self.model(
+            items_per_page=items_per_page,
+            order_by_field=order_by_field,
+        )
+        obj.save()
+        return obj
+
+    def init_paginated_section(self, items_per_page, order_by_field):
+        try:
+            obj = PaginatedSection.objects.get(order_by_field=order_by_field)
+            obj.items_per_page = items_per_page
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_paginated_section(items_per_page, order_by_field)
+        return obj
+
+
 class PaginatedSection(models.Model):
     """Parameters for a Paginated Section."""
 
     items_per_page = models.IntegerField(default=10)
     order_by_field = models.CharField(max_length=100)
+    objects = PaginatedSectionManager()
 
     def __str__(self):
       return '{} - {}'.format(self.items_per_page, self.order_by_field)
