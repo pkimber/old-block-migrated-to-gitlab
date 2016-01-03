@@ -1215,6 +1215,15 @@ class LinkManager(models.Manager):
         obj.save()
         return obj
 
+    def create_external_link(self, url_external, title):
+        obj = self.model(
+            url_external=url_external,
+            link_type=self.model.URL_EXTERNAL,
+            title=title,
+        )
+        obj.save()
+        return obj
+
     def create_internal_link(self, url_internal):
         obj = self.model(
             url_internal=url_internal,
