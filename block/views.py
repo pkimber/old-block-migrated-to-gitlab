@@ -366,12 +366,6 @@ class PageDesignMixin(object):
         ))
         for e in PageSection.objects.filter(page=page) :
             qs = self.get_section_queryset(e, self.request.GET.get('page'))
-            # block_model = _get_block_model(e)
-            # qs = _paginate_section(
-            #     block_model.objects.pending(e),
-            #     self.request.GET.get('page'),
-            #     e.section
-            # )
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
@@ -558,7 +552,7 @@ class TemplateSectionCreateView(
         with transaction.atomic():
             self.object = form.save()
             # update all the pages with the new sections
-            self.object.template.update_pages()
+            Page.objects.refresh_sections_from_template(self.object.template)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -576,7 +570,8 @@ class TemplateSectionRemoveView(
         self.object = form.save(commit=False)
         with transaction.atomic():
             self.object.delete()
-            self.object.template.update_pages()
+            # remove sections from all existing pages
+            Page.objects.refresh_sections_from_template(self.object.template)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
