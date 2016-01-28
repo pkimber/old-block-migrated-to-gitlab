@@ -5,7 +5,9 @@ from block.models import (
     Document,
     EditState,
     Image,
+    ImageCategory,
     Link,
+    LinkCategory,
     ModerateState,
     Page,
     PageSection,
@@ -30,6 +32,16 @@ class EditStateFactory(factory.django.DjangoModelFactory):
         model = EditState
 
 
+class ImageCategoryFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = ImageCategory
+
+    @factory.sequence
+    def name(n):
+        return 'name_{}'.format(n)
+
+
 class ImageFactory(factory.django.DjangoModelFactory):
 
     class Meta:
@@ -38,10 +50,26 @@ class ImageFactory(factory.django.DjangoModelFactory):
     image = factory.django.ImageField()
 
 
+class LinkCategoryFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = LinkCategory
+
+    @factory.sequence
+    def name(n):
+        return 'name_{}'.format(n)
+
+
 class LinkFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Link
+
+    link_type = Link.URL_EXTERNAL
+
+    @factory.sequence
+    def title(n):
+        return 'title_{}'.format(n)
 
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):
@@ -50,10 +78,26 @@ class ModerateStateFactory(factory.django.DjangoModelFactory):
         model = ModerateState
 
 
+class TemplateFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Template
+
+    @factory.sequence
+    def name(n):
+        return 'name_{:02d}'.format(n)
+
+    @factory.sequence
+    def template_name(n):
+        return 'example/template_{:02d}.html'.format(n)
+
+
 class PageFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Page
+
+    template = factory.SubFactory(TemplateFactory)
 
     @factory.sequence
     def order(n):
@@ -67,10 +111,6 @@ class PageFactory(factory.django.DjangoModelFactory):
     @factory.sequence
     def slug_menu(n):
         return 'menu_{:02d}'.format(n)
-
-    @factory.sequence
-    def template_name(n):
-        return 'example/template_{:02d}.html'.format(n)
 
 
 class SectionFactory(factory.django.DjangoModelFactory):
@@ -90,12 +130,6 @@ class PageSectionFactory(factory.django.DjangoModelFactory):
 
     page = factory.SubFactory(PageFactory)
     section = factory.SubFactory(SectionFactory)
-
-
-class TemplateFactory(factory.django.DjangoModelFactory):
-
-    class Meta:
-        model = Template
 
 
 class TemplateSectionFactory(factory.django.DjangoModelFactory):

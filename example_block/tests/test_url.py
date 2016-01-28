@@ -2,7 +2,6 @@
 import pytest
 
 from django.core.urlresolvers import NoReverseMatch
-from django.db.utils import IntegrityError
 
 from block.tests.factories import PageFactory
 from block.models import (
@@ -82,6 +81,16 @@ def test_init_reverse_url_invalid():
             'A page which does not exist', 'project.settings', 'does-not-exist'
         )
     assert "Reverse for 'project.settings' with arguments" in str(e.value)
+
+
+@pytest.mark.django_db
+def test_init_reverse_url_is_custom():
+    page = PageFactory(slug=Page.CUSTOM, slug_menu='calendar', is_custom=True)
+    url = Url.objects.init_reverse_url(
+        'Calendar',
+        'calendar.information',
+    )
+    assert '/calendar/information/' == url.url
 
 
 @pytest.mark.django_db

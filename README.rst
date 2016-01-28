@@ -1,6 +1,16 @@
 block
 *****
 
+To Do
+
+- Link wizard
+
+  - Can you delete a document, a link... or both?
+
+- Other tickets (to minimise migrations)
+
+  - SEO
+
 Django application
 
 Install
@@ -26,8 +36,8 @@ Testing
   find . -name '*.pyc' -delete
   py.test -x
 
-Usage
-=====
+Development
+===========
 
 ::
 

@@ -26,9 +26,45 @@
                 </td>
                 <td>
                   {{ c.title }}
+                  {% if c.link %}
+                    <br>
+                    <a href="{{ c.link.url }}" target="_blank">
+                      <i class="fa fa-link"></i>
+                      {{ c.link.link_type_description }}:
+                      {{ c.link.title }}
+                      {% if c.link.category.name %}
+                        <small>({{ c.link.category.name }})</small>
+                      {% endif %}
+                    </a>
+                  {% endif %}
+                  {% if c.references %}
+                    {% for item in c.ordered_references %}
+                      <br>
+                      <a href="{{ item.link.url }}" target="_blank">
+                        {{ item.order }}.
+                        {{ item.link.link_type_description }}:
+                        {{ item.link.title }}
+                        {% if item.link.category.name %}
+                          <small>({{ item.link.category.name }})</small>
+                        {% endif %}
+                      </a>
+                    {% endfor %}
+                  {% endif %}
                   {% if c.picture %}
                     <br>
-                    <img src="{% thumbnail c.picture.image 200x200  crop='center' %}">
+                    <h3>Picture</h3>
+                    <img src="{% thumbnail c.picture.image 100x100 crop='center' %}">
+                  {% endif %}
+                  {% if c.ordered_slideshow.count %}
+                    <h3>Slideshow</h3>
+                    {% for item in c.ordered_slideshow %}
+                      <br>
+                      <img src="{% thumbnail item.image.image 100x100 crop='center' %}">
+                      <br>
+                      {{ item.order }}.
+                      {{ item.image.title }}
+                      <br>
+                    {% endfor %}
                   {% endif %}
                 </td>
                 <td>

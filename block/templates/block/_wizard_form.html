@@ -1,44 +1,42 @@
 {% load base_tags %}
-{% if legend %}
-  <legend>{{ legend }}</legend>
-{% endif %}
-{% if multi_column %}
-  <div class="pure-g">
-{% endif %}
-{% for field in form.visible_fields %}
-  {% if field|is_radio_select or field|is_checkbox_select_multiple %}
-    {% for error in field.errors %}
-      <span class="errorlist"><mark>{{ error }}</mark></span>
-    {% endfor %}
-    {% for item in field %}
-      {% if multi_column %}
-        <div class="pure-u-1-2 pure-u-md-1-4">
-      {% endif %}
-      {{ item }}
-      {% if multi_column %}
-        </div>
-      {% endif %}
-    {% endfor %}
-  {% else %}
-    <div class="pure-control-group">
-      {% if field.label %}
-        <label for='{{ field.id_for_label }}'>
-          {{ field.label }}
-          {% if field.help_text %} - {{ field.help_text }}{% endif %}:
-        </label>
-      {% endif %}
-      {% if aligned %}
-        {{ field }}
-      {% endif %}
-      {% for error in field.errors %}
-        <span class="errorlist"><mark>{{ error }}</mark></span>
-      {% endfor %}
-      {% if not aligned %}
-        {{ field }}
-      {% endif %}
-    </div>
+
+<form action="." {% if form_id %}id="{{ form_id }}"{% endif %} method="{% if method %}{{ method }}{% else %}post{% endif %}" {% if multipart %}enctype="multipart/form-data"{% endif %} class="pure-form {% if aligned %}pure-form-aligned{% else %}pure-form-stacked{% endif %}">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    {{ form.non_field_errors }}
   {% endif %}
-{% endfor %}
-{% if multi_column %}
-  </div>
-{% endif %}
+  <fieldset>
+    {% if legend %}
+      <legend>{{ legend }}</legend>
+    {% endif %}
+    <div class="pure-g">
+      {% for field in form.visible_fields %}
+        <!-- errors -->
+        {% if field.errors %}
+            <div class="pure-u-1">
+          {% for error in field.errors %}
+            <span class="errorlist"><mark>{{ error }}</mark></span>
+          {% endfor %}
+            </div>
+        {% endif %}
+        <!-- end - errors -->
+        {% for item in field %}
+          <div class="pure-u-1-2 pure-u-md-1-4">
+            {{ item }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="pure-controls">
+      <p>
+        <input type="submit" value="{% if submit %}{{ submit }}{% else %}Submit{% endif %}" class="pure-button pure-button-primary" />
+      </p>
+    </div>
+  </fieldset>
+  {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+  {% endfor %}
+  {% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+  {% endif %}
+</form>

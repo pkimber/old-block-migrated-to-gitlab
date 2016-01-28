@@ -5,6 +5,8 @@ from block.tests.factories import PageSectionFactory
 from example_block.models import (
     Title,
     TitleBlock,
+    TitleImage,
+    TitleLink,
 )
 
 
@@ -26,3 +28,15 @@ class TitleFactory(factory.django.DjangoModelFactory):
     @factory.sequence
     def order(n):
         return n
+
+
+class TitleImageFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = TitleImage
+
+
+class TitleLinkFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = TitleLink

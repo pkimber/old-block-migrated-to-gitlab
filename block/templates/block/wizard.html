@@ -44,6 +44,9 @@
   {% ifequal 'e' wizard.steps.current %}
     Choose a previously uploaded document
   {% endifequal %}
+  {% ifequal 'list_delete' wizard.steps.current %}
+    Delete images from the library
+  {% endifequal %}
 {% endblock sub_heading %}
 
 {% block content %}
@@ -70,11 +73,13 @@
                 <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="pure-button pure-button-primary">< {% trans "Back" %}</button>
               {% endif %}
               <button type="submit" value="{% trans "submit" %}" class="pure-button pure-button-primary">
-                {% ifequal 1 wizard.steps.step1 %}
+                {% if wizard.steps.step1 == 1 %}
                   Next >
+                {% elif wizard.steps.current == 'list_delete' %}
+                  Delete
                 {% else %}
                   Submit
-                {% endifequal %}
+                {% endif %}
               </button>
             </p>
           </div>

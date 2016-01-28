@@ -13,7 +13,7 @@ from django.db import (
 from django.db.models import Max
 from django.utils import timezone
 
-from easy_thumbnails.fields import ThumbnailerImageField
+from django_extensions.db.fields import AutoSlugField
 
 from base.model_utils import (
     copy_model_instance,
@@ -53,18 +53,22 @@ class Wizard:
         elif self.wizard_type == self.LINK:
             result = 'fa fa-globe'
         else:
-            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+            raise BlockError(
+                "Unknown wizard type: '{}'".format(self.wizard_type)
+            )
         return result
 
     @property
     def url_name(self):
         result = ''
         if self.wizard_type == self.IMAGE:
-            result = 'block.image.wizard'
+            result = 'block.wizard.image.option'
         elif self.wizard_type == self.LINK:
-            result = 'block.link.wizard'
+            result = 'block.wizard.link.option'
         else:
-            raise BlockError("Unknown wizard type: '{}'".format(wizard_type))
+            raise BlockError(
+                "Unknown wizard type: '{}'".format(self.wizard_type)
+            )
         return result
 
 
@@ -162,24 +166,77 @@ class ModerateState(models.Model):
 reversion.register(ModerateState)
 
 
+class TemplateManager(models.Manager):
+    """Move to ``block``?"""
+
+    def create_template(self, name, template_name):
+        template = self.model(name=name, template_name=template_name)
+        template.save()
+        return template
+
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+    def init_template(self, name, template_name):
+        try:
+            obj = self.model.objects.get(template_name=template_name)
+            obj.name = name
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_template(name, template_name)
+        return obj
+
+    def templates(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'name'
+        )
+
+
+class Template(TimeStampedModel):
+
+    name = models.CharField(max_length=100)
+    template_name = models.CharField(
+        max_length=150,
+        help_text="File name e.g. 'compose/page_article.html'",
+        unique=True,
+    )
+    deleted = models.BooleanField(default=False)
+    objects = TemplateManager()
+
+    class Meta:
+        ordering = ('template_name',)
+        verbose_name = 'Template'
+        verbose_name_plural = 'Templates'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+reversion.register(Template)
+
+
 class PageManager(models.Manager):
 
     def create_page(
-            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+            self, slug_page, slug_menu, name, order, template, **kwargs):
         obj = self.model(
             name=name,
             slug=slug_page,
             slug_menu=slug_menu,
             order=order,
-            template_name=template_name,
+            template=template,
             is_custom=kwargs.get('is_custom', False),
             is_home=kwargs.get('is_home', False),
         )
         obj.save()
         return obj
 
-    def init_page(
-            self, slug_page, slug_menu, name, order, template_name, **kwargs):
+    def init_page(self, slug_page, slug_menu, name, order, template, **kwargs):
         if not slug_menu:
             slug_menu = ''
         try:
@@ -188,7 +245,7 @@ class PageManager(models.Manager):
             obj.slug = slug_page
             obj.slug_menu = slug_menu
             obj.order = order
-            obj.template_name = template_name
+            obj.template = template
             obj.is_custom = kwargs.get('is_custom', False)
             obj.is_home = kwargs.get('is_home', False)
             obj.save()
@@ -198,10 +255,18 @@ class PageManager(models.Manager):
                 slug_menu,
                 name,
                 order,
-                template_name,
+                template,
                 **kwargs
             )
         return obj
+
+    def next_order(self):
+        result = self.model.objects.aggregate(max_order=Max('order'))
+        max_order = result.get('max_order', 0)
+        if max_order:
+            return max_order + 1
+        else:
+            return 1
 
     def menu(self):
         """Return page objects for a menu."""
@@ -211,7 +276,8 @@ class PageManager(models.Manager):
         return self.model.objects.all().exclude(
             deleted=True,
         ).order_by(
-            'order'
+            '-is_custom',
+            'order',
         )
 
     def pages(self):
@@ -219,6 +285,10 @@ class PageManager(models.Manager):
         return self.page_list().exclude(
             is_custom=True,
         )
+
+    def refresh_sections_from_template(self, template):
+        for p in self.model.objects.filter(template=template):
+            p.refresh_sections_from_template()
 
 
 class Page(TimeStampedModel):
@@ -249,11 +319,25 @@ class Page(TimeStampedModel):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
     slug_menu = models.SlugField(max_length=100, blank=True)
-    order = models.IntegerField(default=0)
+    order = models.IntegerField(help_text="Menu order (set to 0 to hide)")
     is_home = models.BooleanField(default=False)
-    template_name = models.CharField(max_length=150)
+    template = models.ForeignKey(
+        Template,
+        #blank=True, null=True
+    )
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
+    meta_description = models.TextField(
+        blank=True,
+        help_text=(
+            'Concise explanation of the contents of this page '
+            '(used by search engines - optimal length 155 characters).'
+        ),
+    )
+    meta_keywords = models.TextField(
+        blank=True,
+        help_text='keywords for search engines',
+    )
     objects = PageManager()
 
     class Meta:
@@ -264,6 +348,13 @@ class Page(TimeStampedModel):
 
     def __str__(self):
         return '{}'.format(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            raise BlockError("Cannot save a page with no slug.")
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
 
     def get_absolute_url(self):
         name = self.url_name
@@ -281,6 +372,37 @@ class Page(TimeStampedModel):
             result.update(dict(menu=self.slug_menu,))
         return result
 
+    def refresh_sections_from_template(self):
+        """Update page sections by comparing to the template sections."""
+        # iterate through existing sections in the page
+        section_slugs = [s.section.slug for s in self.pagesection_set.all()]
+        for slug in section_slugs:
+            try:
+                # if the section is still used on the page, then keep it.
+                template_section = self.template.templatesection_set.get(
+                    section__slug=slug
+                )
+            except TemplateSection.DoesNotExist:
+                # pass
+                # PJK 30/10/2015
+                # Am I too scared to leave this in!!
+                # if the section is not used on the page, then delete it.
+                PageSection.objects.get(page=self, section__slug=slug).delete()
+        # iterate through the new sections
+        for template_section in self.template.templatesection_set.all():
+            try:
+                # if the section exists on the page, then keep it.
+                PageSection.objects.get(
+                    page=self, section=template_section.section
+                )
+            except PageSection.DoesNotExist:
+                # if the section is not on the page, then add it.
+                page_section = PageSection(
+                    page=self,
+                    section=template_section.section,
+                )
+                page_section.save()
+
     @property
     def url_name(self):
         """Use by this class and the ``Url`` class (see below)."""
@@ -292,11 +414,32 @@ class Page(TimeStampedModel):
 reversion.register(Page)
 
 
+class PaginatedSectionManager(models.Manager):
+
+    def create_paginated_section(self, items_per_page, order_by_field):
+        obj = self.model(
+            items_per_page=items_per_page,
+            order_by_field=order_by_field,
+        )
+        obj.save()
+        return obj
+
+    def init_paginated_section(self, items_per_page, order_by_field):
+        try:
+            obj = PaginatedSection.objects.get(order_by_field=order_by_field)
+            obj.items_per_page = items_per_page
+            obj.save()
+        except self.model.DoesNotExist:
+            obj = self.create_paginated_section(items_per_page, order_by_field)
+        return obj
+
+
 class PaginatedSection(models.Model):
     """Parameters for a Paginated Section."""
 
     items_per_page = models.IntegerField(default=10)
     order_by_field = models.CharField(max_length=100)
+    objects = PaginatedSectionManager()
 
     def __str__(self):
       return '{} - {}'.format(self.items_per_page, self.order_by_field)
@@ -532,13 +675,15 @@ class BlockModel(TimeStampedModel):
 
 class ContentManager(models.Manager):
 
-    def next_order(self):
-        result = self.model.objects.aggregate(max_order=Max('order'))
-        max_order = result.get('max_order', 0)
-        if max_order:
-            return max_order + 1
-        else:
-            return 1
+    def next_order(self, block):
+        rtn = self.model.objects.filter(
+                    block__page_section=block.page_section
+                    ).exclude(
+                        moderate_state__slug='removed'
+                        ).aggregate(Max('order'))['order__max']
+        if rtn is None:
+            rtn = -1
+        return rtn + 1
 
     def pending(self, page_section, kwargs=None):
         """Return a list of pending content for a section.
@@ -685,17 +830,31 @@ class ContentModel(TimeStampedModel):
                 'type': wizard_type,
             }
         )
-        return False
 
     @property
     def wizard_urls(self):
-        """Return the URLs for the image and link wizards."""
+        """Return the URLs for the image and link wizards.
+
+        The return value looks like this::
+            [
+                {
+                    'caption': 'Picture',
+                    'url': '/block/wizard/image/29/1/picture/single/',
+                    'class': 'fa fa-image'
+                },
+                {
+                    'caption': 'Link',
+                    'url': '/block/wizard/link/29/1/link/single/',
+                    'class': 'fa fa-globe'
+                }
+            ]
+
+        """
         result = []
         if hasattr(self, 'wizard_fields'):
             for item in self.wizard_fields:
                 result.append({
-                    'caption': item.field_name.title().translate(
-                                item.field_name.maketrans('_', ' ')),
+                    'caption': item.field_name.title(),
                     'class': item.css_class,
                     'url': self._wizard_url(
                         item.url_name,
@@ -733,7 +892,8 @@ class Document(models.Model) :
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
-        self.original_file_name = os.path.basename(self.document.name)
+        if self.document.name:
+            self.original_file_name = os.path.basename(self.document.name)
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
@@ -764,13 +924,57 @@ class HeaderFooter(SingletonModel):
 reversion.register(HeaderFooter)
 
 
+class ImageCategoryManager(models.Manager):
+
+    def create_category(self, name):
+        obj = self.model(name=name)
+        obj.save()
+        return obj
+
+    def categories(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'slug',
+        )
+
+    def init_category(self, name):
+        count = self.model.objects.filter(name=name).count()
+        if not count:
+            self.create_category(name)
+
+
+class ImageCategory(models.Model):
+
+    name = models.CharField(max_length=100)
+    slug = AutoSlugField(max_length=100, unique=True, populate_from=('name',))
+    deleted = models.BooleanField(default=False)
+    objects = ImageCategoryManager()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Image Category'
+        verbose_name_plural = 'Image Categories'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    @property
+    def in_use(self):
+        images = Image.objects.filter(category=self, deleted=False)
+        return images.count() > 0
+
+reversion.register(ImageCategory)
+
+
 class ImageManager(models.Manager):
 
     def images(self):
         return self.model.objects.all().exclude(
             deleted=True,
         ).order_by(
-            'title'
+            'category__slug',
+            'title',
         )
 
 
@@ -790,6 +994,7 @@ class Image(TimeStampedModel):
 
     - Do we want to add tags field in here so we can search/group images?
       e.g. https://github.com/alex/django-taggit
+    - For now, we are adding a category only.
 
     """
 
@@ -797,6 +1002,7 @@ class Image(TimeStampedModel):
     image = models.ImageField(upload_to='link/image')
     original_file_name = models.CharField(max_length=100)
     deleted = models.BooleanField(default=False)
+    category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
 
     class Meta:
@@ -812,7 +1018,54 @@ class Image(TimeStampedModel):
         # Call the "real" save() method.
         super().save(*args, **kwargs)
 
+    def set_deleted(self):
+        self.deleted = True
+        self.save()
+
 reversion.register(Image)
+
+
+class LinkCategoryManager(models.Manager):
+
+    def create_category(self, name):
+        obj = self.model(name=name)
+        obj.save()
+        return obj
+
+    def categories(self):
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'slug',
+        )
+
+    def init_category(self, name):
+        count = self.model.objects.filter(name=name).count()
+        if not count:
+            self.create_category(name)
+
+
+class LinkCategory(models.Model):
+
+    name = models.CharField(max_length=100)
+    slug = AutoSlugField(max_length=100, unique=True, populate_from=('name',))
+    deleted = models.BooleanField(default=False)
+    objects = LinkCategoryManager()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Link Category'
+        verbose_name_plural = 'Link Categories'
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+    @property
+    def in_use(self):
+        links = Link.objects.filter(category=self, deleted=False)
+        return links.count() > 0
+
+reversion.register(LinkCategory)
 
 
 class UrlManager(models.Manager):
@@ -839,6 +1092,12 @@ class UrlManager(models.Manager):
             )
         obj.save()
         return obj
+
+    def init_pages(self):
+        """Add non-custom pages to the list of URLs."""
+        for page in Page.objects.pages():
+            if not page.is_custom:
+                self.init_page_url(page)
 
     def init_reverse_url(self, title, name, arg1=None, arg2=None, arg3=None):
         arg1 = arg1 or ''
@@ -916,6 +1175,14 @@ class Url(models.Model):
     deleted = models.BooleanField(default=False)
     objects = UrlManager()
 
+    class Meta:
+        unique_together = ('page', 'name', 'arg1', 'arg2', 'arg3')
+        verbose_name = 'URL'
+        verbose_name_plural = 'URLs'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
     @property
     def url(self):
         result = None
@@ -932,24 +1199,27 @@ class Url(models.Model):
             result = reverse(self.name, args=params)
         return result
 
-    class Meta:
-        unique_together = ('page', 'name', 'arg1', 'arg2', 'arg3')
-        verbose_name = 'URL'
-        verbose_name_plural = 'URLs'
-
-    def __str__(self):
-        return '{}'.format(self.title)
-
 reversion.register(Url)
 
 
 class LinkManager(models.Manager):
 
-    def create_document_link(self, document):
+    def create_document_link(self, document, category=None):
         obj = self.model(
             document=document,
             link_type=self.model.DOCUMENT,
             title=document.title,
+        )
+        if category:
+            obj.category = category
+        obj.save()
+        return obj
+
+    def create_external_link(self, url_external, title):
+        obj = self.model(
+            url_external=url_external,
+            link_type=self.model.URL_EXTERNAL,
+            title=title,
         )
         obj.save()
         return obj
@@ -962,6 +1232,15 @@ class LinkManager(models.Manager):
         )
         obj.save()
         return obj
+
+    def links(self):
+        """List of links."""
+        return self.model.objects.all().exclude(
+            deleted=True,
+        ).order_by(
+            'category__slug',
+            'title',
+        )
 
 
 class Link(TimeStampedModel):
@@ -994,6 +1273,8 @@ class Link(TimeStampedModel):
 
     title = models.CharField(max_length=250)
     link_type = models.CharField(max_length=1, choices=LINK_TYPE_CHOICES)
+    category = models.ForeignKey(LinkCategory, blank=True, null=True)
+    deleted = models.BooleanField(default=False)
 
     document = models.ForeignKey(
         Document,
@@ -1015,6 +1296,20 @@ class Link(TimeStampedModel):
     )
     objects = LinkManager()
 
+    class Meta:
+        verbose_name = 'Link'
+        verbose_name_plural = 'Links'
+
+    def __str__(self):
+        return '{}'.format(self.title)
+
+    def save(self, *args, **kwargs):
+        if self.link_type:
+            # Call the "real" save() method.
+            super().save(*args, **kwargs)
+        else:
+            raise BlockError("'Link' records must have a 'link_type'")
+
     @property
     def file_name(self):
         result = None
@@ -1025,6 +1320,28 @@ class Link(TimeStampedModel):
     @property
     def is_document(self):
         return bool(self.link_type == self.DOCUMENT)
+
+    @property
+    def link_type_description(self):
+        if self.link_type == self.DOCUMENT:
+            return 'Document'
+        elif self.link_type == self.URL_EXTERNAL:
+            return 'Web Site'
+        elif self.link_type == self.URL_INTERNAL:
+            return 'Page'
+        else:
+            raise BlockError(
+                "'Link' {} does not have a 'link_type' (or is an "
+                "unknown link type: '{}')".format(self.pk, self.link_type)
+            )
+
+    @property
+    def open_in_tab(self):
+        """Should this link be opened in a new tab in the browser?"""
+        result = True
+        if self.link_type == self.URL_INTERNAL:
+            result = False
+        return result
 
     @property
     def url(self):
@@ -1042,88 +1359,7 @@ class Link(TimeStampedModel):
             )
         return result
 
-    class Meta:
-        verbose_name = 'Link'
-        verbose_name_plural = 'Links'
-
-    def __str__(self):
-        return '{}'.format(self.title)
-
 reversion.register(Link)
-
-
-class TemplateManager(models.Manager):
-    """Move to ``block``?"""
-
-    def create_template(self, template_name):
-        template = self.model(template_name=template_name)
-        template.save()
-        return template
-
-    def init_template(self, template_name):
-        templates = self.model.objects.filter(template_name=template_name)
-        if templates:
-            result = templates[0]
-        else:
-            result = self.create_template(template_name)
-        return result
-
-
-class Template(TimeStampedModel):
-    """Move to ``block``?"""
-
-    template_name = models.CharField(
-        max_length=150,
-        help_text="File name e.g. 'compose/page_article.html'",
-    )
-    objects = TemplateManager()
-
-    class Meta:
-        ordering = ('template_name',)
-        verbose_name = 'Template'
-        verbose_name_plural = 'Templates'
-
-    def __str__(self):
-        return '{}'.format(self.template_name)
-
-    def update_page(self, page):
-        # iterate through existing sections in the page
-        section_slugs = [s.section.slug for s in page.pagesection_set.all()]
-        for slug in section_slugs:
-            try:
-                # if the section is still used on the page, then keep it.
-                template_section = self.templatesection_set.get(
-                    section__slug=slug
-                )
-            except TemplateSection.DoesNotExist:
-                # if the section is not used on the page, then delete it.
-                PageSection.objects.get(page=page, section__slug=slug).delete()
-        # iterate through the new sections
-        for template_section in self.templatesection_set.all():
-            try:
-                # if the section exists on the page, then keep it.
-                PageSection.objects.get(
-                    page=page, section=template_section.section
-                )
-            except PageSection.DoesNotExist:
-                # if the section is not on the page, then add it.
-                page_section = PageSection(
-                    page=page,
-                    section=template_section.section,
-                )
-                page_section.save()
-        # update the page template name (if it has changed)
-        if page.template_name == self.template_name:
-            pass
-        else:
-            page.template_name = self.template_name
-            page.save()
-
-    def update_pages(self):
-        for p in Page.objects.filter(template_name=self.template_name):
-            self.update_page(p)
-
-reversion.register(Template)
 
 
 class TemplateSectionManager(models.Manager):
@@ -1146,7 +1382,6 @@ class TemplateSectionManager(models.Manager):
 
 
 class TemplateSection(TimeStampedModel):
-    """Move to ``block``?"""
 
     template = models.ForeignKey(Template)
     section = models.ForeignKey(Section)
@@ -1216,7 +1451,7 @@ class ViewUrl(models.Model):
 reversion.register(ViewUrl)
 
 
-class Menu (models.Model):
+class Menu(models.Model):
     slug = models.SlugField(max_length=100)
     title = models.CharField(max_length=100)
     navigation = models.BooleanField(default=True)
@@ -1232,7 +1467,7 @@ class Menu (models.Model):
 reversion.register(Menu)
 
 
-class MenuItem (models.Model):
+class MenuItem(models.Model):
     menu = models.ForeignKey(Menu, blank=False, null=True)
     slug = models.SlugField(max_length=100)
     parent = models.ForeignKey('self', blank=True, null=True)

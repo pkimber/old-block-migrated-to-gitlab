@@ -44,6 +44,9 @@ urlpatterns = patterns(
         view=SettingsView.as_view(),
         name='project.settings'
         ),
+    url(regex=r'^wizard/',
+        view=include('block.urls.wizard')
+        ),
     url(regex=r'^',
         view=include('login.urls')
         ),

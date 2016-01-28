@@ -10,6 +10,15 @@
   {% endif %}
 {% endblock title %}
 
+{% block meta_extra %}
+  {% if page.meta_description %}
+    <meta name="description" content="{{ page.meta_description }}">
+  {% endif %}
+  {% if page.meta_keywords %}
+    <meta name="keywords" content="{{ page.meta_keywords }}">
+  {% endif %}
+{% endblock meta_extra %}
+
 {% block heading %}
   {% if header_footer %}
     {{ header_footer.header }}

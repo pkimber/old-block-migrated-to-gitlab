@@ -1,0 +1,67 @@
+{% extends 'dash/base.html' %}
+
+{% load thumbnail %}
+
+{% block sub_title %}
+  Image Wizard
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Use the arrows to change the order
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+            <a href="{{ url_option }}" class="pure-menu-link">
+              <i class="fa fa-reply"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% for item in many_to_many %}
+        <form action="." method="post" class="pure-form">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            {{ form.non_field_errors }}
+          {% endif %}
+          {{ item.order }}.
+          {{ item.image.title }}
+          <br>
+          <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+          <br>
+          {% if forloop.first %}
+            <button class="pure-button pure-button-disabled">
+          {% else %}
+            <button type="submit" name="up" value="{{ item.pk }}" class="pure-button">
+          {% endif %}
+            <i class="fa fa-arrow-up"></i>
+          </button>
+          {% if forloop.last %}
+            <button class="pure-button pure-button-disabled">
+          {% else %}
+            <button type="submit" name="down" value="{{ item.pk }}" class="pure-button">
+          {% endif %}
+            <i class="fa fa-arrow-down"></i>
+          </button>
+          <br>
+          <br>
+        </form>
+      {% endfor %}
+      <br>
+      <a href="{{ url_option }}" class="pure-button pure-button-primary">
+        <span style="color:white;">
+          <i class="fa fa-reply"></i>
+          Finish
+        </span>
+      </a>
+    </div>
+  </div>
+{% endblock content %}

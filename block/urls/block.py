@@ -6,8 +6,17 @@ from django.conf.urls import (
 
 from block.views import (
     HeaderFooterUpdateView,
-    ImageWizard,
-    LinkWizard,
+    ImageCategoryCreateView,
+    ImageCategoryDeleteView,
+    ImageCategoryListView,
+    ImageCategoryUpdateView,
+    ImageListDeleteView,
+    ImageListView,
+    ImageUpdateView,
+    LinkCategoryCreateView,
+    LinkCategoryDeleteView,
+    LinkCategoryListView,
+    LinkCategoryUpdateView,
     PageCreateView,
     PageDeleteView,
     PageListView,
@@ -29,6 +38,54 @@ urlpatterns = patterns(
         view=HeaderFooterUpdateView.as_view(),
         name='block.header.footer.update'
         ),
+    # image category
+    url(regex=r'^image/category/$',
+        view=ImageCategoryListView.as_view(),
+        name='block.image.category.list'
+        ),
+    url(regex=r'^image/category/create/$',
+        view=ImageCategoryCreateView.as_view(),
+        name='block.image.category.create'
+        ),
+    url(regex=r'^image/category/(?P<pk>\d+)/update/$',
+        view=ImageCategoryUpdateView.as_view(),
+        name='block.image.category.update'
+        ),
+    url(regex=r'^image/category/(?P<pk>\d+)/delete/$',
+        view=ImageCategoryDeleteView.as_view(),
+        name='block.image.category.delete'
+        ),
+    # image
+    url(regex=r'^image/$',
+        view=ImageListView.as_view(),
+        name='block.image.list'
+        ),
+    url(regex=r'^image/delete/$',
+        view=ImageListDeleteView.as_view(),
+        name='block.image.list.delete'
+        ),
+    url(regex=r'^image/(?P<pk>\d+)/update/$',
+        view=ImageUpdateView.as_view(),
+        name='block.image.update'
+        ),
+    # link category
+    url(regex=r'^link/category/$',
+        view=LinkCategoryListView.as_view(),
+        name='block.link.category.list'
+        ),
+    url(regex=r'^link/category/create/$',
+        view=LinkCategoryCreateView.as_view(),
+        name='block.link.category.create'
+        ),
+    url(regex=r'^link/category/(?P<pk>\d+)/update/$',
+        view=LinkCategoryUpdateView.as_view(),
+        name='block.link.category.update'
+        ),
+    url(regex=r'^link/category/(?P<pk>\d+)/delete/$',
+        view=LinkCategoryDeleteView.as_view(),
+        name='block.link.category.delete'
+        ),
+    # page
     url(regex=r'^page/$',
         view=PageListView.as_view(),
         name='block.page.list'
@@ -76,13 +133,5 @@ urlpatterns = patterns(
     url(regex=r'^template/section/(?P<pk>\d+)/remove/$',
         view=TemplateSectionRemoveView.as_view(),
         name='block.template.section.remove'
-        ),
-    url(regex=r'^wizard/image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/$',
-        view=ImageWizard.as_view(),
-        name='block.image.wizard'
-        ),
-    url(regex=r'^wizard/link/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/$',
-        view=LinkWizard.as_view(),
-        name='block.link.wizard'
         ),
 )

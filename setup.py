@@ -27,7 +27,7 @@ setup(
             'templates/block/*.*',
         ],
     },
-    version='0.1.42',
+    version='0.1.50',
     description='block',
     author='Malcolm Dinsmore',
     author_email='m.dinsmore@talk21.com',

@@ -1,0 +1,38 @@
+{% extends 'dash/base.html' %}
+
+{% block sub_title %}
+  Image Library
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Delete Images from Library
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+            <a href="{% url 'block.image.list' %}" class="pure-menu-link">
+              <i class="fa fa-reply"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      <h3>
+        Select one (or more) images to delete from the library...
+      </h3>
+    </div>
+  </div>
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include 'block/_wizard_form.html' with submit='Delete from Library' %}
+      <br>
+    </div>
+  </div>
+{% endblock content %}

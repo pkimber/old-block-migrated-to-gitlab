@@ -1,1 +1,2 @@
 --ignore-dir=venv-block
+--ignore-dir=htmlcov

@@ -1,11 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django import forms
-from django.conf import settings
-from django.forms.widgets import RadioFieldRenderer
-from django.utils.html import (
-    format_html,
-    format_html_join,
-)
+from django.utils.html import format_html
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -18,12 +13,13 @@ from block.models import (
     Document,
     HeaderFooter,
     Image,
+    ImageCategory,
     Link,
+    LinkCategory,
     Page,
     Section,
     Template,
     TemplateSection,
-    Wizard,
 )
 
 
@@ -35,9 +31,38 @@ def _label_from_instance(obj):
         'size': (100, 100),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-    return format_html('{}<br /><img src="{}" />'.format(
+    return format_html('{}<br><img src="{}" />'.format(
         obj.title,
         thumbnail.url,
+    ))
+
+
+def _label_from_many_to_many_instance(obj):
+    """The label is the image."""
+    thumbnailer = get_thumbnailer(obj.image.image)
+    thumbnail_options = {
+        'crop': True,
+        'size': (100, 100),
+    }
+    thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+    return format_html('{}. {}<br><img src="{}" />'.format(
+        obj.order,
+        obj.image.title,
+        thumbnail.url,
+    ))
+
+
+def _link_label_from_instance(obj):
+    return format_html('{} (<small>{}</small>)'.format(
+        obj.title,
+        obj.link_type_description,
+    ))
+
+
+def _link_label_from_many_to_many_instance(obj):
+    return format_html('{} (<small>{}</small>)'.format(
+        obj.link.title,
+        obj.link.link_type_description,
     ))
 
 
@@ -55,6 +80,30 @@ class ImageModelMultipleChoiceField(forms.ModelMultipleChoiceField):
         return _label_from_instance(obj)
 
 
+class LinkModelChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_instance(obj)
+
+
+class LinkModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_instance(obj)
+
+
+class LinkManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _link_label_from_many_to_many_instance(obj)
+
+
+class ManyToManyMultipleChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return _label_from_many_to_many_instance(obj)
+
+
 class ContentEmptyForm(forms.ModelForm):
 
     class Meta:
@@ -65,6 +114,16 @@ class ContentEmptyForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     """Allow the user to upload a document (for the form wizard)."""
 
+    add_to_library = forms.BooleanField(
+        help_text='tick this box to add the document to the library',
+        initial=True,
+        required=False,
+    )
+    category = forms.ModelChoiceField(
+        queryset=LinkCategory.objects.categories(),
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         title = self.fields['title']
@@ -74,28 +133,21 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = (
-            'title',
             'document',
+            'title',
+            'category',
+            'add_to_library',
         )
         widgets = {
             'document': forms.FileInput,
         }
 
 
-class DocumentListForm(forms.ModelForm):
-    """List of documents (for the form wizard)."""
-
-    def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
-        for name in ('title', 'document'):
-            self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
+class EmptyForm(forms.ModelForm):
 
     class Meta:
-        model = Link
-        fields = (
-            'title',
-            'document',
-        )
+        model = ContentModel
+        fields = ()
 
 
 class ExternalLinkForm(forms.ModelForm):
@@ -111,6 +163,7 @@ class ExternalLinkForm(forms.ModelForm):
         fields = (
             'title',
             'url_external',
+            'category',
         )
 
 
@@ -143,24 +196,69 @@ class HeaderFooterForm(RequiredFieldForm):
         )
 
 
+class ImageCategoryEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = ImageCategory
+        fields = ()
+
+
+class ImageCategoryForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = ImageCategory
+        fields = (
+            'name',
+        )
+
+
 class ImageForm(forms.ModelForm):
     """Allow the user to upload an image (for the form wizard)."""
+
+    add_to_library = forms.BooleanField(
+        help_text='tick this box to add the image to the library',
+        initial=True,
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         title = self.fields['title']
         title.widget.attrs.update({'class': 'pure-input-2-3'})
         set_widget_required(title)
+        category = self.fields['category']
+        category.queryset = ImageCategory.objects.categories()
 
     class Meta:
         model = Image
         fields = (
-            'title',
             'image',
+            'title',
+            'category',
+            'add_to_library',
         )
         widgets = {
             'image': forms.FileInput,
         }
+
+
+class ImageListDeleteForm(forms.Form):
+    """List of images (so the user can delete them)."""
+
+    images = ImageModelMultipleChoiceField(
+        queryset=Image.objects.images(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        fields = (
+            'images',
+        )
 
 
 class ImageListForm(forms.Form):
@@ -171,6 +269,15 @@ class ImageListForm(forms.Form):
         empty_label=None,
         widget=forms.RadioSelect,
     )
+
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            images = self.fields['images']
+            images.queryset = Image.objects.images().filter(
+                category__slug=category_slug
+            )
 
     class Meta:
         model = Image
@@ -188,28 +295,120 @@ class ImageMultiSelectForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
     )
 
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            images = self.fields['images']
+            images.queryset = Image.objects.images().filter(
+                category__slug=category_slug
+            )
+
     class Meta:
         fields = (
             'images',
         )
 
 
-class LinkMultiSelectForm(forms.Form):
-    """List of links (for the form wizard)."""
+class ImageSelectForm(forms.Form):
+    """List of current images in the slideshow."""
 
-    links = forms.ModelMultipleChoiceField(
-        queryset=Link.objects.none(),
+    # Note: The ``queryset`` will not contain ``Image`` records.
+    many_to_many = ManyToManyMultipleChoiceField(
+        queryset=Image.objects.none(),
+        required=False,
         widget=forms.CheckboxSelectMultiple,
     )
 
     def __init__(self, *args, **kwargs):
-        links = kwargs.pop('links')
-        super ().__init__(*args,**kwargs)
-        links_field = self.fields['links']
-        links_field.queryset = links
+        qs_many_to_many = kwargs.pop('many_to_many')
+        super().__init__(*args, **kwargs)
+        many_to_many = self.fields['many_to_many']
+        many_to_many.queryset = qs_many_to_many.order_by('order')
         # tick every link - so the user can untick the ones they want to remove
-        initial = {item.pk: True for item in links}
-        links_field.initial = initial
+        initial = {item.pk: True for item in qs_many_to_many}
+        many_to_many.initial = initial
+
+
+class ImageUpdateForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        title = self.fields['title']
+        title.widget.attrs.update({'class': 'pure-input-2-3'})
+        set_widget_required(title)
+        category = self.fields['category']
+        category.queryset = ImageCategory.objects.categories()
+
+    class Meta:
+        model = Image
+        fields = (
+            'title',
+            'category',
+        )
+
+
+class LinkCategoryEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = LinkCategory
+        fields = ()
+
+
+class LinkCategoryForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'pure-input-2-3'})
+
+    class Meta:
+        model = LinkCategory
+        fields = (
+            'name',
+        )
+
+
+class LinkListForm(forms.Form):
+    """List of links (for the form wizard)."""
+
+    links = LinkModelChoiceField(
+        queryset=Link.objects.links(),
+        empty_label=None,
+        widget=forms.RadioSelect,
+    )
+
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            links = self.fields['links']
+            links.queryset = Link.objects.links().filter(
+                category__slug=category_slug
+            )
+
+    class Meta:
+        model = Link
+        fields = (
+            'links',
+        )
+
+
+class LinkMultiSelectForm(forms.Form):
+    """List of links (for the form wizard)."""
+
+    links = LinkModelMultipleChoiceField(
+        queryset=Link.objects.links(),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def __init__(self, *args, **kwargs):
+        category_slug = kwargs.pop('category_slug')
+        super().__init__(*args, **kwargs)
+        if category_slug:
+            links = self.fields['links']
+            links.queryset = Link.objects.links().filter(
+                category__slug=category_slug
+            )
 
     class Meta:
         fields = (
@@ -217,114 +416,24 @@ class LinkMultiSelectForm(forms.Form):
         )
 
 
-class ImageTypeForm(forms.Form):
-    """Allow the user to select the image type (for the form wizard)."""
+class LinkSelectForm(forms.Form):
+    """List of current images in the slideshow."""
 
-    FORM_IMAGE = 'i'
-    FORM_IMAGE_LIST = 'a'
-    FORM_IMAGE_MULTI_SELECT = 'c'
-    # this form :)
-    FORM_IMAGE_TYPE = 'image_type'
-    # remove does not have a form
-    REMOVE = 'r'
-
-    OPTION_CAPTION = {
-        FORM_IMAGE: 'Upload an image',
-        FORM_IMAGE_LIST: 'Use an existing image',
-        FORM_IMAGE_MULTI_SELECT: 'Select one or more images',
-        REMOVE: 'Remove {} from the page',
-    }
-
-    image_type = forms.ChoiceField(label="Choose the type of image")
+    # Note: The ``queryset`` will not contain ``Link`` records.
+    many_to_many = LinkManyToManyMultipleChoiceField(
+        queryset=Link.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
 
     def __init__(self, *args, **kwargs):
-        link_type = kwargs.pop('link_type')
-        super ().__init__(*args,**kwargs)
-        # get the list of items (in the order displayed)
-        if link_type == Wizard.SINGLE:
-            items = [
-                self.FORM_IMAGE_LIST,
-                self.FORM_IMAGE,
-                self.REMOVE,
-            ]
-        else:
-            items = [
-                self.FORM_IMAGE_MULTI_SELECT,
-                self.FORM_IMAGE,
-            ]
-        # build the list of choices - adding the description
-        choices = []
-        for item in items:
-            description = self.OPTION_CAPTION[item]
-            if item == self.REMOVE:
-                if link_type == Wizard.MULTI:
-                    description = description.format('images')
-                else:
-                    description = description.format('image')
-            choices.append((item, description))
-        self.fields['image_type'].choices = choices
-
-    class Meta:
-        fields = (
-            'image_type',
-        )
-
-
-class LinkTypeForm(forms.Form):
-    """Allow the user to select the link type (for the form wizard)."""
-
-    FORM_DOCUMENT = 'u'
-    FORM_DOCUMENT_LIST = 'e'
-    FORM_EXTERNAL_URL = 'l'
-    FORM_PAGE_URL = 'p'
-    # this form :)
-    FORM_LINK_TYPE = 'link_type'
-    FORM_LINK_MULTI_REMOVE = 'x'
-    # remove does not have a form
-    REMOVE = 'r'
-
-    FORM_CHOICES = {
-        FORM_EXTERNAL_URL: 'Link to another site',
-        FORM_PAGE_URL: 'Page on this site',
-        FORM_DOCUMENT: 'Upload a document and link to it',
-        FORM_DOCUMENT_LIST: 'Use an existing document',
-        FORM_LINK_MULTI_REMOVE: 'Remove one or more links',
-        REMOVE: 'Remove Link',
-    }
-
-    link_type = forms.ChoiceField(label="Choose the type of link")
-
-    def __init__(self, *args, **kwargs):
-        link_type = kwargs.pop('link_type')
-        super ().__init__(*args,**kwargs)
-        # get the list of items (in the order displayed)
-        # I don't think we are handling multi-links yet.
-        if link_type == Wizard.SINGLE:
-            items = [
-                self.FORM_EXTERNAL_URL,
-                self.FORM_PAGE_URL,
-                self.FORM_DOCUMENT,
-                self.FORM_DOCUMENT_LIST,
-                self.REMOVE,
-            ]
-        else:
-            items = [
-                self.FORM_EXTERNAL_URL,
-                self.FORM_PAGE_URL,
-                self.FORM_DOCUMENT,
-                self.FORM_DOCUMENT_LIST,
-                self.FORM_LINK_MULTI_REMOVE,
-            ]
-        # build the list of choices - adding the description
-        choices = []
-        for item in items:
-            choices.append((item, self.FORM_CHOICES[item]))
-        self.fields['link_type'].choices = choices
-
-    class Meta:
-        fields = (
-            'link_type',
-        )
+        qs_many_to_many = kwargs.pop('many_to_many')
+        super().__init__(*args, **kwargs)
+        many_to_many = self.fields['many_to_many']
+        many_to_many.queryset = qs_many_to_many.order_by('order')
+        # tick every link - so the user can untick the ones they want to remove
+        initial = {item.pk: True for item in qs_many_to_many}
+        many_to_many.initial = initial
 
 
 class PageEmptyForm(forms.ModelForm):
@@ -334,9 +443,18 @@ class PageEmptyForm(forms.ModelForm):
         fields = ()
 
 
-class PageForm(RequiredFieldForm):
+class PageBaseForm(RequiredFieldForm):
 
-    template = forms.ModelChoiceField(queryset=Template.objects.all())
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('meta_description', 'meta_keywords'):
+            field = self.fields[name]
+            field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
+        template = self.fields['template']
+        template.queryset = Template.objects.templates()
+
+
+class PageForm(PageBaseForm):
 
     class Meta:
         model = Page
@@ -345,8 +463,35 @@ class PageForm(RequiredFieldForm):
             'slug',
             'slug_menu',
             'order',
+            'meta_description',
+            'meta_keywords',
             'is_home',
             'template',
+        )
+
+
+class PageFormSimple(PageBaseForm):
+
+    class Meta:
+        model = Page
+        fields = (
+            'name',
+            'template',
+            'meta_description',
+            'meta_keywords',
+        )
+
+
+class PageFormSimpleUpdate(PageBaseForm):
+
+    class Meta:
+        model = Page
+        fields = (
+            'name',
+            'template',
+            'order',
+            'meta_description',
+            'meta_keywords',
         )
 
 
@@ -363,6 +508,7 @@ class PageListForm(forms.ModelForm):
         fields = (
             'title',
             'url_internal',
+            'category',
         )
 
 
@@ -385,6 +531,7 @@ class TemplateForm(RequiredFieldForm):
     class Meta:
         model = Template
         fields = (
+            'name',
             'template_name',
         )
 

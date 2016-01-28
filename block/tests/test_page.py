@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from block.models import Page
+from block.models import (
+    Page,
+    Template,
+)
 from block.tests.factories import PageFactory
 
 
@@ -19,7 +22,8 @@ def test_init_not():
 
 @pytest.mark.django_db
 def test_init():
-    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html')
+    template = Template.objects.init_template('Home', 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, template)
     try:
         Page.objects.get(slug=Page.HOME)
     except Page.DoesNotExist:
@@ -28,39 +32,44 @@ def test_init():
 
 @pytest.mark.django_db
 def test_init_change_order():
+    template = Template.objects.init_template('Home', 'home.html')
     # create page (order 1)
-    Page.objects.init_page(Page.HOME, '', 'Home', 1, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 1, template)
     page = Page.objects.get(slug=Page.HOME)
     assert 1 == page.order
     # update page (order 3)
-    Page.objects.init_page(Page.HOME, '', 'Home', 3, 'my.html')
+    template = Template.objects.init_template('My Template', 'my.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 3, template)
     page = Page.objects.get(slug=Page.HOME)
     assert 3 == page.order
-    assert 'my.html' == page.template_name
+    assert 'my.html' == page.template.template_name
 
 
 @pytest.mark.django_db
 def test_init_is_home():
-    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html', is_home=True)
+    template = Template.objects.init_template('Home', 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, template, is_home=True)
     page = Page.objects.get(slug=Page.HOME)
     assert True == page.is_home
 
 
 @pytest.mark.django_db
 def test_init_is_not_home():
-    Page.objects.init_page(Page.HOME, '', 'Home' , 0, 'home.html')
+    template = Template.objects.init_template('Home', 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home' , 0, template)
     page = Page.objects.get(slug=Page.HOME)
     assert False == page.is_home
 
 
 @pytest.mark.django_db
 def test_init_set_home():
+    template = Template.objects.init_template('Home', 'home.html')
     # create page (is not a home page)
-    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html')
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, template)
     page = Page.objects.get(slug=Page.HOME)
     assert False == page.is_home
     # update page (is now a home page)
-    Page.objects.init_page(Page.HOME, '', 'Home', 0, 'home.html', is_home=True)
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, template, is_home=True)
     page = Page.objects.get(slug=Page.HOME)
     assert True == page.is_home
 
@@ -94,7 +103,18 @@ def test_page_list():
     PageFactory(slug='info')
     PageFactory(slug='portfolio')
     result = [p.slug for p in Page.objects.page_list()]
-    assert ['home', 'custom', 'info', 'portfolio'] == result
+    assert ['custom', 'home', 'info', 'portfolio'] == result
+
+
+@pytest.mark.django_db
+def test_page_get_next_order():
+    PageFactory(order=4)
+    assert 5 == Page.objects.next_order()
+
+
+@pytest.mark.django_db
+def test_page_get_next_order_no_pages():
+    assert 1 == Page.objects.next_order()
 
 
 @pytest.mark.django_db

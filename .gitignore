@@ -39,8 +39,8 @@ venv-*
 .pydevproject
 
 # dev
-.cache/
 *~
+.cache/
 htmlcov/
 
 # private info

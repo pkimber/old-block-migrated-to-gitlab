@@ -45,7 +45,7 @@
                 <a href="{{ object.get_absolute_url }}">
                 {% endif %}
                   {% if object.deleted %}<del>{% endif %}
-                  {% if object.order %}
+                  {% if object.order and not object.is_custom %}
                     {{ object.order }})
                   {% endif %}
                   {{ object.name }}
@@ -61,16 +61,21 @@
                 </a>
               </td>
               <td>
-                {% if object.is_home %}
-                  Home
-                {% endif %}
-                {% if object.is_custom %}
-                  Custom
-                {% endif %}
+                <small>
+                  {% if object.is_home %}
+                    Home
+                  {% elif not object.order %}
+                    Hidden
+                  {% endif %}
+                  {% if object.is_custom %}
+                    Custom
+                  {% endif %}
+                </small>
               </td>
               <td>
                 <a href="{% url 'block.page.update' object.pk %}">
                   <i class="fa fa-cog"></i>
+                  <small>{{ object.template.name }}</small>
                 </a>
               </td>
               <td>

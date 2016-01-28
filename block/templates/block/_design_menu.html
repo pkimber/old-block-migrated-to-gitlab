@@ -1,7 +1,7 @@
 {% if user.is_staff %}
   {% if is_block_page %}
     <li class="pure-menu-item">
-      <a href="{% if design %}{{ page.get_absolute_url }}{% else %}{{ page.get_design_url }}{% endif %}"
+      <a href="{% if design %}{{ view_url }}{% else %}{{ page.get_design_url }}?view={{ path }}{% endif %}"
         title="{% if design %}View{% else %}Design{% endif %}"
         class="pure-menu-link menu-mini">
         {% if design %}

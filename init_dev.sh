@@ -10,5 +10,5 @@ django-admin.py migrate --noinput
 django-admin.py demo_data_login
 django-admin.py demo_data_block
 django-admin.py demo_data_example
-
+django-admin.py init_app_block
 django-admin.py runserver

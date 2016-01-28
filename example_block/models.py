@@ -34,6 +34,16 @@ class Title(ContentModel):
         related_name='title_link',
         blank=True, null=True
     )
+    slideshow = models.ManyToManyField(
+        Image,
+        related_name='slideshow',
+        through='TitleImage'
+    )
+    references = models.ManyToManyField(
+        Link,
+        related_name='references',
+        through='TitleLink'
+    )
 
     class Meta:
         # cannot put 'unique_together' on abstract base class
@@ -46,6 +56,29 @@ class Title(ContentModel):
         return '{} ({}, {})'.format(
             self.title, self.order, self.moderate_state.name
         )
+
+    def copy_related_data(self, published_instance):
+        """Copy slideshow images and links for the references."""
+        for item in self.ordered_slideshow():
+            obj = self.slideshow.through(
+                content=published_instance,
+                image=item.image,
+                order=item.order,
+            )
+            obj.save()
+        for item in self.ordered_references():
+            obj = self.references.through(
+                content=published_instance,
+                link=item.link,
+                order=item.order,
+            )
+            obj.save()
+
+    def ordered_references(self):
+        return self.references.through.objects.filter(content=self)
+
+    def ordered_slideshow(self):
+        return self.slideshow.through.objects.filter(content=self)
 
     def url_publish(self):
         return reverse('example.title.publish', kwargs={'pk': self.pk})
@@ -60,7 +93,51 @@ class Title(ContentModel):
     def wizard_fields(self):
         return [
             Wizard('picture', Wizard.IMAGE, Wizard.SINGLE),
+            Wizard('slideshow', Wizard.IMAGE, Wizard.MULTI),
             Wizard('link', Wizard.LINK, Wizard.SINGLE),
+            Wizard('references', Wizard.LINK, Wizard.MULTI),
         ]
 
 reversion.register(Title)
+
+
+class TitleImage(models.Model):
+    """Slideshow images for the title.
+
+    This is the model that is used to govern the many-to-many relationship
+    between ``Title`` and ``Image``.
+
+    https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
+
+    """
+    content = models.ForeignKey(Title)
+    image = models.ForeignKey(Image)
+    order = models.IntegerField()
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Title Image'
+        verbose_name_plural = 'Title Images'
+
+reversion.register(TitleImage)
+
+
+class TitleLink(models.Model):
+    """Reference links for the title.
+
+    This is the model that is used to govern the many-to-many relationship
+    between ``Title`` and ``Link``.
+
+    https://docs.djangoproject.com/en/1.8/topics/db/models/#extra-fields-on-many-to-many-relationships
+
+    """
+    content = models.ForeignKey(Title)
+    link = models.ForeignKey(Link)
+    order = models.IntegerField()
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Title Link'
+        verbose_name_plural = 'Title Links'
+
+reversion.register(TitleLink)

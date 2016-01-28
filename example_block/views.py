@@ -1,8 +1,5 @@
 # -*- encoding: utf-8 -*-
-from django.views.generic import (
-    ListView,
-    TemplateView,
-)
+from django.views.generic import TemplateView
 
 from braces.views import (
     LoginRequiredMixin,
@@ -11,7 +8,6 @@ from braces.views import (
 
 from base.view_utils import BaseMixin
 from block.forms import ContentEmptyForm
-from block.models import Page
 from block.views import (
     ContentCreateView,
     ContentPublishView,
