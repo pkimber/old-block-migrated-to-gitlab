@@ -2,7 +2,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 
-import reversion
+from reversion import revisions as reversion
 
 from block.models import (
     BlockModel,

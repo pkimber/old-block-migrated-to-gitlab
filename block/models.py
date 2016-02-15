@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 import os
-import reversion
+from reversion import revisions as reversion
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType

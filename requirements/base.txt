@@ -4,7 +4,7 @@ django-braces==1.8.1
 django-compressor==1.5
 django-extensions==1.5.7
 django-formtools==1.0
-django-reversion==1.9.3
+django-reversion==1.10.1
 Django==1.8.5
 easy-thumbnails==2.2
 pillow==3.0.0
