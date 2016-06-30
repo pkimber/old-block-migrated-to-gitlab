@@ -33,6 +33,7 @@ from braces.views import (
 from base.view_utils import BaseMixin
 from .forms import (
     DocumentForm,
+    EmptyContentForm,
     EmptyForm,
     ExternalLinkForm,
     HeaderFooterForm,
@@ -871,6 +872,7 @@ class WizardImageOption(
 
 class WizardImageOrder(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
+    """PJK"""
 
     form_class = EmptyForm
     template_name = 'block/wizard_image_order.html'
@@ -923,7 +925,7 @@ class WizardImageOrder(
 class WizardImageRemove(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, UpdateView):
 
-    form_class = EmptyForm
+    form_class = EmptyContentForm
     template_name = 'block/wizard_image_remove.html'
 
     def form_valid(self, form):
@@ -1183,7 +1185,7 @@ class WizardLinkPage(
 class WizardLinkRemove(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, UpdateView):
 
-    form_class = EmptyForm
+    form_class = EmptyContentForm
     template_name = 'block/wizard_link_remove.html'
 
     def form_valid(self, form):

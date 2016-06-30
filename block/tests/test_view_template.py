@@ -37,7 +37,7 @@ def test_add_section_to_template(client):
             section=section_a.pk,
         ))
     assert 302 == response.status_code
-    expect = "http://testserver" + reverse('block.template.list')
+    expect = reverse('block.template.list')
     assert expect == response["Location"]
     assert 1 == page_1.pagesection_set.all().count()
     assert 0 == page_2.pagesection_set.all().count()
@@ -70,8 +70,7 @@ def test_remove_section_from_template(client):
         reverse('block.template.section.remove', args = [template_section.pk])
     )
     assert 302 == response.status_code
-    # import ipdb; ipdb.set_trace()
-    expect = "http://testserver" + reverse('block.template.list')
+    expect = reverse('block.template.list')
     assert expect == response["Location"]
     assert 1 == page_1.pagesection_set.all().count()
     assert 2 == page_2.pagesection_set.all().count()

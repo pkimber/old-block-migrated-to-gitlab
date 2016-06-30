@@ -143,10 +143,16 @@ class DocumentForm(forms.ModelForm):
         }
 
 
-class EmptyForm(forms.ModelForm):
+class EmptyContentForm(forms.ModelForm):
 
     class Meta:
         model = ContentModel
+        fields = ()
+
+
+class EmptyForm(forms.Form):
+
+    class Meta:
         fields = ()
 
 
