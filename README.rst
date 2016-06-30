@@ -21,10 +21,9 @@ Virtual Environment
 
 ::
 
-  pyvenv-3.4 --without-pip venv-block
+  virtualenv --python=python3 venv-block
   source venv-block/bin/activate
-  wget https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py
-  python get-pip.py
+  pip install --upgrade pip
 
   pip install -r requirements/local.txt
 
@@ -46,4 +45,4 @@ Development
 Release
 =======
 
-https://www.pkimber.net/open/
+https://www.kbsoftware.co.uk/docs/
