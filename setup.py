@@ -20,17 +20,17 @@ def get_readme():
 
 setup(
     name='kb-block',
-    packages=['block', 'block.templatetags', 'block.management', 'block.management.commands', 'block.migrations', 'block.tests', 'block.urls'],
+    packages=['block', 'block.urls', 'block.migrations', 'block.templatetags', 'block.management', 'block.management.commands', 'block.tests'],
     package_data={
         'block': [
             'templates/*.*',
             'templates/block/*.*',
         ],
     },
-    version='0.1.52',
+    version='0.1.53',
     description='block',
-    author='Malcolm Dinsmore',
-    author_email='m.dinsmore@talk21.com',
+    author='Patrick Kimber',
+    author_email='code@pkimber.net',
     url='git@github.com:pkimber/block.git',
     classifiers=[
         'Development Status :: 1 - Planning',
