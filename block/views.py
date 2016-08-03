@@ -105,7 +105,7 @@ def _paginate_section(qs, page_no, section):
             # If page is not an integer, deliver first page.
             qs = paginator.page(1)
         except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
+            # If page is out of range (e.g. 9999), deliver last page of results
             qs = paginator.page(paginator.num_pages)
     return qs
 
@@ -290,7 +290,7 @@ class PageCreateView(
     model = Page
 
     def form_valid(self, form):
-        template = form.cleaned_data.get('template')
+        # template = form.cleaned_data.get('template')
         with transaction.atomic():
             self.object = form.save(commit=False)
             if not self.request.user.is_superuser:
@@ -338,9 +338,9 @@ class PageListView(
 
 class PageTemplateMixin(object):
 
-    def get_template_names(self) :
+    def get_template_names(self):
         page = self.get_page()
-        return [page.template.template_name,]
+        return [page.template.template_name, ]
 
 
 class PageDesignMixin(object):
@@ -365,7 +365,7 @@ class PageDesignMixin(object):
             is_block_page=True,
             view_url=view_url,
         ))
-        for e in PageSection.objects.filter(page=page) :
+        for e in PageSection.objects.filter(page=page):
             qs = self.get_section_queryset(e, self.request.GET.get('page'))
             context.update({
                 '{}_list'.format(e.section.slug): qs,
@@ -798,7 +798,8 @@ class WizardLinkMixin(WizardMixin):
 
 
 class WizardImageChoose(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        FormView):
 
     template_name = 'block/wizard_image_choose.html'
 
@@ -865,13 +866,15 @@ class WizardImageChoose(
 
 
 class WizardImageOption(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, TemplateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        TemplateView):
 
     template_name = 'block/wizard_image_option.html'
 
 
 class WizardImageOrder(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        FormView):
     """PJK"""
 
     form_class = EmptyForm
@@ -893,7 +896,7 @@ class WizardImageOrder(
             if idx == len(ordered) - 1:
                 raise BlockError("Cannot move the last item down")
             ordered[idx], ordered[idx+1] = ordered[idx+1], ordered[idx]
-        elif up: # up
+        elif up:  # up
             if idx == 0:
                 raise BlockError("Cannot move the first item up")
             ordered[idx], ordered[idx-1] = ordered[idx-1], ordered[idx]
@@ -923,7 +926,8 @@ class WizardImageOrder(
 
 
 class WizardImageRemove(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, UpdateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        UpdateView):
 
     form_class = EmptyContentForm
     template_name = 'block/wizard_image_remove.html'
@@ -948,7 +952,8 @@ class WizardImageRemove(
 
 
 class WizardImageSelect(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        FormView):
     """List the current images in the slideshow and allow the user to remove.
 
     Allow the user to de-select any of the images.
@@ -991,7 +996,8 @@ class WizardImageSelect(
 
 
 class WizardImageUpload(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin, CreateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
+        CreateView):
 
     form_class = ImageForm
     template_name = 'block/wizard_image_upload.html'
@@ -1077,7 +1083,8 @@ class WizardLinkChoose(
 
 
 class WizardLinkExternal(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        CreateView):
 
     form_class = ExternalLinkForm
     template_name = 'block/wizard_link_external.html'
@@ -1101,7 +1108,8 @@ class WizardLinkExternal(
 
 
 class WizardLinkOption(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, TemplateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        TemplateView):
 
     template_name = 'block/wizard_link_option.html'
 
@@ -1128,7 +1136,7 @@ class WizardLinkOrder(
             if idx == len(ordered) - 1:
                 raise BlockError("Cannot move the last item down")
             ordered[idx], ordered[idx+1] = ordered[idx+1], ordered[idx]
-        elif up: # up
+        elif up:  # up
             if idx == 0:
                 raise BlockError("Cannot move the first item up")
             ordered[idx], ordered[idx-1] = ordered[idx-1], ordered[idx]
@@ -1158,7 +1166,8 @@ class WizardLinkOrder(
 
 
 class WizardLinkPage(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        CreateView):
 
     form_class = PageListForm
     template_name = 'block/wizard_link_page.html'
@@ -1172,7 +1181,7 @@ class WizardLinkPage(
             self._update_link(
                 content_obj,
                 self.object,
-                #Link.objects.create_internal_link(self.object)
+                # Link.objects.create_internal_link(self.object)
             )
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
@@ -1183,7 +1192,8 @@ class WizardLinkPage(
 
 
 class WizardLinkRemove(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, UpdateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        UpdateView):
 
     form_class = EmptyContentForm
     template_name = 'block/wizard_link_remove.html'
@@ -1208,7 +1218,8 @@ class WizardLinkRemove(
 
 
 class WizardLinkUpload(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, CreateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        CreateView):
 
     form_class = DocumentForm
     template_name = 'block/wizard_link_upload.html'
