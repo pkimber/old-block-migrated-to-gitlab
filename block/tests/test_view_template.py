@@ -38,7 +38,7 @@ def test_add_section_to_template(client):
         ))
     assert 302 == response.status_code
     expect = reverse('block.template.list')
-    assert expect == response["Location"]
+    assert response["Location"].endswith(expect)
     assert 1 == page_1.pagesection_set.all().count()
     assert 0 == page_2.pagesection_set.all().count()
     assert 1 == page_3.pagesection_set.all().count()
@@ -71,7 +71,7 @@ def test_remove_section_from_template(client):
     )
     assert 302 == response.status_code
     expect = reverse('block.template.list')
-    assert expect == response["Location"]
+    assert response["Location"].endswith(expect)
     assert 1 == page_1.pagesection_set.all().count()
     assert 2 == page_2.pagesection_set.all().count()
     assert 1 == page_3.pagesection_set.all().count()
