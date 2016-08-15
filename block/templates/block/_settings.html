@@ -31,6 +31,7 @@
       </a>
     </div>
   </div>
+  {% if not no_header_footer %}
   <div class="pure-u-1 pure-u-md-1-4">
     <div class="l-box">
       <a href="{% url 'block.header.footer.update' %}">
@@ -39,6 +40,7 @@
       </a>
     </div>
   </div>
+  {% endif %}
   {% if user.is_superuser %}
     <div class="pure-u-1 pure-u-md-1-4">
       <div class="l-box">
