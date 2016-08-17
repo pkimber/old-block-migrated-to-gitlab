@@ -49,7 +49,7 @@ class Wizard:
     def css_class(self):
         result = ''
         if self.wizard_type == self.IMAGE:
-            result ='fa fa-image'
+            result = 'fa fa-image'
         elif self.wizard_type == self.LINK:
             result = 'fa fa-globe'
         else:
@@ -323,7 +323,7 @@ class Page(TimeStampedModel):
     is_home = models.BooleanField(default=False)
     template = models.ForeignKey(
         Template,
-        #blank=True, null=True
+        # blank=True, null=True
     )
     deleted = models.BooleanField(default=False)
     is_custom = models.BooleanField(default=False)
@@ -354,7 +354,6 @@ class Page(TimeStampedModel):
             raise BlockError("Cannot save a page with no slug.")
         # Call the "real" save() method.
         super().save(*args, **kwargs)
-
 
     def get_absolute_url(self):
         name = self.url_name
@@ -442,7 +441,7 @@ class PaginatedSection(models.Model):
     objects = PaginatedSectionManager()
 
     def __str__(self):
-      return '{} - {}'.format(self.items_per_page, self.order_by_field)
+        return '{} - {}'.format(self.items_per_page, self.order_by_field)
 
 reversion.register(PaginatedSection)
 
@@ -450,7 +449,8 @@ reversion.register(PaginatedSection)
 class SectionManager(models.Manager):
 
     def create_section(
-            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+            self, slug, name, block_app, block_model, create_url_name,
+            **kwargs):
         obj = self.model(
             slug=slug,
             name=name,
@@ -465,7 +465,8 @@ class SectionManager(models.Manager):
         return obj
 
     def init_section(
-            self, slug, name, block_app, block_model, create_url_name, **kwargs):
+            self, slug, name, block_app, block_model, create_url_name,
+            **kwargs):
         """Create a section if it doesn't already exist."""
         if not create_url_name:
             create_url_name = ''
@@ -503,7 +504,9 @@ class Section(TimeStampedModel):
     )
     create_url_name = models.CharField(
         max_length=100, blank=True,
-        help_text="url name for creating the model e.g. 'compose.article.create'"
+        help_text=(
+            "url name for creating the model e.g. 'compose.article.create'"
+        )
     )
     paginated = models.ForeignKey(PaginatedSection, blank=True, null=True)
     objects = SectionManager()
@@ -865,7 +868,7 @@ class ContentModel(TimeStampedModel):
         return result
 
 
-class Document(models.Model) :
+class Document(models.Model):
 
     title = models.CharField(max_length=200)
     document = models.FileField(
@@ -1473,10 +1476,10 @@ class MenuItem(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True)
     title = models.CharField(max_length=100)
     order = models.PositiveIntegerField(default=0)
-    link = models.ForeignKey (Link, blank=True, null=True)
+    link = models.ForeignKey(Link, blank=True, null=True)
 
     class Meta:
-        ordering=('order','title',)
+        ordering = ('order', 'title',)
         verbose_name = "Menu Item"
         verbose_name_plural = "Menu Items"
 

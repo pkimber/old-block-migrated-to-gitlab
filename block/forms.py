@@ -160,7 +160,7 @@ class ExternalLinkForm(forms.ModelForm):
     """Enter a URL for a web site (for the form wizard)."""
 
     def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
         for name in ('title', 'url_external'):
             self.fields[name].widget.attrs.update({'class': 'pure-input-2-3'})
 
@@ -505,7 +505,7 @@ class PageListForm(forms.ModelForm):
     """Select a page from this web site (for the form wizard)."""
 
     def __init__(self, *args, **kwargs):
-        super ().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({'class': 'pure-input-2-3'})
         self.fields['url_internal'].label = 'URL'
 
