@@ -73,6 +73,7 @@ from .models import (
     Section,
     Template,
     TemplateSection,
+    Url,
     ViewUrl,
     Wizard,
 )
@@ -298,6 +299,7 @@ class PageCreateView(
                 self.object.order = Page.objects.next_order()
             self.object.save()
             self.object.refresh_sections_from_template()
+            Url.objects.init_pages()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_form_class(self):
@@ -453,6 +455,7 @@ class PageUpdateView(
         with transaction.atomic():
             self.object = form.save()
             self.object.refresh_sections_from_template()
+            Url.objects.init_pages()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
