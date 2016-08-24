@@ -1128,11 +1128,6 @@ class UrlManager(models.Manager):
         obj.save()
         return obj
 
-    def init_pages(self):
-        """Add all non-custom pages to the list of URLs."""
-        for page in Page.objects.pages():
-            self.init_page_url(page)
-
     def urls(self):
         return self.model.objects.all().exclude(
             deleted=True,
