@@ -1,8 +1,5 @@
 # -*- encoding: utf-8 -*-
-from django.conf.urls import (
-    patterns,
-    url,
-)
+from django.conf.urls import url
 
 from block.views import (
     HeaderFooterUpdateView,
@@ -32,8 +29,7 @@ from block.views import (
 )
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(regex=r'^header-footer/$',
         view=HeaderFooterUpdateView.as_view(),
         name='block.header.footer.update'
@@ -134,4 +130,4 @@ urlpatterns = patterns(
         view=TemplateSectionRemoveView.as_view(),
         name='block.template.section.remove'
         ),
-)
+]

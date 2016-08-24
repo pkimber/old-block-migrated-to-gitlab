@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 from block.models import Wizard
-from block.tests.factories import ImageCategoryFactory
+from block.tests.factories import ImageCategoryFactory, ImageFactory
 from example_block.tests.factories import TitleFactory
 from login.tests.fixture import perm_check
 
@@ -85,7 +85,7 @@ def test_wizard_image_select(perm_check):
 
 @pytest.mark.django_db
 def test_wizard_image_remove(perm_check):
-    content = TitleFactory()
+    content = TitleFactory(picture=ImageFactory())
     url = url_image_single(content, 'block.wizard.image.remove')
     perm_check.staff(url)
 

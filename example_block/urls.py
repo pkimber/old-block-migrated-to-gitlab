@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
@@ -25,8 +25,7 @@ from .views import (
 admin.autodiscover()
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # '/' send to home
     url(regex=r'^$',
         view=PageTemplateView.as_view(),
@@ -100,7 +99,7 @@ urlpatterns = patterns(
         view=TitleRemoveView.as_view(),
         name='example.title.remove'
         ),
-)
+]
 
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

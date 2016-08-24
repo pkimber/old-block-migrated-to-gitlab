@@ -1,8 +1,5 @@
 # -*- encoding: utf-8 -*-
-from django.conf.urls import (
-    patterns,
-    url,
-)
+from django.conf.urls import url
 
 from block.views import (
     WizardImageChoose,
@@ -22,8 +19,7 @@ from block.views import (
 )
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # image wizard
     url(regex=r'^image/(?P<content>\d+)/(?P<pk>\d+)/(?P<field>[-\w\d]+)/(?P<type>[-\w\d]+)/choose/$',
         view=WizardImageChoose.as_view(),
@@ -90,4 +86,4 @@ urlpatterns = patterns(
         view=WizardLinkPage.as_view(),
         name='block.wizard.link.page'
         ),
-)
+]

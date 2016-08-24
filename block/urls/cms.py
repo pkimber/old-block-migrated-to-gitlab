@@ -1,19 +1,11 @@
 # -*- encoding: utf-8 -*-
-from django.conf.urls import (
-    patterns,
-    url,
-)
-
-from block.views import (
-    CmsPageDesignView,
-    CmsPageView,
-)
+from django.conf.urls import url
 
 from block.models import Page
+from block.views import CmsPageDesignView, CmsPageView
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(regex=r'^$',
         view=CmsPageView.as_view(),
         kwargs=dict(page=Page.HOME),
@@ -35,4 +27,4 @@ urlpatterns = patterns(
         view=CmsPageView.as_view(),
         name='project.page'
         ),
-)
+]
