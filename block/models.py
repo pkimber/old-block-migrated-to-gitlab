@@ -1320,6 +1320,14 @@ class Link(TimeStampedModel):
         return bool(self.link_type == self.DOCUMENT)
 
     @property
+    def is_internal(self):
+        return bool(self.link_type == self.URL_INTERNAL)
+
+    @property
+    def is_external(self):
+        return bool(self.link_type == self.URL_EXTERNAL)
+
+    @property
     def link_type_description(self):
         if self.link_type == self.DOCUMENT:
             return 'Document'
