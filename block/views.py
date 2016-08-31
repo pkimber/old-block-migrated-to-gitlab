@@ -321,7 +321,7 @@ class MenuItemCreateView(
         return MenuItemForm
 
     def get_success_url(self):
-        return reverse('block.menuitem.list', args=[self._get_menu().pk])
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
 
 
 class MenuItemDeleteView(
@@ -338,7 +338,7 @@ class MenuItemDeleteView(
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('block.menuitem.list', args=[self._get_menu().pk])
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
 
 
 class MenuItemListView(
@@ -375,7 +375,7 @@ class MenuItemUpdateView(
         return MenuItemForm
 
     def get_success_url(self):
-        return reverse('block.menuitem.list', args=[self._get_menu().pk])
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
 
 
 class PageCreateView(
