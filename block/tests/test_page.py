@@ -50,15 +50,15 @@ def test_init_is_home():
     template = Template.objects.init_template('Home', 'home.html')
     Page.objects.init_page(Page.HOME, '', 'Home', 0, template, is_home=True)
     page = Page.objects.get(slug=Page.HOME)
-    assert True == page.is_home
+    assert page.is_home
 
 
 @pytest.mark.django_db
 def test_init_is_not_home():
     template = Template.objects.init_template('Home', 'home.html')
-    Page.objects.init_page(Page.HOME, '', 'Home' , 0, template)
+    Page.objects.init_page(Page.HOME, '', 'Home', 0, template)
     page = Page.objects.get(slug=Page.HOME)
-    assert False == page.is_home
+    assert page.is_home is False
 
 
 @pytest.mark.django_db
@@ -67,11 +67,11 @@ def test_init_set_home():
     # create page (is not a home page)
     Page.objects.init_page(Page.HOME, '', 'Home', 0, template)
     page = Page.objects.get(slug=Page.HOME)
-    assert False == page.is_home
+    assert page.is_home is False
     # update page (is now a home page)
     Page.objects.init_page(Page.HOME, '', 'Home', 0, template, is_home=True)
     page = Page.objects.get(slug=Page.HOME)
-    assert True == page.is_home
+    assert page.is_home
 
 
 @pytest.mark.django_db
