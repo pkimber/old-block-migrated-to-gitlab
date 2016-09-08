@@ -8,6 +8,8 @@ from block.models import (
     ImageCategory,
     Link,
     LinkCategory,
+    Menu,
+    MenuItem,
     ModerateState,
     Page,
     PageSection,
@@ -70,6 +72,32 @@ class LinkFactory(factory.django.DjangoModelFactory):
     @factory.sequence
     def title(n):
         return 'title_{}'.format(n)
+
+
+class MenuFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = Menu
+
+    @factory.sequence
+    def slug(n):
+        return 'menu_{:02d}'.format(n)
+
+
+class MenuItemFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = MenuItem
+
+    menu = factory.SubFactory(MenuFactory)
+
+    @factory.sequence
+    def order(n):
+        return n + 1
+
+    @factory.sequence
+    def slug(n):
+        return 'menuitem_{:02d}'.format(n)
 
 
 class ModerateStateFactory(factory.django.DjangoModelFactory):

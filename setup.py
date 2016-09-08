@@ -27,7 +27,7 @@ setup(
             'templates/block/*.*',
         ],
     },
-    version='0.1.55',
+    version='0.1.57',
     description='block',
     author='Malcolm Dinsmore',
     author_email='zebyea@gmail.com',
