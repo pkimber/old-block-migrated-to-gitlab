@@ -119,8 +119,15 @@ class ContentPageMixin(BaseMixin):
         context.update(dict(
             page=self.get_page(),
             menu_list=Page.objects.menu(),
+            footer=self.get_footer(),
         ))
         return context
+
+    def get_footer(self):
+        try:
+            return Page.objects.get(slug=Page.FOOTER)
+        except Page.DoesNotExist:
+            return None
 
     def get_page(self):
         menu = self.kwargs.get('menu', '')
@@ -407,14 +414,8 @@ class PageMixin(object):
                     "('{}')".format(self.request.path, page.get_absolute_url())
                 )
 
-    def get_context_data(self, **kwargs):
-        context = super(PageMixin, self).get_context_data(**kwargs)
-        page = self.get_page()
-        self._check_url(page)
-        context.update(dict(
-            design=False,
-            is_block_page=True,
-        ))
+    def _create_sections(self, page):
+        context = {}
         for e in PageSection.objects.filter(page=page):
             block_model = _get_block_model(e)
             qs = _paginate_section(
@@ -425,6 +426,22 @@ class PageMixin(object):
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page = self.get_page()
+        self._check_url(page)
+        context.update(dict(
+            design=False,
+            is_block_page=True,
+        ))
+        sections = self._create_sections(page)
+        context.update(sections)
+        footer = self.get_footer()
+        if footer:
+            sections = self._create_sections(footer)
+            context.update(sections)
         return context
 
 
