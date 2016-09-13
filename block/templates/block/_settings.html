@@ -31,6 +31,17 @@
       </a>
     </div>
   </div>
+  {% if not no_navigation_menu %}
+  <div class="pure-u-1 pure-u-md-1-4">
+    <div class="l-box">
+      {# navigation menu should be called main #}
+      <a href="{% url 'block.menuitem.list' 'main' %}">
+        <i class="fa fa-bars"></i>
+        Navigation Menu
+      </a>
+    </div>
+  </div>
+  {% endif %}
   {% if not no_header_footer %}
   <div class="pure-u-1 pure-u-md-1-4">
     <div class="l-box">
