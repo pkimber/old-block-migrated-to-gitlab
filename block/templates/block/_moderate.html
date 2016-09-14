@@ -1,23 +1,23 @@
 {% if c.is_pending_added or c.is_pending_edited %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_publish }}">
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_publish }}?path={{ path }}">
     <i class="fa fa-check"></i>
     Publish
   </a>
 {% endif %}
-<a class="pure-button pure-button-xsmall" href="{{ c.url_update }}">
+<a class="pure-button pure-button-xsmall" href="{{ c.url_update }}?path={{ path }}">
   <i class="fa fa-edit"></i>
   Edit
 </a>
 
 {% for url in c.wizard_urls %}
-  <a class="pure-button pure-button-xsmall" href="{{ url.url }}">
+  <a class="pure-button pure-button-xsmall" href="{{ url.url }}?path={{ path }}">
     <i class="{{ url.class }}"></i>
     {{ url.caption }}
   </a>
 {% endfor %}
 
 {% if can_remove %}
-  <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}">
+  <a class="pure-button pure-button-xsmall" href="{{ c.url_remove }}?path={{ path }}">
     <i class="fa fa-times"></i>
     Remove
   </a>
