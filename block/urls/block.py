@@ -14,6 +14,10 @@ from block.views import (
     LinkCategoryDeleteView,
     LinkCategoryListView,
     LinkCategoryUpdateView,
+    MenuItemCreateView,
+    MenuItemDeleteView,
+    MenuItemListView,
+    MenuItemUpdateView,
     PageCreateView,
     PageDeleteView,
     PageListView,
@@ -80,6 +84,23 @@ urlpatterns = [
     url(regex=r'^link/category/(?P<pk>\d+)/delete/$',
         view=LinkCategoryDeleteView.as_view(),
         name='block.link.category.delete'
+        ),
+    # MenuItem
+    url(regex=r'^menuitem/(?P<slug>[-\w]+)/$',
+        view=MenuItemListView.as_view(),
+        name='block.menuitem.list'
+        ),
+    url(regex=r'^menuitem/(?P<slug>[-\w]+)/create/$',
+        view=MenuItemCreateView.as_view(),
+        name='block.menuitem.create'
+        ),
+    url(regex=r'^menuitem/(?P<pk>\d+)/delete/$',
+        view=MenuItemDeleteView.as_view(),
+        name='block.menuitem.delete'
+        ),
+    url(regex=r'^menuitem/(?P<pk>\d+)/update/$',
+        view=MenuItemUpdateView.as_view(),
+        name='block.menuitem.update'
         ),
     # page
     url(regex=r'^page/$',

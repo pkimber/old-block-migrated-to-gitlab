@@ -50,6 +50,8 @@ from .forms import (
     LinkListForm,
     LinkMultiSelectForm,
     LinkSelectForm,
+    MenuItemEmptyForm,
+    MenuItemForm,
     PageEmptyForm,
     PageForm,
     PageFormSimple,
@@ -67,6 +69,7 @@ from .models import (
     ImageCategory,
     Link,
     LinkCategory,
+    Menu,
     MenuItem,
     Page,
     PageSection,
@@ -292,6 +295,96 @@ class HeaderFooterUpdateView(
         return reverse('block.page.list')
 
 
+# Menu - CRUD views
+class MenuMixin(object):
+    def _get_menu(self):
+        # default to menu called 'main' for now
+        return Menu.objects.get(slug='main')
+
+
+class MenuItemCreateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, MenuMixin, BaseMixin,
+        CreateView):
+
+    model = MenuItem
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+            self.object.menu = self._get_menu()
+            self.object.slug = slugify(self.object.title)
+            self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context.update(dict(
+            menu=self._get_menu(),
+        ))
+        return context
+
+    def get_form_class(self):
+        return MenuItemForm
+
+    def get_success_url(self):
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
+
+
+class MenuItemDeleteView(
+        LoginRequiredMixin, StaffuserRequiredMixin, MenuMixin, BaseMixin,
+        UpdateView):
+
+    form_class = MenuItemEmptyForm
+    model = MenuItem
+    template_name = 'block/menuitem_delete_form.html'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.set_deleted(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
+
+
+class MenuItemListView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
+
+    model = MenuItem
+    paginate_by = 15
+
+    def get_queryset(self):
+        return MenuItem.objects.filter(
+            menu__slug=self.kwargs.get('slug', None)
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(dict(
+            menu=Menu.objects.get(slug=self.kwargs.get('slug', None)),
+        ))
+        return context
+
+
+class MenuItemUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, MenuMixin, BaseMixin,
+        UpdateView):
+
+    model = MenuItem
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_form_class(self):
+        return MenuItemForm
+
+    def get_success_url(self):
+        return reverse('block.menuitem.list', args=[self._get_menu().slug])
+
+
 class PageCreateView(
         LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, CreateView):
 
@@ -483,16 +576,9 @@ class CmsMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        try:
-            main_menu_items = MenuItem.objects.filter(
-                menu__slug='main',
-                parent=None
-            )
-        except MenuItem.DoesNotExist:
-            main_menu_items = []
         context.update(dict(
             header_footer=HeaderFooter.load(),
-            main_menu_items=main_menu_items
+            main_menu_item_list=Menu.objects.navigation_menu_items()
         ))
         return context
 
@@ -1037,6 +1123,7 @@ class WizardImageUpload(
 
 class WizardLinkChoose(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+    """ choose a link from the library """
 
     template_name = 'block/wizard_link_choose.html'
 
@@ -1088,14 +1175,14 @@ class WizardLinkChoose(
         return kwargs
 
     def form_valid(self, form):
-        images = form.cleaned_data['links']
+        links = form.cleaned_data['links']
         content_obj = self._content_obj()
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
-            self._update_link(content_obj, images)
+            self._update_link(content_obj, links)
             url = self._page_design_url(content_obj)
         elif link_type == Wizard.MULTI:
-            self._update_links_many_to_many(images)
+            self._update_links_many_to_many(links)
             url = reverse('block.wizard.link.option', kwargs=self._kwargs())
         else:
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
@@ -1105,6 +1192,7 @@ class WizardLinkChoose(
 class WizardLinkExternal(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
         CreateView):
+    """ add a link to a url not on this site """
 
     form_class = ExternalLinkForm
     template_name = 'block/wizard_link_external.html'
@@ -1136,6 +1224,7 @@ class WizardLinkOption(
 
 class WizardLinkOrder(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+    """ set the order of multiple links """
 
     form_class = EmptyForm
     template_name = 'block/wizard_link_order.html'
@@ -1188,6 +1277,7 @@ class WizardLinkOrder(
 class WizardLinkPage(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
         CreateView):
+    """ add a link to a page from this site """
 
     form_class = PageListForm
     template_name = 'block/wizard_link_page.html'
@@ -1214,6 +1304,7 @@ class WizardLinkPage(
 class WizardLinkRemove(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
         UpdateView):
+    """ remove a link """
 
     form_class = EmptyContentForm
     template_name = 'block/wizard_link_remove.html'
@@ -1240,6 +1331,7 @@ class WizardLinkRemove(
 class WizardLinkUpload(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
         CreateView):
+    """ Upload a document and link to it """
 
     form_class = DocumentForm
     template_name = 'block/wizard_link_upload.html'

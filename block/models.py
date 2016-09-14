@@ -18,6 +18,7 @@ from django_extensions.db.fields import AutoSlugField
 from base.model_utils import (
     copy_model_instance,
     TimeStampedModel,
+    TimedCreateModifyDeleteModel,
 )
 from base.singleton import SingletonModel
 
@@ -1457,10 +1458,22 @@ class ViewUrl(models.Model):
 reversion.register(ViewUrl)
 
 
-class Menu(models.Model):
+class MenuManager(models.Manager):
+    def navigation_menu_items(self):
+        # not all systems have a navigation menu
+        try:
+            return self.model.objects.get(
+                slug='main'
+            ).menuitem_set.exclude(deleted=True).exclude(parent__isnull=False)
+        except self.model.DoesNotExist:
+            return None
+
+
+class Menu(TimedCreateModifyDeleteModel):
     slug = models.SlugField(max_length=100)
     title = models.CharField(max_length=100)
     navigation = models.BooleanField(default=True)
+    objects = MenuManager()
 
     class Meta:
         ordering = ('navigation', 'slug',)
@@ -1473,8 +1486,8 @@ class Menu(models.Model):
 reversion.register(Menu)
 
 
-class MenuItem(models.Model):
-    menu = models.ForeignKey(Menu, blank=False, null=True)
+class MenuItem(TimedCreateModifyDeleteModel):
+    menu = models.ForeignKey(Menu)
     slug = models.SlugField(max_length=100)
     parent = models.ForeignKey('self', blank=True, null=True)
     title = models.CharField(max_length=100)
@@ -1500,5 +1513,16 @@ class MenuItem(models.Model):
             return self.link.url
         else:
             return '#'
+
+    def get_content_type(self):
+        return ContentType.objects.get_for_model(self)
+
+    # required by the link wizard
+    def get_design_url(self):
+        return reverse('block.menuitem.list', args=[self.menu.slug])
+
+    # required by the link wizard
+    def set_pending_edit(self):
+        pass
 
 reversion.register(MenuItem)

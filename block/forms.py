@@ -16,6 +16,7 @@ from block.models import (
     ImageCategory,
     Link,
     LinkCategory,
+    MenuItem,
     Page,
     Section,
     Template,
@@ -440,6 +441,34 @@ class LinkSelectForm(forms.Form):
         # tick every link - so the user can untick the ones they want to remove
         initial = {item.pk: True for item in qs_many_to_many}
         many_to_many.initial = initial
+
+
+class MenuItemEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = MenuItem
+        fields = ()
+
+
+class MenuItemBaseForm(RequiredFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('order', 'title'):
+            field = self.fields[name]
+            field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
+        # parent = self.fields['parent']
+        # parent.queryset = MenuItem.objects.primary_items()
+
+
+class MenuItemForm(MenuItemBaseForm):
+
+    class Meta:
+        model = MenuItem
+        fields = (
+            'order',
+            'title',
+        )
 
 
 class PageEmptyForm(forms.ModelForm):
