@@ -483,7 +483,7 @@ class PageDesignMixin(object):
         ))
         sections = self._create_sections(page)
         context.update(sections)
-        # footer
+        # footer page
         footer = self.get_footer()
         if footer:
             sections = self._create_sections(footer)
@@ -500,9 +500,15 @@ class PageDesignView(
 class PageMixin(object):
 
     def _check_url(self, page):
-        """Check the page is being accessed using the correct URL."""
+        """Check the page is being accessed using the correct URL.
+
+        For custom pages, we make sure the actual URL is different to the
+        page URL (we won't have ``custom`` in the URL).  We make an exception
+        to this for the home page.
+
+        """
         if self.request.path == page.get_absolute_url():
-            if page.is_custom:
+            if page.is_custom and not page.is_home:
                 raise BlockError(
                     "This is a custom page, so the request path "
                     "should NOT match the absolute url: '{}'".format(
@@ -542,7 +548,7 @@ class PageMixin(object):
         ))
         sections = self._create_sections(page)
         context.update(sections)
-        # footer
+        # footer page
         footer = self.get_footer()
         if footer:
             sections = self._create_sections(footer)
