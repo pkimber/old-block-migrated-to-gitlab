@@ -128,7 +128,7 @@ class ContentPageMixin(BaseMixin):
 
     def get_footer(self):
         try:
-            return Page.objects.get(slug=Page.FOOTER)
+            return Page.objects.get(slug=Page.CUSTOM, slug_menu=Page.FOOTER)
         except Page.DoesNotExist:
             return None
 
