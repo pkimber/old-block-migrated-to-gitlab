@@ -456,17 +456,8 @@ class PageDesignMixin(object):
         )
         return qs
 
-    def get_context_data(self, **kwargs):
-        context = super(PageDesignMixin, self).get_context_data(**kwargs)
-        page = self.get_page()
-        view_url = ViewUrl.objects.view_url(
-            self.request.user, page, self.request.GET.get('view')
-        )
-        context.update(dict(
-            design=True,
-            is_block_page=True,
-            view_url=view_url,
-        ))
+    def _create_sections(self, page):
+        context = {}
         for e in PageSection.objects.filter(page=page):
             qs = self.get_section_queryset(e, self.request.GET.get('page'))
             context.update({
@@ -477,6 +468,26 @@ class PageDesignMixin(object):
                 context.update({
                     '{}_create_url'.format(e.section.slug): create_url,
                 })
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page = self.get_page()
+        view_url = ViewUrl.objects.view_url(
+            self.request.user, page, self.request.GET.get('view')
+        )
+        context.update(dict(
+            design=True,
+            is_block_page=True,
+            view_url=view_url,
+        ))
+        sections = self._create_sections(page)
+        context.update(sections)
+        # footer
+        footer = self.get_footer()
+        if footer:
+            sections = self._create_sections(footer)
+            context.update(sections)
         return context
 
 
@@ -531,6 +542,7 @@ class PageMixin(object):
         ))
         sections = self._create_sections(page)
         context.update(sections)
+        # footer
         footer = self.get_footer()
         if footer:
             sections = self._create_sections(footer)
