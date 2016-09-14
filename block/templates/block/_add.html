@@ -1,4 +1,4 @@
-<a class="pure-button pure-button-xsmall" href="{{ url }}?path={{ path }}">
+<a class="pure-button pure-button-xsmall" href="{{ url }}{% if return_path %}?path={{ return_path }}{% endif %}">
   <i class="fa fa-plus"></i>
   Add{% if caption %} {{ caption }}{% endif %}
 </a>
