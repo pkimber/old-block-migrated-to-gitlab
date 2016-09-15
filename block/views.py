@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import (
     EmptyPage,
@@ -30,7 +31,7 @@ from braces.views import (
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
 )
-from base.view_utils import BaseMixin
+from base.view_utils import BaseMixin, RedirectNextMixin
 from .forms import (
     DocumentForm,
     EmptyContentForm,
@@ -170,7 +171,8 @@ class ContentPageMixin(BaseMixin):
         return self.object.block.page_section.page.get_design_url()
 
 
-class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
+class ContentCreateView(
+        ContentPageMixin, RedirectNextMixin, BaseMixin, CreateView):
 
     def get_next_order(self, block):
         return self.model.objects.next_order(block)
@@ -187,10 +189,16 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
         block.save()
         self.object.block = block
         self.object.order = self.get_next_order(block)
-        return super(ContentCreateView, self).form_valid(form)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = super().get_success_url()
+        return url
 
 
-class ContentPublishView(BaseMixin, UpdateView):
+class ContentPublishView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         """Publish 'pending' content."""
@@ -205,10 +213,13 @@ class ContentPublishView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            return self.object.block.page_section.page.get_design_url()
+        return url
 
 
-class ContentRemoveView(BaseMixin, UpdateView):
+class ContentRemoveView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -222,18 +233,21 @@ class ContentRemoveView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            return self.object.block.page_section.page.get_design_url()
+        return url
 
 
-class ContentUpdateView(BaseMixin, UpdateView):
+class ContentUpdateView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.set_pending_edit()
-        return super(ContentUpdateView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        context = super(ContentUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update(dict(
             is_update=True,
         ))
@@ -243,7 +257,10 @@ class ContentUpdateView(BaseMixin, UpdateView):
         return self.object.block.section
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = self.object.block.page_section.page.get_design_url()
+        return url
 
 
 class ElementCreateView(BaseMixin, CreateView):
