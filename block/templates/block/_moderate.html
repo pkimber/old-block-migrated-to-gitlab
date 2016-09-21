@@ -1,18 +1,18 @@
 {% if c.is_pending_added or c.is_pending_edited %}
   <a
     class="pure-button pure-button-xsmall"
-    title="Publish {{ caption }}"
+    title="Publish{% if caption %} {{ caption }}{% endif %}"
     href="{{ c.url_publish }}{% if return_path %}?next={{ return_path }}{% endif %}">
     <i class="fa fa-check"></i>
-    Publish {{ caption }}
+    Publish{% if caption %} {{ caption }}{% endif %}
   </a>
 {% endif %}
 <a
   class="pure-button pure-button-xsmall"
-  title="Edit {{ caption }}"
+  title="Edit{% if caption %} {{ caption }}{% endif %}"
   href="{{ c.url_update }}{% if return_path %}?next={{ return_path }}{% endif %}">
   <i class="fa fa-edit"></i>
-  Edit {{ caption }}
+  Edit{% if caption %} {{ caption }}{% endif %}
 </a>
 
 {% for url in c.wizard_urls %}
@@ -25,9 +25,9 @@
 {% if can_remove %}
   <a
     class="pure-button pure-button-xsmall"
-    title="Remove {{ caption }}"
+    title="Remove{% if caption %} {{ caption }}{% endif %}"
     href="{{ c.url_remove }}{% if return_path %}?next={{ return_path }}{% endif %}">
     <i class="fa fa-times"></i>
-    Remove {{ caption }}
+    Remove{% if caption %} {{ caption }}{% endif %}
   </a>
 {% endif %}
