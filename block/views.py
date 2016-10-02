@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import (
     EmptyPage,
@@ -30,7 +31,7 @@ from braces.views import (
     StaffuserRequiredMixin,
     SuperuserRequiredMixin,
 )
-from base.view_utils import BaseMixin
+from base.view_utils import BaseMixin, RedirectNextMixin
 from .forms import (
     DocumentForm,
     EmptyContentForm,
@@ -122,8 +123,15 @@ class ContentPageMixin(BaseMixin):
         context.update(dict(
             page=self.get_page(),
             menu_list=Page.objects.menu(),
+            footer=self.get_footer(),
         ))
         return context
+
+    def get_footer(self):
+        try:
+            return Page.objects.get(slug=Page.CUSTOM, slug_menu=Page.FOOTER)
+        except Page.DoesNotExist:
+            return None
 
     def get_page(self):
         menu = self.kwargs.get('menu', '')
@@ -163,7 +171,8 @@ class ContentPageMixin(BaseMixin):
         return self.object.block.page_section.page.get_design_url()
 
 
-class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
+class ContentCreateView(
+        ContentPageMixin, RedirectNextMixin, BaseMixin, CreateView):
 
     def get_next_order(self, block):
         return self.model.objects.next_order(block)
@@ -180,10 +189,16 @@ class ContentCreateView(ContentPageMixin, BaseMixin, CreateView):
         block.save()
         self.object.block = block
         self.object.order = self.get_next_order(block)
-        return super(ContentCreateView, self).form_valid(form)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = super().get_success_url()
+        return url
 
 
-class ContentPublishView(BaseMixin, UpdateView):
+class ContentPublishView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         """Publish 'pending' content."""
@@ -198,10 +213,13 @@ class ContentPublishView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            return self.object.block.page_section.page.get_design_url()
+        return url
 
 
-class ContentRemoveView(BaseMixin, UpdateView):
+class ContentRemoveView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -215,18 +233,21 @@ class ContentRemoveView(BaseMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            return self.object.block.page_section.page.get_design_url()
+        return url
 
 
-class ContentUpdateView(BaseMixin, UpdateView):
+class ContentUpdateView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.set_pending_edit()
-        return super(ContentUpdateView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        context = super(ContentUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update(dict(
             is_update=True,
         ))
@@ -236,7 +257,10 @@ class ContentUpdateView(BaseMixin, UpdateView):
         return self.object.block.section
 
     def get_success_url(self):
-        return self.object.block.page_section.page.get_design_url()
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = self.object.block.page_section.page.get_design_url()
+        return url
 
 
 class ElementCreateView(BaseMixin, CreateView):
@@ -449,17 +473,8 @@ class PageDesignMixin(object):
         )
         return qs
 
-    def get_context_data(self, **kwargs):
-        context = super(PageDesignMixin, self).get_context_data(**kwargs)
-        page = self.get_page()
-        view_url = ViewUrl.objects.view_url(
-            self.request.user, page, self.request.GET.get('view')
-        )
-        context.update(dict(
-            design=True,
-            is_block_page=True,
-            view_url=view_url,
-        ))
+    def _create_sections(self, page):
+        context = {}
         for e in PageSection.objects.filter(page=page):
             qs = self.get_section_queryset(e, self.request.GET.get('page'))
             context.update({
@@ -472,6 +487,26 @@ class PageDesignMixin(object):
                 })
         return context
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page = self.get_page()
+        view_url = ViewUrl.objects.view_url(
+            self.request.user, page, self.request.GET.get('view')
+        )
+        context.update(dict(
+            design=True,
+            is_block_page=True,
+            view_url=view_url,
+        ))
+        sections = self._create_sections(page)
+        context.update(sections)
+        # footer page
+        footer = self.get_footer()
+        if footer:
+            sections = self._create_sections(footer)
+            context.update(sections)
+        return context
+
 
 class PageDesignView(
         LoginRequiredMixin, StaffuserRequiredMixin,
@@ -482,9 +517,15 @@ class PageDesignView(
 class PageMixin(object):
 
     def _check_url(self, page):
-        """Check the page is being accessed using the correct URL."""
+        """Check the page is being accessed using the correct URL.
+
+        For custom pages, we make sure the actual URL is different to the
+        page URL (we won't have ``custom`` in the URL).  We make an exception
+        to this for the home page.
+
+        """
         if self.request.path == page.get_absolute_url():
-            if page.is_custom:
+            if page.is_custom and not page.is_home:
                 raise BlockError(
                     "This is a custom page, so the request path "
                     "should NOT match the absolute url: '{}'".format(
@@ -500,14 +541,8 @@ class PageMixin(object):
                     "('{}')".format(self.request.path, page.get_absolute_url())
                 )
 
-    def get_context_data(self, **kwargs):
-        context = super(PageMixin, self).get_context_data(**kwargs)
-        page = self.get_page()
-        self._check_url(page)
-        context.update(dict(
-            design=False,
-            is_block_page=True,
-        ))
+    def _create_sections(self, page):
+        context = {}
         for e in PageSection.objects.filter(page=page):
             block_model = _get_block_model(e)
             qs = _paginate_section(
@@ -518,6 +553,23 @@ class PageMixin(object):
             context.update({
                 '{}_list'.format(e.section.slug): qs,
             })
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page = self.get_page()
+        self._check_url(page)
+        context.update(dict(
+            design=False,
+            is_block_page=True,
+        ))
+        sections = self._create_sections(page)
+        context.update(sections)
+        # footer page
+        footer = self.get_footer()
+        if footer:
+            sections = self._create_sections(footer)
+            context.update(sections)
         return context
 
 

@@ -92,7 +92,6 @@ class EditStateManager(models.Manager):
     def _edit(self):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.EDIT)
-
     def _push(self):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.PUSH)
@@ -316,6 +315,7 @@ class Page(TimeStampedModel):
     """
     CUSTOM = 'custom'
     HOME = 'home'
+    FOOTER = 'footer'
 
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100)
