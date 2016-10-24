@@ -926,6 +926,7 @@ class HeaderFooter(SingletonModel):
             'right side of the Footer below a heading '
         ),
     )
+    
     url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
     url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
     url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)
