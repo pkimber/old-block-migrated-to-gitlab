@@ -912,8 +912,20 @@ class HeaderFooter(SingletonModel):
     """Move to ``block``?"""
 
     header = models.CharField(max_length=150, blank=True)
-    footer_left = models.CharField(max_length=500, blank=True)
-    footer_right = models.CharField(max_length=500, blank=True)
+    footer_left = models.TextField(
+        blank=True,
+        help_text=(
+            'A block of text intended to be shown on the '
+            'left side of the Footer below a heading '
+        ),
+    )
+    footer_right = models.TextField(
+        blank=True,
+        help_text=(
+            'A block of text intended to be shown on the '
+            'right side of the Footer below a heading '
+        ),
+    )
     url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
     url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
     url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)
