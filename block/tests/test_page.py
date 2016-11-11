@@ -126,3 +126,11 @@ def test_pages():
     PageFactory(slug='portfolio')
     result = [p.slug for p in Page.objects.pages()]
     assert ['home', 'info', 'portfolio'] == result
+
+
+@pytest.mark.django_db
+def test_set_deleted():
+    obj = PageFactory(slug='home', order=0)
+    assert obj.deleted is False
+    obj.set_deleted()
+    assert obj.deleted is True

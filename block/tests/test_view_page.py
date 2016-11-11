@@ -44,6 +44,21 @@ def test_custom_does_not_exist(client):
 
 
 @pytest.mark.django_db
+def test_deleted(client):
+    page = Page.objects.init_page(
+        'info',
+        'contact',
+        'Contact',
+        1,
+        TemplateFactory(template_name='example/page.html'),
+    )
+    page.set_deleted()
+    url = reverse('project.page', args=['info', 'contact'])
+    response = client.get(url)
+    assert 404 == response.status_code
+
+
+@pytest.mark.django_db
 def test_page_create(client):
     """Create a page and make sure the list of URLs is updated."""
     user = UserFactory(is_staff=True)

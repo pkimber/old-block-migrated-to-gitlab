@@ -403,6 +403,10 @@ class Page(TimeStampedModel):
                 )
                 page_section.save()
 
+    def set_deleted(self):
+        self.deleted = True
+        self.save()
+
     @property
     def url_name(self):
         """Use by this class and the ``Url`` class (see below)."""
