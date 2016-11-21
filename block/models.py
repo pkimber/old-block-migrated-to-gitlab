@@ -92,6 +92,7 @@ class EditStateManager(models.Manager):
     def _edit(self):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.EDIT)
+
     def _push(self):
         """Internal use only."""
         return EditState.objects.get(slug=EditState.PUSH)
@@ -930,7 +931,7 @@ class HeaderFooter(SingletonModel):
             'right side of the Footer below a heading '
         ),
     )
-    
+
     url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
     url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
     url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)
@@ -950,7 +951,6 @@ class HeaderFooter(SingletonModel):
     google_map_long = models.FloatField(default=0)
     google_map_lat = models.FloatField(default=0)
     google_map_zoom = models.PositiveIntegerField(default=17)
-
 
     class Meta:
         verbose_name = 'Header and footer'
