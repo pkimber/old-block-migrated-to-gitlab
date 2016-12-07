@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from django import forms
 from django.utils.html import format_html
-
 from easy_thumbnails.files import get_thumbnailer
 
 from base.form_utils import (
+    FileDropInput,
     RequiredFieldForm,
     set_widget_required,
 )
@@ -127,9 +127,12 @@ class DocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        title = self.fields['title']
-        title.widget.attrs.update({'class': 'pure-input-2-3'})
-        set_widget_required(title)
+        for field_name in ['document', 'title']:
+            field = self.fields[field_name]
+            field.widget.attrs.update({'class': 'pure-input-2-3'})
+            set_widget_required(field)
+        category = self.fields['category']
+        category.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Document
@@ -140,7 +143,7 @@ class DocumentForm(forms.ModelForm):
             'add_to_library',
         )
         widgets = {
-            'document': forms.FileInput,
+            'document': FileDropInput,
         }
 
 
@@ -234,11 +237,13 @@ class ImageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        title = self.fields['title']
-        title.widget.attrs.update({'class': 'pure-input-2-3'})
-        set_widget_required(title)
+        for field_name in ['image', 'title']:
+            field = self.fields[field_name]
+            field.widget.attrs.update({'class': 'pure-input-2-3'})
+            set_widget_required(field)
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
+        category.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
@@ -249,7 +254,7 @@ class ImageForm(forms.ModelForm):
             'add_to_library',
         )
         widgets = {
-            'image': forms.FileInput,
+            'image': FileDropInput(),
         }
 
 
