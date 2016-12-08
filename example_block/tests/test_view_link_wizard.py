@@ -230,7 +230,6 @@ def test_upload_single(client):
     # check
     content.refresh_from_db()
     expect = content.block.page_section.page.get_design_url()
-    import ipdb; ipdb.set_trace()
     assert 302 == response.status_code
     assert expect in response['Location']
     assert 'Cricket' == content.link.title
