@@ -70,7 +70,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
-    'compressor.finders.CompressorFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -126,7 +125,6 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
-    'compressor',
     'debug_toolbar',
     'easy_thumbnails',
     'reversion',
@@ -174,9 +172,6 @@ LOGGING = {
 # URL where requests are redirected after login when the contrib.auth.login
 # view gets no next parameter.
 LOGIN_REDIRECT_URL = reverse_lazy('project.dash')
-
-# django-compressor
-COMPRESS_ENABLED = False # defaults to the opposite of DEBUG
 
 # https://github.com/johnsensible/django-sendfile
 SENDFILE_BACKEND = 'sendfile.backends.development'
