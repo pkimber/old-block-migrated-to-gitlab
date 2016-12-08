@@ -223,13 +223,14 @@ def test_upload_single(client):
     data = {
         'add_to_library': True,
         'category': category.pk,
-        'image': test_file(),
+        'document': test_file(),
         'title': 'Cricket',
     }
     response = client.post(url, data)
     # check
     content.refresh_from_db()
     expect = content.block.page_section.page.get_design_url()
+    import ipdb; ipdb.set_trace()
     assert 302 == response.status_code
     assert expect in response['Location']
     assert 'Cricket' == content.link.title
