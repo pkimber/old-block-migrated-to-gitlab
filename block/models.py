@@ -1366,6 +1366,15 @@ class Link(TimeStampedModel):
 
     @property
     def blocks_used(self):
+        """
+        See this link for help on NestedObjects (note combine 2 lines for link)
+        http://stackoverflow.com/questions/12158714/how-to-show-related-ite
+        ms-using-deleteview-in-django
+
+        Basically NestedObjects is a helper util to find objects that have
+        defined the items in the list passed to the collect method in a
+        foreignkey relationship
+        """
         collector = NestedObjects(using='default')
         collector.collect([self])
         usage_list = collector.nested()
