@@ -3,7 +3,9 @@ import os
 from reversion import revisions as reversion
 
 from django.conf import settings
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.contenttypes.models import ContentType
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import (
@@ -1361,6 +1363,30 @@ class Link(TimeStampedModel):
     @property
     def is_external(self):
         return bool(self.link_type == self.URL_EXTERNAL)
+
+    @property
+    def blocks_used(self):
+        collector = NestedObjects(using='default')
+        collector.collect([self])
+        usage_list = collector.nested()
+        used = []
+        if len(usage_list) > 1:
+            for link_use in usage_list[1]:
+                if link_use.is_published or link_use.is_pending:
+                    used.append(link_use)
+        return used
+
+    @property
+    def pages_used(self):
+        pages = {}
+        for section in self.blocks_used:
+            page = section.block.page_section.page
+            pages.update({page.name: page})
+        return pages.values()
+
+    @property
+    def in_use(self):
+        return len(self.blocks_used) > 0
 
     @property
     def link_type_description(self):

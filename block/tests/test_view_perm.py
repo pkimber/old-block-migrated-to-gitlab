@@ -7,6 +7,7 @@ from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
     LinkCategoryFactory,
+    LinkFactory,
     PageFactory,
 )
 from login.tests.fixture import perm_check
@@ -103,3 +104,32 @@ def test_link_category_delete(perm_check):
 def test_link_category_update(perm_check):
     obj = LinkCategoryFactory()
     perm_check.staff(reverse('block.link.category.update', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_document_create(perm_check):
+    perm_check.staff(reverse('block.link.document.create', ))
+
+
+@pytest.mark.django_db
+def test_link_delete(perm_check):
+    obj = LinkFactory()
+    perm_check.staff(reverse('block.link.delete', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_document_update(perm_check):
+    obj = LinkFactory()
+    perm_check.staff(reverse('block.link.document.update', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_external_update(perm_check):
+    obj = LinkFactory()
+    perm_check.staff(reverse('block.link.external.update', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_link_internal_update(perm_check):
+    obj = LinkFactory()
+    perm_check.staff(reverse('block.link.internal.update', args=[obj.pk]))

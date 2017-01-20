@@ -126,13 +126,17 @@ class DocumentForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
+        in_library = kwargs.pop('in_library', None)
         super().__init__(*args, **kwargs)
         for field_name in ['document', 'title']:
             field = self.fields[field_name]
             field.widget.attrs.update({'class': 'pure-input-2-3'})
-            set_widget_required(field)
+            if field_name == 'title' or not in_library:
+                set_widget_required(field)
         category = self.fields['category']
         category.widget.attrs.update({'class': 'pure-input-2-3'})
+        if in_library:
+            del self.fields['add_to_library']
 
     class Meta:
         model = Document
@@ -351,6 +355,7 @@ class ImageUpdateForm(RequiredFieldForm):
         set_widget_required(title)
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
+        category.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
@@ -378,6 +383,13 @@ class LinkCategoryForm(RequiredFieldForm):
         fields = (
             'name',
         )
+
+
+class LinkEmptyForm(forms.ModelForm):
+
+    class Meta:
+        model = Link
+        fields = ()
 
 
 class LinkListForm(forms.Form):

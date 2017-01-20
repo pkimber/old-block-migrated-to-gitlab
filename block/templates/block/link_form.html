@@ -1,0 +1,20 @@
+{% extends 'dash/base.html' %}
+
+{% load thumbnail %}
+
+{% block sub_title %}
+  Update Link Detail
+{% endblock sub_title %}
+
+{% block sub_heading %}
+  Update Link Detail {% if object %}{{ object.title }}{% endif %}
+{% endblock sub_heading %}
+
+{% block content %}
+  <div class="pure-g">
+    <div class="pure-u-1">
+      {% include '_form.html' %}
+      <br>
+    </div>
+  </div>
+{% endblock content %}

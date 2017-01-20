@@ -30,7 +30,7 @@ from login.tests.factories import (
 def test_file():
     """create an (image) file ready to upload."""
     fp = io.BytesIO()
-    PIL.Image.new('1', (1,1)).save(fp, 'png')
+    PIL.Image.new('1', (1, 1)).save(fp, 'png')
     fp.seek(0)
     return SimpleUploadedFile(
         'file.png',
@@ -96,7 +96,9 @@ def test_wizard_image_choose_category_multi(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_image_multi(content, 'block.wizard.image.choose', category=category)
+    url = url_image_multi(
+        content, 'block.wizard.image.choose', category=category
+    )
     assert category.slug in url
     data = {
         'images': [image_2.pk, image_4.pk],
@@ -122,7 +124,9 @@ def test_wizard_image_choose_category_single(client):
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_image_single(content, 'block.wizard.image.choose', category=category)
+    url = url_image_single(
+        content, 'block.wizard.image.choose', category=category
+    )
     assert category.slug in url
     data = {
         'images': image.pk,
@@ -331,7 +335,7 @@ def test_wizard_image_upload_single(client):
     content = TitleFactory()
     category = ImageCategoryFactory()
     ImageFactory()
-    #image = ImageFactory()
+    # image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
