@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse_lazy
 
 DEBUG = True
 TESTING = False
+ALLOW_DEBUG_TOOLBAR=False
 
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
@@ -125,7 +126,6 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
-    'debug_toolbar',
     'easy_thumbnails',
     'reversion',
 )
