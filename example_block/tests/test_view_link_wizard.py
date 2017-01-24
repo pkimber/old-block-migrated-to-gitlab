@@ -2,11 +2,11 @@
 import pytest
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 
 from block.models import (
     BlockError,
     Document,
-    Link,
     Url,
 )
 from block.tests.factories import (
@@ -71,7 +71,9 @@ def test_choose_category_multi(client):
     user = UserFactory(is_staff=True)
     assert 0 == content.references.count()
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_link_multi(content, 'block.wizard.link.choose', category=category)
+    url = url_link_multi(
+        content, 'block.wizard.link.choose', category=category
+    )
     assert category.slug in url
     data = {
         'links': [link_2.pk, link_4.pk],
@@ -118,7 +120,9 @@ def test_choose_single_category(client):
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    url = url_link_single(content, 'block.wizard.link.choose', category=category)
+    url = url_link_single(
+        content, 'block.wizard.link.choose', category=category
+    )
     assert category.slug in url
     data = {
         'links': link.pk,
@@ -135,7 +139,7 @@ def test_choose_single_category(client):
 @pytest.mark.django_db
 def test_page_single(client):
     content = TitleFactory()
-    #category = ImageCategoryFactory()
+    # category = ImageCategoryFactory()
     page = PageFactory(name='Information', slug='info', slug_menu='')
     url_internal = Url.objects.init_page_url(page)
     user = UserFactory(is_staff=True)
@@ -144,8 +148,8 @@ def test_page_single(client):
     url = url_link_single(content, 'block.wizard.link.page')
     # create a document ready to upload
     data = {
-        #'add_to_library': True,
-        #'category': category.pk,
+        # 'add_to_library': True,
+        # 'category': category.pk,
         'url_internal': url_internal.pk,
         'title': 'Cricket',
     }
@@ -162,9 +166,9 @@ def test_page_single(client):
 @pytest.mark.django_db
 def test_external_single(client):
     content = TitleFactory()
-    #category = ImageCategoryFactory()
-    #DocumentFactory()
-    #image = ImageFactory()
+    # category = ImageCategoryFactory()
+    # DocumentFactory()
+    # image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -172,7 +176,7 @@ def test_external_single(client):
     # create a document ready to upload
     data = {
         'add_to_library': True,
-        #'category': category.pk,
+        # 'category': category.pk,
         'url_external': 'https://www.pkimber.net',
         'title': 'Rugby',
     }
@@ -185,10 +189,10 @@ def test_external_single(client):
     assert 'Rugby' == content.link.title
     assert content.link is not None
     assert 'https://www.pkimber.net' == content.link.url_external
-    #assert content.link.category == category
-    #assert content.link.document.deleted is False
+    # assert content.link.category == category
+    # assert content.link.document.deleted is False
     # check a document has been added to the database
-    #assert 2 == Document.objects.count()
+    # assert 2 == Document.objects.count()
 
 
 @pytest.mark.django_db
@@ -214,7 +218,7 @@ def test_upload_single(client):
     content = TitleFactory()
     category = LinkCategoryFactory()
     DocumentFactory()
-    #image = ImageFactory()
+    # image = ImageFactory()
     user = UserFactory(is_staff=True)
     assert content.link is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -381,3 +385,19 @@ def test_select_multi(client):
     assert link_1.pk in result and link_3.pk in result
     # ordering controlled by 'ordering' on 'TitleLink' model
     assert [1, 2] == [item.order for item in qs]
+
+
+@pytest.mark.django_db
+def test_link_delete_exception(client):
+    """Should not delete a link which is in use.
+    """
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    link = LinkFactory()
+    TitleFactory(link=link)
+    assert link.deleted is False
+    # test
+    url = reverse('block.link.delete', args=[link.pk])
+    with pytest.raises(BlockError) as e:
+        client.post(url)
+    assert 'Cannot delete a link which is in use' in str(e.value)

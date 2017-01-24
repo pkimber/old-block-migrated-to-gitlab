@@ -14,6 +14,13 @@ from block.views import (
     LinkCategoryDeleteView,
     LinkCategoryListView,
     LinkCategoryUpdateView,
+    LinkListView,
+    LinkDeleteView,
+    LinkRedirectView,
+    LinkDocumentCreateView,
+    LinkDocumentUpdateView,
+    LinkUrlInternalUpdateView,
+    LinkUrlExternalUpdateView,
     MenuItemCreateView,
     MenuItemDeleteView,
     MenuItemListView,
@@ -84,6 +91,35 @@ urlpatterns = [
     url(regex=r'^link/category/(?P<pk>\d+)/delete/$',
         view=LinkCategoryDeleteView.as_view(),
         name='block.link.category.delete'
+        ),
+    # link
+    url(regex=r'^link/$',
+        view=LinkListView.as_view(),
+        name='block.link.list'
+        ),
+    url(regex=r'^link/(?P<pk>\d+)/delete/$',
+        view=LinkDeleteView.as_view(),
+        name='block.link.delete'
+        ),
+    url(regex=r'^link/document/create/$',
+        view=LinkDocumentCreateView.as_view(),
+        name='block.link.document.create'
+        ),
+    url(regex=r'^link/document/(?P<pk>\d+)/$',
+        view=LinkDocumentUpdateView.as_view(),
+        name='block.link.document.update'
+        ),
+    url(regex=r'^link/external/(?P<pk>\d+)/$',
+        view=LinkUrlExternalUpdateView.as_view(),
+        name='block.link.external.update'
+        ),
+    url(regex=r'^link/internal/(?P<pk>\d+)/$',
+        view=LinkUrlInternalUpdateView.as_view(),
+        name='block.link.internal.update'
+        ),
+    url(regex=r'link/(?P<type>[-\w]+)/(?P<pk>\d+)/$',
+        view=LinkRedirectView.as_view(),
+        name='block.link.follow'
         ),
     # MenuItem
     url(regex=r'^menuitem/(?P<slug>[-\w]+)/$',

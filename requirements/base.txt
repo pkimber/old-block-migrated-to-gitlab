@@ -1,10 +1,10 @@
 bleach==1.4.3
 celery==3.1.25
-django-braces==1.9.0
-django-extensions==1.7.4
-django-formtools==1.0
-django-reversion==2.0.6
-Django==1.10.3
+django-braces==1.10.0
+django-extensions==1.7.5
+django-formtools==2.0
+django-reversion==2.0.8
+Django==1.10.5
 easy-thumbnails==2.3
-pillow==3.3.1
-pytz==2016.6.1
+pillow==3.4.2
+pytz==2016.10

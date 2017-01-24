@@ -15,7 +15,9 @@ from django.http import (
     Http404,
     HttpResponseRedirect,
 )
+from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
+from django.views.generic.base import RedirectView
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -48,6 +50,7 @@ from .forms import (
     ImageUpdateForm,
     LinkCategoryEmptyForm,
     LinkCategoryForm,
+    LinkEmptyForm,
     LinkListForm,
     LinkMultiSelectForm,
     LinkSelectForm,
@@ -1530,6 +1533,137 @@ class LinkCategoryUpdateView(
 
     def get_success_url(self):
         return reverse('block.link.category.list')
+
+
+class LinkListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+
+    def get_queryset(self):
+        return Link.objects.links()
+
+
+class LinkUpdateMixin(object):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'url_option': reverse('block.link.list')})
+        return context
+
+
+class LinkDocumentCreateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
+        CreateView):
+    """ Upload a document and link to it """
+
+    form_class = DocumentForm
+    template_name = 'block/wizard_link_upload.html'
+
+    def form_valid(self, form):
+        category = form.cleaned_data['category']
+        with transaction.atomic():
+            self.object = form.save()
+            Link.objects.create_document_link(self.object, category)
+        url = reverse('block.link.list')
+        return HttpResponseRedirect(url)
+
+
+class LinkDocumentUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
+        UpdateView):
+
+    """ Update a document link
+
+    N.B. A bit more complicated because we need to reference the Link in the
+    in the url to the this view but to manage uploading the file the form's
+    model is Document
+    """
+    form_class = DocumentForm
+    template_name = 'block/wizard_link_upload.html'
+
+    @property
+    def _link(self):
+        return Link.objects.get(pk=self.kwargs.get('pk'))
+
+    def get_object(self):
+        return self._link.document
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'in_library': True})
+        return kwargs
+
+    def form_valid(self, form):
+        category = form.cleaned_data['category']
+        with transaction.atomic():
+            self.object = form.save()
+            link = self._link
+            link.title = self.object.title
+            link.category = category
+            link.save()
+        return HttpResponseRedirect(reverse('block.link.list'))
+
+    def get_initial(self):
+        return {'category': self._link.category}
+
+    def get_success_url(self):
+        return reverse('block.link.list')
+
+
+class LinkUrlExternalUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
+        UpdateView):
+    """ add a link to a url not on this site """
+
+    form_class = ExternalLinkForm
+    template_name = 'block/wizard_link_external.html'
+    model = Link
+
+    def get_success_url(self):
+        return reverse('block.link.list')
+
+
+class LinkUrlInternalUpdateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
+        UpdateView):
+
+    """ update a link to a page from this site """
+
+    form_class = PageListForm
+    template_name = 'block/wizard_link_page.html'
+    model = Link
+
+    def get_success_url(self):
+        return reverse('block.link.list')
+
+
+class LinkDeleteView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
+
+    form_class = LinkEmptyForm
+    model = Link
+    template_name = 'block/link_delete_form.html'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if self.object.in_use:
+            raise BlockError(
+                "Cannot delete a link which is "
+                "in use: '{}'".format(self.object.title)
+            )
+        self.object.deleted = True
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('block.link.list')
+
+
+class LinkRedirectView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        pk = kwargs.get('pk')
+        type = kwargs.get('type')
+        link = Link.objects.get(pk=pk)
+        link = get_object_or_404(Link, pk=pk, link_type=type)
+        self.url = link.url
+        return super().get_redirect_url(*args, **kwargs)
 
 
 class WizardLinkSelect(

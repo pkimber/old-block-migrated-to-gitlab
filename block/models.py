@@ -3,7 +3,9 @@ import os
 from reversion import revisions as reversion
 
 from django.conf import settings
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.contenttypes.models import ContentType
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import (
@@ -1361,6 +1363,47 @@ class Link(TimeStampedModel):
     @property
     def is_external(self):
         return bool(self.link_type == self.URL_EXTERNAL)
+
+    @property
+    def blocks_used(self):
+        """Find all models with a foreign key to a link.
+
+        This code looks through all the tables in the database and finds all
+        the foreign keys to this link instance (``Link``).
+
+        - Check the StackOverflow article above for more information.
+        - ``link_use`` is a row from a model which contains the foreign key.
+
+        See this link for help on NestedObjects (note combine 2 lines for link)
+        http://stackoverflow.com/questions/12158714/how-to-show-related-ite
+        ms-using-deleteview-in-django
+
+        Basically NestedObjects is a helper util to find objects that have
+        defined the items in the list passed to the collect method in a
+        foreignkey relationship
+
+        """
+        collector = NestedObjects(using='default')
+        collector.collect([self])
+        usage_list = collector.nested()
+        used = []
+        if len(usage_list) > 1:
+            for link_use in usage_list[1]:
+                if link_use.is_published or link_use.is_pending:
+                    used.append(link_use)
+        return used
+
+    @property
+    def pages_used(self):
+        pages = {}
+        for section in self.blocks_used:
+            page = section.block.page_section.page
+            pages.update({page.name: page})
+        return pages.values()
+
+    @property
+    def in_use(self):
+        return len(self.blocks_used) > 0
 
     @property
     def link_type_description(self):

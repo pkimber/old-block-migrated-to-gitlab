@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django import template
 
-
 register = template.Library()
 
 
@@ -11,8 +10,12 @@ def block_add(url, caption="", return_path=None):
 
 
 @register.inclusion_tag('block/_moderate.html')
-def block_moderate(generic_content, can_remove=True, caption="", return_path=None):
-    return dict(c=generic_content, can_remove=can_remove, caption=caption, return_path=return_path)
+def block_moderate(
+        generic_content, can_remove=True, caption="", return_path=None):
+    return dict(
+        c=generic_content, can_remove=can_remove, caption=caption,
+        return_path=return_path
+    )
 
 
 @register.inclusion_tag('block/_status.html')
