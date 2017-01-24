@@ -1366,7 +1366,14 @@ class Link(TimeStampedModel):
 
     @property
     def blocks_used(self):
-        """
+        """Find all models with a foreign key to a link.
+
+        This code looks through all the tables in the database and finds all
+        the foreign keys to this link instance (``Link``).
+
+        - Check the StackOverflow article above for more information.
+        - ``link_use`` is a row from a model which contains the foreign key.
+
         See this link for help on NestedObjects (note combine 2 lines for link)
         http://stackoverflow.com/questions/12158714/how-to-show-related-ite
         ms-using-deleteview-in-django
@@ -1374,6 +1381,7 @@ class Link(TimeStampedModel):
         Basically NestedObjects is a helper util to find objects that have
         defined the items in the list passed to the collect method in a
         foreignkey relationship
+
         """
         collector = NestedObjects(using='default')
         collector.collect([self])
