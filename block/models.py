@@ -1545,6 +1545,22 @@ class MenuManager(models.Manager):
         except self.model.DoesNotExist:
             return None
 
+    def create_menu(self, slug, title, navigation=True):
+        menu = self.model(
+            slug=slug, title=title, navigation=navigation
+        )
+        menu.save()
+        return menu
+
+    def init_menu(self, slug, title, navigation=True):
+        try:
+            menu = self.model.objects.get(
+                slug=slug,
+            )
+        except self.model.DoesNotExist:
+            menu = self.create_menu(slug, title, navigation)
+        return menu
+
 
 class Menu(TimedCreateModifyDeleteModel):
     slug = models.SlugField(max_length=100)

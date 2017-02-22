@@ -387,8 +387,16 @@ class MenuItemListView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        menu_slug = self.kwargs.get('slug', None)
+        try:
+            menu = Menu.objects.get(slug=menu_slug)
+        except Menu.DoesNotExist:
+            # Create the default navigation menu
+            menu = Menu.objects.create_menu(
+                slug=menu_slug, title="Navigation Menu"
+            )
         context.update(dict(
-            menu=Menu.objects.get(slug=self.kwargs.get('slug', None)),
+            menu=menu,
         ))
         return context
 
