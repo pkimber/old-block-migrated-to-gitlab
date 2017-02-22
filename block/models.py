@@ -1540,14 +1540,44 @@ class MenuManager(models.Manager):
         # not all systems have a navigation menu
         try:
             return self.model.objects.get(
-                slug='main'
+                slug=self.model.NAVIGATION
             ).menuitem_set.exclude(deleted=True).exclude(parent__isnull=False)
         except self.model.DoesNotExist:
             return None
 
+    def create_menu(self, slug, title, navigation=True):
+        menu = self.model(
+            slug=slug, title=title, navigation=navigation
+        )
+        menu.save()
+        return menu
+
+    def init_menu(self, slug, title, navigation=None):
+        try:
+            menu = self.model.objects.get(
+                slug=slug
+            )
+            changed = False
+            if menu.title != title:
+                menu.title = title
+                changed = True
+            if navigation is not None and menu.navigation != navigation:
+                menu.navigation = navigation
+                changed = True
+            if changed:
+                menu.save()
+        except self.model.DoesNotExist:
+            menu = self.create_menu(
+                slug, title, navigation is None or navigation
+            )
+        return menu
+
 
 class Menu(TimedCreateModifyDeleteModel):
-    slug = models.SlugField(max_length=100)
+
+    NAVIGATION = 'main'
+
+    slug = models.SlugField(max_length=100, unique=True)
     title = models.CharField(max_length=100)
     navigation = models.BooleanField(default=True)
     objects = MenuManager()
@@ -1563,6 +1593,42 @@ class Menu(TimedCreateModifyDeleteModel):
 reversion.register(Menu)
 
 
+class MenuItemManager(models.Manager):
+    def create_menuitem(self, menu, slug, title, order, link, parent=None):
+        menuitem = self.model(
+            menu=menu, slug=slug, title=title, order=order, link=link,
+            parent=parent
+        )
+        menuitem.save()
+        return menuitem
+
+    def init_menuitem(self, menu, slug, title, order, link, parent=None):
+        try:
+            menuitem = self.model.objects.get(
+                menu=menu, slug=slug
+            )
+            changed = False
+            if menuitem.title != title:
+                menuitem.title = title
+                changed = True
+            if menuitem.order != order:
+                menuitem.order = order
+                changed = True
+            if menuitem.link != link:
+                menuitem.link = link
+                changed = True
+            if parent and menuitem.parent != parent:
+                menuitem.parent = parent
+                changed = True
+            if changed:
+                menuitem.save()
+        except self.model.DoesNotExist:
+            menuitem = self.create_menuitem(
+                menu, slug, title, order, link, parent
+            )
+        return menuitem
+
+
 class MenuItem(TimedCreateModifyDeleteModel):
     menu = models.ForeignKey(Menu)
     slug = models.SlugField(max_length=100)
@@ -1570,8 +1636,10 @@ class MenuItem(TimedCreateModifyDeleteModel):
     title = models.CharField(max_length=100)
     order = models.PositiveIntegerField(default=0)
     link = models.ForeignKey(Link, blank=True, null=True)
+    objects = MenuItemManager()
 
     class Meta:
+        unique_together = ('menu', 'slug')
         ordering = ('order', 'title',)
         verbose_name = "Menu Item"
         verbose_name_plural = "Menu Items"
