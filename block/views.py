@@ -325,7 +325,7 @@ class HeaderFooterUpdateView(
 class MenuMixin(object):
     def _get_menu(self):
         # default to menu called 'main' for now
-        return Menu.objects.get(slug='main')
+        return Menu.objects.get(slug=Menu.NAVIGATION)
 
 
 class MenuItemCreateView(

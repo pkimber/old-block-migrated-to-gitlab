@@ -47,11 +47,31 @@ from login.tests.factories import TEST_PASSWORD, UserFactory
 
 
 @pytest.mark.django_db
+def test_navigation_menu_creates_menu_on_first_run(client):
+    """Navigation Menu View should create menu if does not exist.
+    Subsequent runs should use the existing menu
+    """
+    user = UserFactory(is_staff=True)
+    assert Menu.objects.navigation_menu_items() is None
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = reverse('block.menuitem.list', args=[Menu.NAVIGATION])
+    response = client.get(url)
+
+    assert response.status_code == 200
+    menu = Menu.objects.get(slug=Menu.NAVIGATION)
+    assert menu.title == "Navigation Menu"
+    # run second time
+    response = client.get(url)
+    #  no menu created
+    assert Menu.objects.count() == 1
+
+
+@pytest.mark.django_db
 def test_menuitem_create(client):
     """Create a menuitem and check it's in the navigation menu."""
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    menu = MenuFactory(slug='main')
+    menu = MenuFactory(slug=Menu.NAVIGATION)
     data = {
         'title': 'Home',
         'order': '1',
@@ -71,7 +91,7 @@ def test_menuitem_update(client):
     """Update a menuitem and check it's in the navigation menu."""
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    menu = MenuFactory(slug='main')
+    menu = MenuFactory(slug=Menu.NAVIGATION)
     menu_item = MenuItemFactory(menu=menu)
     data = {
         'title': 'Home',
@@ -94,7 +114,7 @@ def test_menuitem_delete(client):
     """Delete a menuitem and check it's not in the navigation menu."""
     user = UserFactory(is_staff=True)
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
-    menu = MenuFactory(slug='main')
+    menu = MenuFactory(slug=Menu.NAVIGATION)
     menu_item = MenuItemFactory(menu=menu, title="Home", slug="home")
     response = client.post(
         reverse('block.menuitem.delete', args=[menu_item.pk]), {}
