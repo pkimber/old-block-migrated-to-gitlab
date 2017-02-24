@@ -25,24 +25,6 @@ from block.models import (
 )
 
 
-# def _image_queryset(page, category_slug, tag):
-#     qs = Image.objects.images()
-#     if category_slug:
-#         qs = qs.filter(category__slug=category_slug)
-#     if tag:
-#         qs = qs.filter(tags__slug__in=[tag])
-#     paginator = Paginator(qs, 25)
-#     try:
-#         page_obj = paginator.page(page)
-#     except PageNotAnInteger:
-#         # If page is not an integer, deliver first page.
-#         page_obj = paginator.page(1)
-#     except EmptyPage:
-#         # If page is out of range (e.g. 9999), deliver last page of results.
-#         page_obj = paginator.page(paginator.num_pages)
-#     return page_obj
-
-
 def _label_from_instance(obj):
     """The label is the image."""
     thumbnailer = get_thumbnailer(obj.image)
@@ -320,12 +302,8 @@ class ImageListForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         image_queryset = kwargs.pop('image_queryset')
-        # category_slug = kwargs.pop('category_slug')
-        # page = kwargs.pop('page')
-        # tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
         images = self.fields['images']
-        # images.queryset = _image_queryset(page, category_slug, tag)
         images.queryset = image_queryset
 
     class Meta:
@@ -346,17 +324,8 @@ class ImageMultiSelectForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         image_queryset = kwargs.pop('image_queryset')
-        # category_slug = kwargs.pop('category_slug')
-        # page = kwargs.pop('page')
-        # tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
         images = self.fields['images']
-        # images.queryset = _image_queryset(page, category_slug, tag)
-        # import ipdb; ipdb.set_trace()
-        # pks = [x.pk for x in image_queryset]
-        # Fix the "Cannot filter a query once a slice has been taken." error
-        # message:
-        # http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
         images.queryset = Image.objects.filter(pk__in=image_queryset)
 
     class Meta:
@@ -515,8 +484,6 @@ class MenuItemBaseForm(RequiredFieldForm):
         for name in ('order', 'title'):
             field = self.fields[name]
             field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
-        # parent = self.fields['parent']
-        # parent.queryset = MenuItem.objects.primary_items()
 
 
 class MenuItemForm(MenuItemBaseForm):

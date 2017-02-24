@@ -321,10 +321,11 @@ class HeaderFooterUpdateView(
         return reverse('block.page.list')
 
 
-# Menu - CRUD views
 class MenuMixin(object):
+    """Menu - CRUD views."""
+
     def _get_menu(self):
-        # default to menu called 'main' for now
+        """Default to menu called 'main' for now."""
         return Menu.objects.get(slug=Menu.NAVIGATION)
 
 
@@ -425,7 +426,6 @@ class PageCreateView(
     model = Page
 
     def form_valid(self, form):
-        # template = form.cleaned_data.get('template')
         with transaction.atomic():
             self.object = form.save(commit=False)
             if not self.request.user.is_superuser:
@@ -1048,7 +1048,6 @@ class WizardImageChoose(
         return kwargs
 
     def form_valid(self, form):
-        # import ipdb; ipdb.set_trace()
         images = form.cleaned_data['images']
         content_obj = self._content_obj()
         link_type = self._link_type()
