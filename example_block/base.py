@@ -128,6 +128,7 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     'easy_thumbnails',
     'reversion',
+    'taggit',
 )
 
 LOCAL_APPS = (

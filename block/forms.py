@@ -351,17 +351,19 @@ class ImageUpdateForm(RequiredFieldForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         title = self.fields['title']
-        title.widget.attrs.update({'class': 'pure-input-2-3'})
         set_widget_required(title)
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
-        category.widget.attrs.update({'class': 'pure-input-2-3'})
+        for name in ['category', 'tags', 'title']:
+            f = self.fields[name]
+            f.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
         fields = (
             'title',
             'category',
+            'tags',
         )
 
 

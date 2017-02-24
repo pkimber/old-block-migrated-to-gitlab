@@ -16,6 +16,7 @@ from django.db.models import Max
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
+from taggit.managers import TaggableManager
 
 from base.model_utils import (
     copy_model_instance,
@@ -1044,6 +1045,7 @@ class Image(TimeStampedModel):
     deleted = models.BooleanField(default=False)
     category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
+    tags = TaggableManager()
 
     class Meta:
         verbose_name = 'Link Image'
