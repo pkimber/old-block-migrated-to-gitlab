@@ -352,7 +352,12 @@ class ImageMultiSelectForm(forms.Form):
         super().__init__(*args, **kwargs)
         images = self.fields['images']
         # images.queryset = _image_queryset(page, category_slug, tag)
-        images.queryset = image_queryset
+        # import ipdb; ipdb.set_trace()
+        # pks = [x.pk for x in image_queryset]
+        # Fix the "Cannot filter a query once a slice has been taken." error
+        # message:
+        # http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
+        images.queryset = Image.objects.filter(pk__in=image_queryset)
 
     class Meta:
         fields = (

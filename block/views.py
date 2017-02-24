@@ -1041,10 +1041,14 @@ class WizardImageChoose(
         kwargs = super().get_form_kwargs()
         qs = self._image_queryset()
         self.page_obj = self._paginator(qs)
-        kwargs.update(dict(image_queryset=self.page_obj.object_list))
+        # Fix "Cannot filter a query once a slice has been taken.":
+        # http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
+        qs = Image.objects.filter(pk__in=self.page_obj.object_list)
+        kwargs.update(dict(image_queryset=qs))
         return kwargs
 
     def form_valid(self, form):
+        # import ipdb; ipdb.set_trace()
         images = form.cleaned_data['images']
         content_obj = self._content_obj()
         link_type = self._link_type()
