@@ -314,11 +314,12 @@ def test_wizard_image_upload_multi(client):
         'category': category.pk,
         'image': test_file(),
         'title': 'Cricket',
+        'tags': 'bread cheese',
     }
     response = client.post(url, data)
     # check
     content.refresh_from_db()
-    assert 302 == response.status_code
+    assert 302 == response.status_code, response.context['form'].errors
     expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     assert 1 == content.slideshow.count()
@@ -326,6 +327,7 @@ def test_wizard_image_upload_multi(client):
     assert 'Cricket' == image.title
     assert image.category == category
     assert image.deleted is False
+    assert ['bread', 'cheese'] == sorted(image.tags.names())
     # check an image has been added to the database
     assert 1 == Image.objects.count()
 

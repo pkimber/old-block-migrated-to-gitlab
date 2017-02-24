@@ -3,10 +3,9 @@
 -e ../base
 -e ../login
 -e ../mail
-beautifulsoup4
-devpi-client
 django-debug-toolbar
 factory-boy
+ipdb
 psycopg2
 pytest-cov
 pytest-django
@@ -14,5 +13,3 @@ pytest-flakes
 pytest-pep8
 pytest-sugar
 pytest-watch
-pyyaml
-walkdir

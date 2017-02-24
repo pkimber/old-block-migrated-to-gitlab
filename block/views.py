@@ -988,9 +988,10 @@ class WizardImageChoose(
         context = super().get_context_data(**kwargs)
         category_slug = self.kwargs.get('category')
         category = None
+        tags = Image.tags.all()
         if category_slug:
             category = ImageCategory.objects.get(slug=category_slug)
-        context.update(dict(category=category))
+        context.update(dict(category=category, tags=tags))
         return context
 
     def get_form_class(self):
@@ -1005,7 +1006,8 @@ class WizardImageChoose(
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         category_slug = self.kwargs.get('category')
-        kwargs.update(dict(category_slug=category_slug))
+        tag = self.request.GET.get('tag')
+        kwargs.update(dict(category_slug=category_slug, tag=tag))
         return kwargs
 
     def form_valid(self, form):

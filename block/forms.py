@@ -24,6 +24,15 @@ from block.models import (
 )
 
 
+def _image_queryset(category_slug, tag):
+    qs = Image.objects.images()
+    if category_slug:
+        qs = qs.filter(category__slug=category_slug)
+    if tag:
+        qs = qs.filter(tags__slug__in=[tag])
+    return qs
+
+
 def _label_from_instance(obj):
     """The label is the image."""
     thumbnailer = get_thumbnailer(obj.image)
@@ -32,9 +41,20 @@ def _label_from_instance(obj):
         'size': (100, 100),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-    return format_html('{}<br><img src="{}" />'.format(
+    html = """
+        {}
+        <br>
+        <img src="{}" />
+        <br>
+        <small>
+            ({}: {})
+        </small>
+    """
+    return format_html(html.format(
         obj.title,
         thumbnail.url,
+        obj.original_file_name,
+        ', '.join(obj.tags.names()),
     ))
 
 
@@ -243,11 +263,12 @@ class ImageForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name in ['image', 'title']:
             field = self.fields[field_name]
-            field.widget.attrs.update({'class': 'pure-input-2-3'})
             set_widget_required(field)
+        for name in ('category', 'image', 'tags', 'title'):
+            f = self.fields[name]
+            f.widget.attrs.update({'class': 'pure-input-2-3'})
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
-        category.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
@@ -256,6 +277,7 @@ class ImageForm(forms.ModelForm):
             'title',
             'category',
             'add_to_library',
+            'tags',
         )
         widgets = {
             'image': FileDropInput(),
@@ -281,19 +303,17 @@ class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelChoiceField(
-        queryset=Image.objects.images(),
+        queryset=Image.objects.none(),
         empty_label=None,
         widget=forms.RadioSelect,
     )
 
     def __init__(self, *args, **kwargs):
         category_slug = kwargs.pop('category_slug')
+        tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
-        if category_slug:
-            images = self.fields['images']
-            images.queryset = Image.objects.images().filter(
-                category__slug=category_slug
-            )
+        images = self.fields['images']
+        images.queryset = _image_queryset(category_slug, tag)
 
     class Meta:
         model = Image
@@ -306,19 +326,17 @@ class ImageMultiSelectForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelMultipleChoiceField(
-        queryset=Image.objects.images(),
+        queryset=Image.objects.none(),
         required=False,
         widget=forms.CheckboxSelectMultiple,
     )
 
     def __init__(self, *args, **kwargs):
         category_slug = kwargs.pop('category_slug')
+        tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
-        if category_slug:
-            images = self.fields['images']
-            images.queryset = Image.objects.images().filter(
-                category__slug=category_slug
-            )
+        images = self.fields['images']
+        images.queryset = _image_queryset(category_slug, tag)
 
     class Meta:
         fields = (

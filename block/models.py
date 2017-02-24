@@ -1045,7 +1045,7 @@ class Image(TimeStampedModel):
     deleted = models.BooleanField(default=False)
     category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
 
     class Meta:
         verbose_name = 'Link Image'
