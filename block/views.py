@@ -961,6 +961,35 @@ class WizardImageChoose(
 
     template_name = 'block/wizard_image_choose.html'
 
+    def _category_slug(self):
+        return self.kwargs.get('category')
+
+    def _image_queryset(self):
+        category_slug = self._category_slug()
+        tag = self._tag()
+        qs = Image.objects.images()
+        if category_slug:
+            qs = qs.filter(category__slug=category_slug)
+        if tag:
+            qs = qs.filter(tags__slug__in=[tag])
+        return qs
+
+    def _paginator(self, qs):
+        page = self.request.GET.get('page')
+        paginator = Paginator(qs, 12)
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            page_obj = paginator.page(paginator.num_pages)
+        return page_obj
+
+    def _tag(self):
+        return self.request.GET.get('tag')
+
     def _update_images_many_to_many(self, images):
         content_obj = self._content_obj()
         field = self._get_field()
@@ -986,12 +1015,17 @@ class WizardImageChoose(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        category_slug = self.kwargs.get('category')
         category = None
-        tags = Image.tags.all()
+        category_slug = self._category_slug()
         if category_slug:
             category = ImageCategory.objects.get(slug=category_slug)
-        context.update(dict(category=category, tags=tags))
+        context.update(dict(
+            category=category,
+            is_paginated=self.page_obj.has_other_pages(),
+            page_obj=self.page_obj,
+            tag=self._tag(),
+            tags=Image.tags.all(),
+        ))
         return context
 
     def get_form_class(self):
@@ -1005,9 +1039,9 @@ class WizardImageChoose(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        category_slug = self.kwargs.get('category')
-        tag = self.request.GET.get('tag')
-        kwargs.update(dict(category_slug=category_slug, tag=tag))
+        qs = self._image_queryset()
+        self.page_obj = self._paginator(qs)
+        kwargs.update(dict(image_queryset=self.page_obj.object_list))
         return kwargs
 
     def form_valid(self, form):

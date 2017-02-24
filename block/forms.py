@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from django import forms
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.html import format_html
 from easy_thumbnails.files import get_thumbnailer
 
@@ -24,13 +25,22 @@ from block.models import (
 )
 
 
-def _image_queryset(category_slug, tag):
-    qs = Image.objects.images()
-    if category_slug:
-        qs = qs.filter(category__slug=category_slug)
-    if tag:
-        qs = qs.filter(tags__slug__in=[tag])
-    return qs
+# def _image_queryset(page, category_slug, tag):
+#     qs = Image.objects.images()
+#     if category_slug:
+#         qs = qs.filter(category__slug=category_slug)
+#     if tag:
+#         qs = qs.filter(tags__slug__in=[tag])
+#     paginator = Paginator(qs, 25)
+#     try:
+#         page_obj = paginator.page(page)
+#     except PageNotAnInteger:
+#         # If page is not an integer, deliver first page.
+#         page_obj = paginator.page(1)
+#     except EmptyPage:
+#         # If page is out of range (e.g. 9999), deliver last page of results.
+#         page_obj = paginator.page(paginator.num_pages)
+#     return page_obj
 
 
 def _label_from_instance(obj):
@@ -309,11 +319,14 @@ class ImageListForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        category_slug = kwargs.pop('category_slug')
-        tag = kwargs.pop('tag')
+        image_queryset = kwargs.pop('image_queryset')
+        # category_slug = kwargs.pop('category_slug')
+        # page = kwargs.pop('page')
+        # tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
         images = self.fields['images']
-        images.queryset = _image_queryset(category_slug, tag)
+        # images.queryset = _image_queryset(page, category_slug, tag)
+        images.queryset = image_queryset
 
     class Meta:
         model = Image
@@ -332,11 +345,14 @@ class ImageMultiSelectForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        category_slug = kwargs.pop('category_slug')
-        tag = kwargs.pop('tag')
+        image_queryset = kwargs.pop('image_queryset')
+        # category_slug = kwargs.pop('category_slug')
+        # page = kwargs.pop('page')
+        # tag = kwargs.pop('tag')
         super().__init__(*args, **kwargs)
         images = self.fields['images']
-        images.queryset = _image_queryset(category_slug, tag)
+        # images.queryset = _image_queryset(page, category_slug, tag)
+        images.queryset = image_queryset
 
     class Meta:
         fields = (
