@@ -57,7 +57,8 @@
           <i class="fa fa-edit"></i>
           {{ image.title }}
           <small>
-            ({{ image.tags.names|join:', ' }})
+            ({{ image.original_file_name }}:
+            {{ image.tags.names|join:', ' }})
           </small>
         </a>
         <br>
