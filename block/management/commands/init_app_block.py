@@ -1,12 +1,7 @@
 # -*- encoding: utf-8 -*-
 from django.core.management.base import BaseCommand
 
-from block.models import (
-    Page,
-    Template,
-    TemplateSection,
-    Url,
-)
+from block.models import Url
 
 
 class Command(BaseCommand):

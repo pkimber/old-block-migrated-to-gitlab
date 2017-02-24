@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from django import forms
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.html import format_html
 from easy_thumbnails.files import get_thumbnailer
 
