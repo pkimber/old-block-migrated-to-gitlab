@@ -42,9 +42,9 @@ def test_file():
 @pytest.mark.django_db
 def test_wizard_image_choose_multi(client):
     content = TitleFactory()
-    ImageFactory()
-    image_1 = ImageFactory()
-    image_2 = ImageFactory()
+    ImageFactory(title='0')
+    image_1 = ImageFactory(title='1')
+    image_2 = ImageFactory(title='2')
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -54,7 +54,7 @@ def test_wizard_image_choose_multi(client):
     }
     response = client.post(url, data)
     # check
-    assert 302 == response.status_code
+    assert 302 == response.status_code, response.context['form'].errors
     expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     content.refresh_from_db()

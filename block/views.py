@@ -976,7 +976,7 @@ class WizardImageChoose(
 
     def _paginator(self, qs):
         page = self.request.GET.get('page')
-        paginator = Paginator(qs, 12)
+        paginator = Paginator(qs, 16)
         try:
             page_obj = paginator.page(page)
         except PageNotAnInteger:
@@ -1038,12 +1038,22 @@ class WizardImageChoose(
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
 
     def get_form_kwargs(self):
+        """kwargs that will be passed to the __init__ of your form.
+
+        We only paginate the queryset for the form on a ``GET``.  A ``POST``
+        needs access to all images for validation.
+
+        The paginator slices the queryset.  If this queryset is passed to the
+        form validation, we get a ``Cannot filter a query once a slice has been
+        taken`` error message.  To overcome this we create a new queryset:
+        http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
+
+        """
         kwargs = super().get_form_kwargs()
         qs = self._image_queryset()
-        self.page_obj = self._paginator(qs)
-        # Fix "Cannot filter a query once a slice has been taken.":
-        # http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
-        qs = Image.objects.filter(pk__in=self.page_obj.object_list)
+        if not self.request.method == 'POST':
+            self.page_obj = self._paginator(qs)
+            qs = Image.objects.filter(pk__in=self.page_obj.object_list)
         kwargs.update(dict(image_queryset=qs))
         return kwargs
 

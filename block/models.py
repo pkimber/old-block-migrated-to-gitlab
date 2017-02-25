@@ -1052,7 +1052,7 @@ class Image(TimeStampedModel):
         verbose_name_plural = 'Link Images'
 
     def __str__(self):
-        return '{}'.format(self.title)
+        return '{}. {}'.format(self.pk, self.title)
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
