@@ -11,10 +11,7 @@ from django.core.paginator import (
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Max
-from django.http import (
-    Http404,
-    HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 from django.views.generic.base import RedirectView
@@ -28,6 +25,7 @@ from django.views.generic import (
     TemplateView,
 )
 
+from block.tasks import thumbnail_image
 from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
@@ -1219,6 +1217,7 @@ class WizardImageUpload(
         with transaction.atomic():
             self.object = form.save()
             self._update_image(content_obj, self.object)
+        transaction.on_commit(lambda: thumbnail_image.delay(self.object.pk))
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             url = self._page_design_url(content_obj)

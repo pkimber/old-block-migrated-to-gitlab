@@ -175,6 +175,9 @@ LOGGING = {
 # view gets no next parameter.
 LOGIN_REDIRECT_URL = reverse_lazy('project.dash')
 
+# http://docs.celeryproject.org/en/2.5/django/unit-testing.html
+CELERY_ALWAYS_EAGER = True
+
 # https://github.com/johnsensible/django-sendfile
 SENDFILE_BACKEND = 'sendfile.backends.development'
 SENDFILE_ROOT = 'media-private'
