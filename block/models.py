@@ -8,15 +8,13 @@ from django.contrib.contenttypes.models import ContentType
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db import (
-    models,
-    transaction,
-)
-from django.db.models import Max
+from django.db import models, transaction
+from django.db.models import Count, Max
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
 from taggit.managers import TaggableManager
+from taggit.models import Tag
 
 from base.model_utils import (
     copy_model_instance,
@@ -985,9 +983,6 @@ class ImageCategoryManager(models.Manager):
         except self.model.DoesNotExist:
             obj = self.create_category(name)
         return obj
-        # count = self.model.objects.filter(name=name).count()
-        # if not count:
-        #     return self.create_category(name)
 
 
 class ImageCategory(models.Model):
@@ -1021,6 +1016,15 @@ class ImageManager(models.Manager):
         ).order_by(
             'category__slug',
             'title',
+        )
+
+    def tags_by_category(self, category):
+        return Tag.objects.filter(
+            image__category__slug=category.slug,
+        ).annotate(
+            num_tags=Count('pk')
+        ).order_by(
+            '-num_tags'
         )
 
 
@@ -1068,6 +1072,8 @@ class Image(TimeStampedModel):
     def set_deleted(self):
         self.deleted = True
         self.save()
+
+
 
 reversion.register(Image)
 

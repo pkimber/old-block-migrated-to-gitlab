@@ -972,6 +972,7 @@ class WizardImageChoose(
         if category_slug:
             qs = qs.filter(category__slug=category_slug)
         if tag:
+
             qs = qs.filter(tags__slug__in=[tag])
         return qs
 
@@ -1020,12 +1021,15 @@ class WizardImageChoose(
         category_slug = self._category_slug()
         if category_slug:
             category = ImageCategory.objects.get(slug=category_slug)
+            tags = Image.objects.tags_by_category(category)
+        else:
+            tags = Image.tags.most_common()
         context.update(dict(
             category=category,
             is_paginated=self.page_obj.has_other_pages(),
             page_obj=self.page_obj,
             tag=self._tag(),
-            tags=Image.tags.all(),
+            tags=tags,
         ))
         return context
 

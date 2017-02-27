@@ -36,12 +36,11 @@
       <br>
     </div>
     <div class="pure-u-1-3 pure-u-md-1-5">
-      <h3>Tags</h3>
+      {% if tags %}
+        <h3>Tags</h3>
+      {% endif %}
       {% if tag %}
-        <a href="?tag=">
-          All Images...
-        </a>
-        <br>
+        &nbsp;&lt;<a href="?tag=" style="white-space:nowrap;">all</a>&gt;&nbsp;&nbsp;&nbsp;
       {% endif %}
       {% for tag in tags|dictsort:"name" %}
         &nbsp;&lt;<a href="?tag={{ tag.slug }}" style="white-space:nowrap;">{{ tag.name }}</a>&gt;&nbsp;&nbsp;&nbsp;
