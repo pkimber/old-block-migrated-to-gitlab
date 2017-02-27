@@ -9,6 +9,26 @@
 {% endblock sub_heading %}
 
 {% block content %}
+  <style>
+    .pill {
+      -webkit-border-radius: 8px;
+      -moz-border-radius: 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+      background: #428CD1;
+      color: white;
+      font-size: 95%;
+      padding: 3px 8px;
+      margin: 0 8px 12px 0;
+    }
+    .pill:visited {
+      background: #529CD1;
+      color: white;
+    }
+    .pill.selected {
+      background: #000;
+    }
+  </style>
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="pure-menu pure-menu-horizontal">
@@ -40,11 +60,15 @@
         <h3>Tags</h3>
       {% endif %}
       {% if tag %}
-        &nbsp;&lt;<a href="?tag=" style="white-space:nowrap;">all</a>&gt;&nbsp;&nbsp;&nbsp;
+        <a href="?tag=" class="pill">All</a>
       {% endif %}
+      {% with main_tag=tag %}
       {% for tag in tags|dictsort:"name" %}
-        &nbsp;&lt;<a href="?tag={{ tag.slug }}" style="white-space:nowrap;">{{ tag.name }}</a>&gt;&nbsp;&nbsp;&nbsp;
+        <a href="?tag={{ tag.slug }}" class="pill{% if tag.slug == main_tag %} selected{% endif %}">
+          {{ tag.name }}
+        </a>
       {% endfor %}
+      {% endwith %}
     </div>
   </div>
 {% endblock content %}
