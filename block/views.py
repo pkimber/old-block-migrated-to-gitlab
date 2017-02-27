@@ -864,6 +864,7 @@ class WizardImageMixin(WizardMixin):
             categories=categories,
             field_name=self._field_name(),
             object=content_obj,
+            tags=Image.tags.all(),
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),

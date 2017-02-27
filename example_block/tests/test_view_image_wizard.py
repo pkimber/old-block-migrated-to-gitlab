@@ -140,6 +140,19 @@ def test_wizard_image_choose_category_single(client):
     assert image == content.picture
 
 
+@pytest.mark.django_db
+def test_wizard_image_option(client):
+    user = UserFactory(is_staff=True)
+    category = ImageCategoryFactory()
+    image = ImageFactory(category=category)
+    image.tags.add('apple')
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    content = TitleFactory()
+    url = url_image_single(content, 'block.wizard.image.option')
+    response = client.get(url)
+    assert 200 == response.status_code
+
+
 def _set_up_order_multi(content):
     image_1 = ImageFactory()
     image_2 = ImageFactory()

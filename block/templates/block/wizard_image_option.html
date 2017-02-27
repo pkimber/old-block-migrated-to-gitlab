@@ -32,10 +32,11 @@
           Choose an image from one of these categories:
         </p>
         {% for category in categories %}
-            <a href="{{ category.url }}" class="pure-menu-link">
-              <i class="fa fa-picture-o"></i>
-              {{ category.name }}
-            </a>
+          &nbsp;&lt;
+          <a href="{{ category.url }}" style="white-space:nowrap;">
+            {{ category.name }}
+          </a>
+          &gt;&nbsp;&nbsp;&nbsp;
         {% endfor %}
       {% endif %}
       <p>
@@ -45,6 +46,18 @@
         <i class="fa fa-picture-o"></i>
         Image Library
       </a>
+      {% if tags %}
+        <p>
+          Choose a tag:
+        </p>
+        {% for tag in tags %}
+          &nbsp;&lt;
+          <a href="{{ url_choose }}?tag={{ tag.slug }}" style="white-space:nowrap;">
+            {{ tag.name }}
+          </a>
+          &gt;&nbsp;&nbsp;&nbsp;
+        {% endfor %}
+      {% endif %}
       <p>
         Or:
       </p>
