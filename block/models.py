@@ -980,9 +980,14 @@ class ImageCategoryManager(models.Manager):
         )
 
     def init_category(self, name):
-        count = self.model.objects.filter(name=name).count()
-        if not count:
-            self.create_category(name)
+        try:
+            obj = self.model.objects.get(name=name)
+        except self.model.DoesNotExist:
+            obj = self.create_category(name)
+        return obj
+        # count = self.model.objects.filter(name=name).count()
+        # if not count:
+        #     return self.create_category(name)
 
 
 class ImageCategory(models.Model):
