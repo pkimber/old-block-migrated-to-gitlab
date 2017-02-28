@@ -11,6 +11,5 @@ def thumbnail_image(image_pk):
         img = Image.objects.get(id=image_pk)
     except Image.DoesNotExist:
         img = None
-    return obj
     if img:
         generate_all_aliases(img.image, include_global=True)
