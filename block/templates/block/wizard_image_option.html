@@ -65,7 +65,7 @@
         <p>
           Choose a tag:
         </p>
-        {% for tag in tags %}
+        {% for tag in tags:"name" %}
           <a href="{{ url_choose }}?tag={{ tag.slug }}" class="pill">
             {{ tag.name }}
           </a>
