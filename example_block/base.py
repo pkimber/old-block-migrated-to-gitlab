@@ -185,15 +185,12 @@ SENDFILE_ROOT = 'media-private'
 FTP_STATIC_DIR = None
 FTP_STATIC_URL = None
 
-THUMBNAIL_DEFAULT_OPTIONS = {'crop': 'center', 'size': (100, 100)}
 
-LAS_THUMBNAIL_OPTIONS = {
-    'crop': False,
-    'autocrop': True,
-    'background': 'white',
-    'watermark': 'logo',
-    'upscale': True,
-}
+THUMBNAIL_DEFAULT_OPTIONS = {
+                    'size': (100, 100),
+                    'crop': 'center',
+                    }
+
 THUMBNAIL_ALIASES = {
     '': {
         '100x100': THUMBNAIL_DEFAULT_OPTIONS,
