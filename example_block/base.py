@@ -189,6 +189,6 @@ THUMBNAIL_DEFAULT_OPTIONS = {'crop': 'center', 'size': (100, 100)}
 
 THUMBNAIL_ALIASES = {
     '': {
-        '100x100': LAS_THUMBNAIL_OPTIONS,
+        '100x100': THUMBNAIL_DEFAULT_OPTIONS,
     },
 }
