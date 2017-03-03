@@ -103,7 +103,7 @@ def test_page_list():
     PageFactory(slug='info')
     PageFactory(slug='portfolio')
     result = [p.slug for p in Page.objects.page_list()]
-    assert ['custom', 'home', 'info', 'portfolio'] == result
+    assert ['home', 'info', 'portfolio', 'custom'] == result
 
 
 @pytest.mark.django_db
