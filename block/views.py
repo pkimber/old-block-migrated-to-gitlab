@@ -802,6 +802,12 @@ class WizardMixin:
         return self.kwargs['type']
 
     def _page_design_url(self, content_obj):
+        """Get the page design URL.
+
+        This method tries to get the design URL from the content object first
+        so the image wizard is able to work with non-block models.
+
+        """
         try:
             result = content_obj.get_design_url()
         except AttributeError:
@@ -1216,6 +1222,8 @@ class WizardImageUpload(
         content_obj = self._content_obj()
         with transaction.atomic():
             self.object = form.save()
+            self.object.user = self.request.user
+            self.object.save()
             self._update_image(content_obj, self.object)
         transaction.on_commit(lambda: thumbnail_image.delay(self.object.pk))
         link_type = self._link_type()

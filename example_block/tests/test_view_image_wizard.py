@@ -338,7 +338,8 @@ def test_wizard_image_upload_multi(client):
     assert 1 == content.slideshow.count()
     image = content.slideshow.first()
     assert 'Cricket' == image.title
-    assert image.category == category
+    assert category == image.category
+    assert user == image.user
     assert image.deleted is False
     assert ['bread', 'cheese'] == sorted(image.tags.names())
     # check an image has been added to the database
