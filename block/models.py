@@ -1040,17 +1040,17 @@ class Image(TimeStampedModel):
               thumbnails with tick boxes for multi-selection and radio buttons
               for single selection.
 
-    TODO
-
-    - Do we want to add tags field in here so we can search/group images?
-      e.g. https://github.com/alex/django-taggit
-    - For now, we are adding a category only.
-
     """
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
     original_file_name = models.CharField(max_length=100)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True, null=True,
+        related_name='+',
+        help_text='User who uploaded the image',
+    )
     deleted = models.BooleanField(default=False)
     category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
