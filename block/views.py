@@ -83,6 +83,7 @@ from .models import (
     Url,
     ViewUrl,
     Wizard,
+    ContentModel,
 )
 
 
@@ -232,6 +233,7 @@ class ContentRemoveView(RedirectNextMixin, BaseMixin, UpdateView):
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
+        self.model.objects.order_vacate(self.object)
         self.object.block.remove(self.request.user)
         messages.info(
             self.request,
@@ -269,6 +271,40 @@ class ContentUpdateView(RedirectNextMixin, BaseMixin, UpdateView):
         url = self.request.POST.get(REDIRECT_FIELD_NAME)
         if not url:
             url = self.object.block.page_section.page.get_design_url()
+        return url
+
+
+class ContentUpView(BaseMixin, RedirectView):
+
+    permanent = False
+    query_string = True
+
+    def get_redirect_url(self, *args, **kwargs):
+
+        content = get_object_or_404(self.model, pk=kwargs['pk'])
+
+        self.model.objects.order_move(content, content.order - 1)
+
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = content.block.page_section.page.get_design_url()
+        return url
+
+
+class ContentDownView(BaseMixin, RedirectView):
+
+    permanent = False
+    query_string = True
+
+    def get_redirect_url(self, *args, **kwargs):
+
+        content = get_object_or_404(self.model, pk=kwargs['pk'])
+
+        self.model.objects.order_move(content, content.order + 1)
+
+        url = self.request.POST.get(REDIRECT_FIELD_NAME)
+        if not url:
+            url = content.block.page_section.page.get_design_url()
         return url
 
 

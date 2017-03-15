@@ -1,3 +1,24 @@
+
+{% if c.url_order_up %}
+
+<a
+  class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} disabled{%endif%}"
+  href="{{ c.url_order_up }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  title="Move {{ caption }} Up">
+  <i class="fa fa-arrow-up"></i>
+</a>
+
+<span class="h6">{{ caption }}#{{ c.order }}</span>
+
+<a
+  class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} disabled{%endif%}"
+  href="{{ c.url_order_down }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  title="Move {{ caption }} Down">
+  <i class="fa fa-arrow-down"></i>
+</a>
+
+{% endif %}
+
 {% if c.is_pending_added or c.is_pending_edited %}
   <a
     class="pure-button pure-button-xsmall"

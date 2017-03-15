@@ -12,7 +12,7 @@ from django.db import (
     models,
     transaction,
 )
-from django.db.models import Max
+from django.db.models import F, Max
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
@@ -687,15 +687,46 @@ class BlockModel(TimeStampedModel):
 
 class ContentManager(models.Manager):
 
-    def next_order(self, block):
-        rtn = self.model.objects.filter(
+    def get_max_order(self, block):
+        max_order = self.model.objects.filter(
                     block__page_section=block.page_section
                     ).exclude(
                         moderate_state__slug='removed'
                         ).aggregate(Max('order'))['order__max']
-        if rtn is None:
-            rtn = -1
-        return rtn + 1
+        return max_order or 0
+
+    def next_order(self, block):
+        max_order = self.model.objects.get_max_order(block)
+        return max_order + 1
+
+    def order_vacate(self, obj):
+        """Vacates a `ContentType.order` - for instance if an item is being
+        deleted or moved.
+        """
+        # Remove this item from the current order
+        self.model.objects.filter(
+                            block__page_section=obj.block.page_section,
+                            order__gt=obj.order
+                            ).exclude(
+                                moderate_state__slug='removed'
+                                ).update(order=F('order')-1)
+        pass
+
+    def order_move(self, obj, target_pos):
+        """Insert a `ContentType` in the current order."""
+        # Remove this item from the current order
+        self.model.objects.order_vacate(obj)
+        # Make a space for its new position
+        self.model.objects.filter(
+                            block__page_section=obj.block.page_section,
+                            order__gte=target_pos
+                            ).exclude(
+                                moderate_state__slug='removed'
+                                ).update(order=F('order')+1)
+        # Place it
+        obj.order = target_pos
+        obj.save()
+        pass
 
     def pending(self, page_section, kwargs=None):
         """Return a list of pending content for a section.
@@ -737,6 +768,8 @@ class ContentModel(TimeStampedModel):
     field is set to 'False'.
 
     """
+
+    order = models.IntegerField()
 
     moderate_state = models.ForeignKey(
         ModerateState,
