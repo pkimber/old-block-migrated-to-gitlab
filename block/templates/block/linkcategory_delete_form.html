@@ -25,24 +25,30 @@
     </div>
     <div class="pure-g">
       <div class="pure-u-1">
-        <br>
-        There are links in this category.
-        <br>
-        If you want to delete this category, remove all links first.
+        <div class="l-box">
+          <br>
+          There are links in this category.
+          <br>
+          If you want to delete this category, remove all links first.
+        </div>
       </div>
     </div>
   {% else %}
     <div class="pure-g">
       <div class="pure-u-1">
-        <br>
-        Are you sure you want to delete the
-        <strong>{{ object.name }}</strong>
-        link category?
+        <div class="l-box">
+          <br>
+          Are you sure you want to delete the
+          <strong>{{ object.name }}</strong>
+          link category?
+        </div>
       </div>
     </div>
     <div class="pure-g">
       <div class="pure-u-1">
-        {% include '_form.html' with submit='Delete Link Category' %}
+        <div class="l-box">
+          {% include '_form.html' with submit='Delete Link Category' %}
+        </div>
       </div>
     </div>
   {% endif %}

@@ -26,45 +26,47 @@
   </div>
   <div class="pure-g">
     <div class="pure-u-1">
-      {% for item in many_to_many %}
-        <form action="." method="post" class="pure-form">
-          {% csrf_token %}
-          {% if form.non_field_errors %}
-            {{ form.non_field_errors }}
-          {% endif %}
+      <div class="l-box">
+        {% for item in many_to_many %}
+          <form action="." method="post" class="pure-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              {{ form.non_field_errors }}
+            {% endif %}
 
-          {{ item.order }}.
-          {{ item.link.link_type_description }}:
-          {{ item.link.title }}
-          {% if item.link.category.name %}
-            <small>({{ item.link.category.name }})</small>
-          {% endif %}
-          <br>
-          {% if forloop.first %}
-            <button class="pure-button pure-button-disabled">
-          {% else %}
-            <button type="submit" name="up" value="{{ item.pk }}" class="pure-button">
-          {% endif %}
-            <i class="fa fa-arrow-up"></i>
-          </button>
-          {% if forloop.last %}
-            <button class="pure-button pure-button-disabled">
-          {% else %}
-            <button type="submit" name="down" value="{{ item.pk }}" class="pure-button">
-          {% endif %}
-            <i class="fa fa-arrow-down"></i>
-          </button>
-          <br>
-          <br>
-        </form>
-      {% endfor %}
-      <br>
-      <a href="{{ url_option }}" class="pure-button pure-button-primary">
-        <span style="color:white;">
-          <i class="fa fa-reply"></i>
-          Finish
-        </span>
-      </a>
+            {{ item.order }}.
+            {{ item.link.link_type_description }}:
+            {{ item.link.title }}
+            {% if item.link.category.name %}
+              <small>({{ item.link.category.name }})</small>
+            {% endif %}
+            <br>
+            {% if forloop.first %}
+              <button class="pure-button pure-button-disabled">
+            {% else %}
+              <button type="submit" name="up" value="{{ item.pk }}" class="pure-button">
+            {% endif %}
+              <i class="fa fa-arrow-up"></i>
+            </button>
+            {% if forloop.last %}
+              <button class="pure-button pure-button-disabled">
+            {% else %}
+              <button type="submit" name="down" value="{{ item.pk }}" class="pure-button">
+            {% endif %}
+              <i class="fa fa-arrow-down"></i>
+            </button>
+            <br>
+            <br>
+          </form>
+        {% endfor %}
+        <br>
+        <a href="{{ url_option }}" class="pure-button pure-button-primary">
+          <span style="color:white;">
+            <i class="fa fa-reply"></i>
+            Finish
+          </span>
+        </a>
+      </div>
     </div>
   </div>
 {% endblock content %}

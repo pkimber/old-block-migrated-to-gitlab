@@ -26,85 +26,89 @@
   </div>
   <div class="pure-g">
     <div class="pure-u-1 pure-u-md-1-2">
-      <h3>What would you like to do?</h3>
-      {% if categories %}
+      <div class="l-box">
+        <h3>What would you like to do?</h3>
+        {% if categories %}
+          <p>
+            Choose an image from one of these categories:
+          </p>
+          {% for category in categories %}
+              <a href="{{ category.url }}" class="pure-menu-link">
+                <i class="fa fa-picture-o"></i>
+                {{ category.name }}
+              </a>
+          {% endfor %}
+        {% endif %}
         <p>
-          Choose an image from one of these categories:
+          Choose from the whole library:
         </p>
-        {% for category in categories %}
-            <a href="{{ category.url }}" class="pure-menu-link">
-              <i class="fa fa-picture-o"></i>
-              {{ category.name }}
-            </a>
-        {% endfor %}
-      {% endif %}
-      <p>
-        Choose from the whole library:
-      </p>
-      <a href="{{ url_choose }}" class="pure-menu-link">
-        <i class="fa fa-picture-o"></i>
-        Image Library
-      </a>
-      <p>
-        Or:
-      </p>
-      <a href="{{ url_upload }}" class="pure-menu-link">
-        <i class="fa fa-cloud-upload"></i>
-        Upload an image
-      </a>
-      {% if image %}
+        <a href="{{ url_choose }}" class="pure-menu-link">
+          <i class="fa fa-picture-o"></i>
+          Image Library
+        </a>
         <p>
-          Maintenance:
+          Or:
         </p>
-        <a href="{{ url_remove }}" class="pure-menu-link">
-          <i class="fa fa-times"></i>
-          Remove the {{ field_name }} from your page
+        <a href="{{ url_upload }}" class="pure-menu-link">
+          <i class="fa fa-cloud-upload"></i>
+          Upload an image
         </a>
-      {% endif %}
-      {# Wizard.MULTI #}
-      {% if many_to_many.count %}
-        <p>
-          Maintenance:
-        </p>
-        <a href="{{ url_order }}" class="pure-menu-link">
-          <i class="fa fa-arrow-up"></i>
-          Order images in your {{ field_name }}
+        {% if image %}
+          <p>
+            Maintenance:
+          </p>
+          <a href="{{ url_remove }}" class="pure-menu-link">
+            <i class="fa fa-times"></i>
+            Remove the {{ field_name }} from your page
+          </a>
+        {% endif %}
+        {# Wizard.MULTI #}
+        {% if many_to_many.count %}
+          <p>
+            Maintenance:
+          </p>
+          <a href="{{ url_order }}" class="pure-menu-link">
+            <i class="fa fa-arrow-up"></i>
+            Order images in your {{ field_name }}
+          </a>
+          <a href="{{ url_select }}" class="pure-menu-link">
+            <i class="fa fa-times"></i>
+            Remove images from your {{ field_name }}
+          </a>
+        {% endif %}
+        <br>
+        <a href="{{ url_page_design }}" class="pure-button pure-button-primary">
+          <span style="color:white;">
+            <i class="fa fa-reply"></i>
+            Finish
+          </span>
         </a>
-        <a href="{{ url_select }}" class="pure-menu-link">
-          <i class="fa fa-times"></i>
-          Remove images from your {{ field_name }}
-        </a>
-      {% endif %}
-      <br>
-      <a href="{{ url_page_design }}" class="pure-button pure-button-primary">
-        <span style="color:white;">
-          <i class="fa fa-reply"></i>
-          Finish
-        </span>
-      </a>
+      </div>
     </div>
     <div class="pure-u-1 pure-u-md-1-2">
-      {# Wizard.SINGLE #}
-      {% if image %}
-        <h3>Current {{ field_name }}:</h3>
-        <img src="{% thumbnail image.image 100x100  crop='center' %}">
-        <br>
-        {{ image.title }}
-        <br>
-        <br>
-      {% endif %}
-      {# Wizard.MULTI #}
-      {% if many_to_many.count %}
-        <h3>Current {{ field_name }}:</h3>
-        {% for item in many_to_many %}
-          <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+      <div class="l-box">
+        {# Wizard.SINGLE #}
+        {% if image %}
+          <h3>Current {{ field_name }}:</h3>
+          <img src="{% thumbnail image.image 100x100  crop='center' %}">
           <br>
-          {{ item.order }}.
-          {{ item.image.title }}
+          {{ image.title }}
           <br>
           <br>
-        {% endfor %}
-      {% endif %}
+        {% endif %}
+        {# Wizard.MULTI #}
+        {% if many_to_many.count %}
+          <h3>Current {{ field_name }}:</h3>
+          {% for item in many_to_many %}
+            <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+            <br>
+            {{ item.order }}.
+            {{ item.image.title }}
+            <br>
+            <br>
+          {% endfor %}
+        {% endif %}
+      </div>
     </div>
   </div>
 {% endblock content %}

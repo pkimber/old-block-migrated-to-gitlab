@@ -52,39 +52,41 @@
 {% block content %}
   <div class="pure-g">
     <div class="pure-u-1">
-       <form id="urlchoice" action="" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} class="pure-form pure-form-stacked">
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-          {{ form.non_field_errors }}
-        {% endif %}
-        <fieldset>
-          {{ wizard.management_form }}
-          {% if wizard.form.forms %}
-            {{ wizard.form.management_form }}
-            {% for form in wizard.form.forms %}
-              {% include 'block/_wizard_form.html' %}
-            {% endfor %}
-          {% else %}
-            {% include 'block/_wizard_form.html' with form=wizard.form %}
+      <div class="l-box">
+         <form id="urlchoice" action="" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} class="pure-form pure-form-stacked">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            {{ form.non_field_errors }}
           {% endif %}
-          <div class="pure-controls">
-            <p>
-              {% if wizard.steps.prev %}
-                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="pure-button pure-button-primary">< {% trans "Back" %}</button>
-              {% endif %}
-              <button type="submit" value="{% trans "submit" %}" class="pure-button pure-button-primary">
-                {% if wizard.steps.step1 == 1 %}
-                  Next >
-                {% elif wizard.steps.current == 'list_delete' %}
-                  Delete
-                {% else %}
-                  Submit
+          <fieldset>
+            {{ wizard.management_form }}
+            {% if wizard.form.forms %}
+              {{ wizard.form.management_form }}
+              {% for form in wizard.form.forms %}
+                {% include 'block/_wizard_form.html' %}
+              {% endfor %}
+            {% else %}
+              {% include 'block/_wizard_form.html' with form=wizard.form %}
+            {% endif %}
+            <div class="pure-controls">
+              <p>
+                {% if wizard.steps.prev %}
+                  <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="pure-button pure-button-primary">< {% trans "Back" %}</button>
                 {% endif %}
-              </button>
-            </p>
-          </div>
-        </fieldset>
-      </form>
+                <button type="submit" value="{% trans "submit" %}" class="pure-button pure-button-primary">
+                  {% if wizard.steps.step1 == 1 %}
+                    Next >
+                  {% elif wizard.steps.current == 'list_delete' %}
+                    Delete
+                  {% else %}
+                    Submit
+                  {% endif %}
+                </button>
+              </p>
+            </div>
+          </fieldset>
+        </form>
+      </div>
     </div>
   </div>
 {% endblock %}

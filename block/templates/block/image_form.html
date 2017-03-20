@@ -13,10 +13,12 @@
 {% block content %}
   <div class="pure-g">
     <div class="pure-u-1">
-      <br>
-      <img src="{% thumbnail object.image 100x100  crop='center' %}">
-      {% include '_form.html' %}
-      <br>
+      <div class="l-box">
+        <br>
+        <img src="{% thumbnail object.image 100x100  crop='center' %}">
+        {% include '_form.html' %}
+        <br>
+      </div>
     </div>
   </div>
 {% endblock content %}
