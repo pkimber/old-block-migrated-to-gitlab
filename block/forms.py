@@ -186,12 +186,25 @@ class HeaderFooterForm(RequiredFieldForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         field_names = (
+            'company_name',
+            'company_address',
+            'company_phone',
+            'company_fax',
+            'company_email',
+            'company_hours',
             'header',
+            'footer_left_header',
             'footer_left',
+            'footer_right_header',
             'footer_right',
             'url_facebook',
             'url_linkedin',
             'url_twitter',
+            'google_verification_code',
+            'google_analytics_code',
+            'google_map_long',
+            'google_map_lat',
+            'google_map_zoom',
         )
         for name in field_names:
             self.fields[name].widget.attrs.update(
@@ -201,12 +214,25 @@ class HeaderFooterForm(RequiredFieldForm):
     class Meta:
         model = HeaderFooter
         fields = (
+            'company_name',
+            'company_address',
+            'company_phone',
+            'company_fax',
+            'company_email',
+            'company_hours',
             'header',
+            'footer_left_header',
             'footer_left',
+            'footer_right_header',
             'footer_right',
             'url_facebook',
             'url_linkedin',
             'url_twitter',
+            'google_verification_code',
+            'google_analytics_code',
+            'google_map_long',
+            'google_map_lat',
+            'google_map_zoom',
         )
 
 

@@ -953,6 +953,16 @@ class HeaderFooter(SingletonModel):
     """Move to ``block``?"""
 
     header = models.CharField(max_length=150, blank=True)
+
+
+    url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
+    url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
+    url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)
+
+    # added by tim
+    footer_left_header = models.CharField(max_length=150, blank=True)
+    footer_right_header = models.CharField(max_length=150, blank=True)
+    
     footer_left = models.TextField(
         blank=True,
         help_text=(
@@ -968,14 +978,8 @@ class HeaderFooter(SingletonModel):
         ),
     )
 
-    url_twitter = models.URLField(verbose_name='Twitter URL', blank=True)
-    url_linkedin = models.URLField(verbose_name='LinkedIn URL', blank=True)
-    url_facebook = models.URLField(verbose_name='Facebook URL', blank=True)
 
-    # added by tim
-    footer_left_header = models.CharField(max_length=150, blank=True)
-    footer_right_header = models.CharField(max_length=150, blank=True)
-
+    company_name = models.CharField(max_length=150, blank=True)
     company_address = models.CharField(max_length=150, blank=True)
     company_phone = models.CharField(max_length=30, blank=True)
     company_fax = models.CharField(max_length=30, blank=True)
