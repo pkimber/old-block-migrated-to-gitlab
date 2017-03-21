@@ -5,16 +5,16 @@ register = template.Library()
 
 
 @register.inclusion_tag('block/_add.html')
-def block_add(url, caption="", return_path=None):
-    return dict(url=url, caption=caption, return_path=return_path)
+def block_add(url, caption="", request_path=None):
+    return dict(url=url, caption=caption, request_path=request_path)
 
 
 @register.inclusion_tag('block/_moderate.html')
 def block_moderate(
-        generic_content, can_remove=True, caption="", return_path=None):
+        generic_content, can_remove=True, caption="", request_path=None):
     return dict(
         c=generic_content, can_remove=can_remove, caption=caption,
-        return_path=return_path
+        request_path=request_path
     )
 
 

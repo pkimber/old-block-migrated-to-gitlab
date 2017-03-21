@@ -1,7 +1,7 @@
 <a
   class="pure-button pure-button-xsmall"
   title="Add{% if caption %} {{ caption }}{% endif %}"
-  href="{{ url }}{% if return_path %}?next={{ return_path }}{% endif %}">
+  href="{{ url }}{% if request_path %}?next={{ request_path }}{% endif %}">
   <i class="fa fa-plus"></i>
   Add{% if caption %} {{ caption }}{% endif %}
 </a>

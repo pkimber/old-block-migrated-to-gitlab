@@ -3,7 +3,7 @@
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} disabled{%endif%}"
-  href="{{ c.url_order_up }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  href="{{ c.url_order_up }}{% if request_path %}?next={{ request_path }}{% endif %}"
   title="Move {{ caption }} Up">
   <i class="fa fa-arrow-up"></i>
 </a>
@@ -12,7 +12,7 @@
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} disabled{%endif%}"
-  href="{{ c.url_order_down }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  href="{{ c.url_order_down }}{% if request_path %}?next={{ request_path }}{% endif %}"
   title="Move {{ caption }} Down">
   <i class="fa fa-arrow-down"></i>
 </a>
@@ -23,7 +23,7 @@
   <a
     class="pure-button pure-button-xsmall"
     title="Publish{% if caption %} {{ caption }}{% endif %}"
-    href="{{ c.url_publish }}{% if return_path %}?next={{ return_path }}{% endif %}">
+    href="{{ c.url_publish }}{% if request_path %}?next={{ request_path }}{% endif %}">
     <i class="fa fa-check"></i>
     Publish{% if caption %} {{ caption }}{% endif %}
   </a>
@@ -31,13 +31,13 @@
 <a
   class="pure-button pure-button-xsmall"
   title="Edit{% if caption %} {{ caption }}{% endif %}"
-  href="{{ c.url_update }}{% if return_path %}?next={{ return_path }}{% endif %}">
+  href="{{ c.url_update }}{% if request_path %}?next={{ request_path }}{% endif %}">
   <i class="fa fa-edit"></i>
   Edit{% if caption %} {{ caption }}{% endif %}
 </a>
 
 {% for url in c.wizard_urls %}
-  <a class="pure-button pure-button-xsmall" href="{{ url.url }}{% if return_path %}?next={{ return_path }}{% endif %}">
+  <a class="pure-button pure-button-xsmall" href="{{ url.url }}{% if request_path %}?next={{ request_path }}{% endif %}">
     <i class="{{ url.class }}"></i>
     {{ url.caption }}
   </a>
@@ -47,7 +47,7 @@
   <a
     class="pure-button pure-button-xsmall"
     title="Remove{% if caption %} {{ caption }}{% endif %}"
-    href="{{ c.url_remove }}{% if return_path %}?next={{ return_path }}{% endif %}">
+    href="{{ c.url_remove }}{% if request_path %}?next={{ request_path }}{% endif %}">
     <i class="fa fa-times"></i>
     Remove{% if caption %} {{ caption }}{% endif %}
   </a>

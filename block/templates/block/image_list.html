@@ -33,35 +33,35 @@
     </div>
   </div>
 
+  <div class="pure-g">
   {% for image in image_list %}
-    <div class="pure-g">
-      {% ifchanged image.category %}
-      <div class="pure-u-1">
-        <div class="l-box">
-          <br>
-          <h3>
-            {% if image.category %}
-              {{ image.category.name }}
-            {% else %}
-              No Category
-            {% endif %}
-          </h3>
-        </div>
+    {% ifchanged image.category %}
+    <div class="pure-u-1">
+      <div class="l-box">
+        <br>
+        <h3>
+          {% if image.category %}
+            {{ image.category.name }}
+          {% else %}
+            No Category
+          {% endif %}
+        </h3>
       </div>
-      {% endifchanged %}
-      <div class="pure-u-1-2 pure-u-md-1-4">
-        <div class="l-box">
-          <img src="{% thumbnail image.image 100x100  crop='center' %}">
-          <br>
-          <a href="{% url 'block.image.update' image.pk %}">
-            <i class="fa fa-edit"></i>
-            {{ image.title }}
-          </a>
-          <br>
-          <br>
-        </div>
+    </div>
+    {% endifchanged %}
+    <div class="pure-u-1-2 pure-u-md-1-4">
+      <div class="l-box">
+        <img src="{% thumbnail image.image 100x100  crop='center' %}">
+        <br>
+        <a href="{% url 'block.image.update' image.pk %}">
+          <i class="fa fa-edit"></i>
+          {{ image.title }}
+        </a>
+        <br>
+        <br>
       </div>
     </div>
   {% endfor %}
+  </div>
 
 {% endblock content %}

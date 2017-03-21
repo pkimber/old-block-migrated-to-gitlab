@@ -993,7 +993,7 @@ class WizardLinkMixin(WizardMixin):
 
 class WizardImageChoose(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        FormView):
+         BaseMixin, FormView):
 
     template_name = 'block/wizard_image_choose.html'
 
@@ -1061,14 +1061,14 @@ class WizardImageChoose(
 
 class WizardImageOption(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        TemplateView):
+        BaseMixin, TemplateView):
 
     template_name = 'block/wizard_image_option.html'
 
 
 class WizardImageOrder(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        FormView):
+        BaseMixin, FormView):
     """PJK"""
 
     form_class = EmptyForm
@@ -1121,7 +1121,7 @@ class WizardImageOrder(
 
 class WizardImageRemove(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        UpdateView):
+        BaseMixin, UpdateView):
 
     form_class = EmptyContentForm
     template_name = 'block/wizard_image_remove.html'
@@ -1147,7 +1147,7 @@ class WizardImageRemove(
 
 class WizardImageSelect(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        FormView):
+        BaseMixin, FormView):
     """List the current images in the slideshow and allow the user to remove.
 
     Allow the user to de-select any of the images.
@@ -1191,7 +1191,7 @@ class WizardImageSelect(
 
 class WizardImageUpload(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardImageMixin,
-        CreateView):
+        BaseMixin, CreateView):
 
     form_class = ImageForm
     template_name = 'block/wizard_image_upload.html'
@@ -1210,7 +1210,8 @@ class WizardImageUpload(
 
 
 class WizardLinkChoose(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        BaseMixin, FormView):
     """ choose a link from the library """
 
     template_name = 'block/wizard_link_choose.html'
@@ -1279,7 +1280,7 @@ class WizardLinkChoose(
 
 class WizardLinkExternal(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
-        CreateView):
+        BaseMixin, CreateView):
     """ add a link to a url not on this site """
 
     form_class = ExternalLinkForm
@@ -1305,13 +1306,14 @@ class WizardLinkExternal(
 
 class WizardLinkOption(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
-        TemplateView):
+        BaseMixin, TemplateView):
 
     template_name = 'block/wizard_link_option.html'
 
 
 class WizardLinkOrder(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        BaseMixin, FormView):
     """ set the order of multiple links """
 
     form_class = EmptyForm
@@ -1364,7 +1366,7 @@ class WizardLinkOrder(
 
 class WizardLinkPage(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
-        CreateView):
+        BaseMixin, CreateView):
     """ add a link to a page from this site """
 
     form_class = PageListForm
@@ -1391,7 +1393,7 @@ class WizardLinkPage(
 
 class WizardLinkRemove(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
-        UpdateView):
+        BaseMixin, UpdateView):
     """ remove a link """
 
     form_class = EmptyContentForm
@@ -1418,7 +1420,7 @@ class WizardLinkRemove(
 
 class WizardLinkUpload(
         LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
-        CreateView):
+        BaseMixin, CreateView):
     """ Upload a document and link to it """
 
     form_class = DocumentForm
@@ -1441,14 +1443,15 @@ class WizardLinkUpload(
         return HttpResponseRedirect(url)
 
 
-class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin,
+        BaseMixin, ListView):
 
     def get_queryset(self):
         return Image.objects.images()
 
 
 class ImageListDeleteView(
-        LoginRequiredMixin, StaffuserRequiredMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, FormView):
     """Mark images (in the library) as deleted.
 
     Images will still be attached to content objects, but will not display in
@@ -1470,7 +1473,7 @@ class ImageListDeleteView(
 
 
 class ImageUpdateView(
-        LoginRequiredMixin, StaffuserRequiredMixin, UpdateView):
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, UpdateView):
 
     form_class = ImageUpdateForm
     model = Image
@@ -1579,7 +1582,8 @@ class LinkCategoryUpdateView(
         return reverse('block.link.category.list')
 
 
-class LinkListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
+class LinkListView(
+        LoginRequiredMixin, StaffuserRequiredMixin, BaseMixin, ListView):
 
     def get_queryset(self):
         return Link.objects.links()
@@ -1595,7 +1599,7 @@ class LinkUpdateMixin(object):
 
 class LinkDocumentCreateView(
         LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
-        CreateView):
+        BaseMixin, CreateView):
     """ Upload a document and link to it """
 
     form_class = DocumentForm
@@ -1612,7 +1616,7 @@ class LinkDocumentCreateView(
 
 class LinkDocumentUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
-        UpdateView):
+        BaseMixin, UpdateView):
 
     """ Update a document link
 
@@ -1654,7 +1658,7 @@ class LinkDocumentUpdateView(
 
 class LinkUrlExternalUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
-        UpdateView):
+        BaseMixin, UpdateView):
     """ add a link to a url not on this site """
 
     form_class = ExternalLinkForm
@@ -1667,7 +1671,7 @@ class LinkUrlExternalUpdateView(
 
 class LinkUrlInternalUpdateView(
         LoginRequiredMixin, StaffuserRequiredMixin, LinkUpdateMixin,
-        UpdateView):
+        BaseMixin, UpdateView):
 
     """ update a link to a page from this site """
 
@@ -1711,7 +1715,8 @@ class LinkRedirectView(RedirectView):
 
 
 class WizardLinkSelect(
-        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin, FormView):
+        LoginRequiredMixin, StaffuserRequiredMixin, WizardLinkMixin,
+        BaseMixin, FormView):
     """List the current links in the slideshow and allow the user to remove.
 
     Allow the user to de-select any of the images.
