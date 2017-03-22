@@ -688,10 +688,12 @@ class ContentManager(models.Manager):
 
     def get_max_order(self, block):
         max_order = self.model.objects.filter(
-                    block__page_section=block.page_section
-                    ).exclude(
-                        moderate_state__slug='removed'
-                        ).aggregate(Max('order'))['order__max']
+            block__page_section=block.page_section
+        ).exclude(
+            moderate_state__slug='removed'
+        ).aggregate(
+            Max('order')
+        )['order__max']
         return max_order or 0
 
     def next_order(self, block):
