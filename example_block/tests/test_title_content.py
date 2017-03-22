@@ -24,6 +24,11 @@ def test_get_max_order():
 
 
 @pytest.mark.django_db
+def test_get_max_order_empty():
+    assert 0 == Title.objects.get_max_order(TitleBlockFactory())
+
+
+@pytest.mark.django_db
 def test_get_max_order_ignore_removed():
     block = TitleBlockFactory()
     TitleFactory(block=block, order=2)
