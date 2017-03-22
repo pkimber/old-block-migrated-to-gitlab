@@ -278,8 +278,9 @@ class PageManager(models.Manager):
         return self.model.objects.all().exclude(
             deleted=True,
         ).order_by(
-            '-is_custom',
+            'is_custom',
             'order',
+            'name',
         )
 
     def pages(self):
@@ -1402,8 +1403,17 @@ class Link(TimeStampedModel):
         used = []
         if len(usage_list) > 1:
             for link_use in usage_list[1]:
-                if link_use.is_published or link_use.is_pending:
-                    used.append(link_use)
+                if (
+                    hasattr(link_use, 'is_published') and
+                    hasattr(link_use, 'is_pending')
+                ):
+                    if link_use.is_published or link_use.is_pending:
+                        used.append(link_use)
+                    elif (
+                        hasattr(link_use, 'deleted') and
+                        not link_use.deleted
+                    ):
+                        used.append(link_use)
         return used
 
     @property

@@ -261,7 +261,7 @@ class ContentUpdateView(RedirectNextMixin, BaseMixin, UpdateView):
         return context
 
     def get_section(self):
-        return self.object.block.section
+        return self.object.block.page_section.section
 
     def get_success_url(self):
         url = self.request.POST.get(REDIRECT_FIELD_NAME)
