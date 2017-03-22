@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
-from django.db.models import F, Max
+from django.db.models import Count, F, Max
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
