@@ -1,9 +1,8 @@
-
 {% if not c.url_order_up == '#' %}
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} pure-button-disabled{%endif%}"
-  href="{{ c.url_order_up }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  href="{{ c.url_order_up }}{% if request_path %}?next={{ request_path }}{% endif %}"
   title="Move {{ caption }} Up">
   <i class="fa fa-arrow-up"></i>
 </a>
@@ -18,7 +17,7 @@
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} pure-button-disabled{%endif%}"
-  href="{{ c.url_order_down }}{% if return_path %}?next={{ return_path }}{% endif %}"
+  href="{{ c.url_order_down }}{% if request_path %}?next={{ request_path }}{% endif %}"
   title="Move {{ caption }} Down">
   <i class="fa fa-arrow-down"></i>
 </a>
@@ -34,6 +33,7 @@
     Publish{% if caption %} {{ caption }}{% endif %}
   </a>
 {% endif %}
+
 <a
   class="pure-button pure-button-xsmall"
   title="Edit{% if caption %} {{ caption }}{% endif %}"
