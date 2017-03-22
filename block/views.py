@@ -81,7 +81,6 @@ from .models import (
     Url,
     ViewUrl,
     Wizard,
-    ContentModel,
 )
 
 
