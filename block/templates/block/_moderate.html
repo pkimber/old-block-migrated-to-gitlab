@@ -1,5 +1,7 @@
 
-{% if not c.url_order_up == '#' %}
+<div class="moderate">
+
+{% if c.url_order_up %}
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} pure-button-disabled{%endif%}"
@@ -7,14 +9,6 @@
   title="Move {{ caption }} Up">
   <i class="fa fa-arrow-up"></i>
 </a>
-
-{% endif %}
-
-<!--
-<span class="h6">{# caption #}#{# c.order #}</span>
--->
-
-{% if not c.url_order_down == '#' %}
 
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} pure-button-disabled{%endif%}"
@@ -58,3 +52,5 @@
     Remove{% if caption %} {{ caption }}{% endif %}
   </a>
 {% endif %}
+
+</div>
