@@ -722,15 +722,16 @@ class ContentManager(models.Manager):
         self.model.objects.order_vacate(obj)
         # Make a space for its new position
         self.model.objects.filter(
-                            block__page_section=obj.block.page_section,
-                            order__gte=target_pos
-                            ).exclude(
-                                moderate_state__slug='removed'
-                                ).update(order=F('order')+1)
+            block__page_section=obj.block.page_section,
+            order__gte=target_pos,
+        ).exclude(
+            moderate_state__slug=ModerateState.REMOVED,
+        ).update(
+            order=F('order')+1
+        )
         # Place it
         obj.order = target_pos
         obj.save()
-        pass
 
     def pending(self, page_section, kwargs=None):
         """Return a list of pending content for a section.
