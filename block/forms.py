@@ -32,9 +32,20 @@ def _label_from_instance(obj):
         'size': (100, 100),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-    return format_html('{}<br><img src="{}" />'.format(
+    html = """
+        {}
+        <br>
+        <img src="{}" />
+        <br>
+        <small>
+            ({}: {})
+        </small>
+    """
+    return format_html(html.format(
         obj.title,
         thumbnail.url,
+        obj.original_file_name,
+        ', '.join(obj.tags.names()),
     ))
 
 
@@ -243,11 +254,12 @@ class ImageForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name in ['image', 'title']:
             field = self.fields[field_name]
-            field.widget.attrs.update({'class': 'pure-input-2-3'})
             set_widget_required(field)
+        for name in ('category', 'image', 'tags', 'title'):
+            f = self.fields[name]
+            f.widget.attrs.update({'class': 'pure-input-2-3'})
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
-        category.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
@@ -256,6 +268,7 @@ class ImageForm(forms.ModelForm):
             'title',
             'category',
             'add_to_library',
+            'tags',
         )
         widgets = {
             'image': FileDropInput(),
@@ -281,19 +294,16 @@ class ImageListForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelChoiceField(
-        queryset=Image.objects.images(),
+        queryset=Image.objects.none(),
         empty_label=None,
         widget=forms.RadioSelect,
     )
 
     def __init__(self, *args, **kwargs):
-        category_slug = kwargs.pop('category_slug')
+        image_queryset = kwargs.pop('image_queryset')
         super().__init__(*args, **kwargs)
-        if category_slug:
-            images = self.fields['images']
-            images.queryset = Image.objects.images().filter(
-                category__slug=category_slug
-            )
+        images = self.fields['images']
+        images.queryset = image_queryset
 
     class Meta:
         model = Image
@@ -306,19 +316,16 @@ class ImageMultiSelectForm(forms.Form):
     """List of images (for the form wizard)."""
 
     images = ImageModelMultipleChoiceField(
-        queryset=Image.objects.images(),
+        queryset=Image.objects.none(),
         required=False,
         widget=forms.CheckboxSelectMultiple,
     )
 
     def __init__(self, *args, **kwargs):
-        category_slug = kwargs.pop('category_slug')
+        image_queryset = kwargs.pop('image_queryset')
         super().__init__(*args, **kwargs)
-        if category_slug:
-            images = self.fields['images']
-            images.queryset = Image.objects.images().filter(
-                category__slug=category_slug
-            )
+        images = self.fields['images']
+        images.queryset = Image.objects.filter(pk__in=image_queryset)
 
     class Meta:
         fields = (
@@ -351,17 +358,19 @@ class ImageUpdateForm(RequiredFieldForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         title = self.fields['title']
-        title.widget.attrs.update({'class': 'pure-input-2-3'})
         set_widget_required(title)
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
-        category.widget.attrs.update({'class': 'pure-input-2-3'})
+        for name in ['category', 'tags', 'title']:
+            f = self.fields[name]
+            f.widget.attrs.update({'class': 'pure-input-2-3'})
 
     class Meta:
         model = Image
         fields = (
             'title',
             'category',
+            'tags',
         )
 
 
@@ -474,8 +483,6 @@ class MenuItemBaseForm(RequiredFieldForm):
         for name in ('order', 'title'):
             field = self.fields[name]
             field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
-        # parent = self.fields['parent']
-        # parent.queryset = MenuItem.objects.primary_items()
 
 
 class MenuItemForm(MenuItemBaseForm):

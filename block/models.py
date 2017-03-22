@@ -8,14 +8,13 @@ from django.contrib.contenttypes.models import ContentType
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.db import (
-    models,
-    transaction,
-)
-from django.db.models import Max
+from django.db import models, transaction
+from django.db.models import Count, Max
 from django.utils import timezone
 
 from django_extensions.db.fields import AutoSlugField
+from taggit.managers import TaggableManager
+from taggit.models import Tag
 
 from base.model_utils import (
     copy_model_instance,
@@ -980,9 +979,11 @@ class ImageCategoryManager(models.Manager):
         )
 
     def init_category(self, name):
-        count = self.model.objects.filter(name=name).count()
-        if not count:
-            self.create_category(name)
+        try:
+            obj = self.model.objects.get(name=name)
+        except self.model.DoesNotExist:
+            obj = self.create_category(name)
+        return obj
 
 
 class ImageCategory(models.Model):
@@ -1018,6 +1019,15 @@ class ImageManager(models.Manager):
             'title',
         )
 
+    def tags_by_category(self, category):
+        return Tag.objects.filter(
+            image__category__slug=category.slug,
+        ).annotate(
+            num_tags=Count('pk')
+        ).order_by(
+            '-num_tags'
+        )
+
 
 class Image(TimeStampedModel):
     """An image *library*, used with the 'ImageWizard'.
@@ -1031,27 +1041,28 @@ class Image(TimeStampedModel):
               thumbnails with tick boxes for multi-selection and radio buttons
               for single selection.
 
-    TODO
-
-    - Do we want to add tags field in here so we can search/group images?
-      e.g. https://github.com/alex/django-taggit
-    - For now, we are adding a category only.
-
     """
 
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='link/image')
     original_file_name = models.CharField(max_length=100)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True, null=True,
+        related_name='+',
+        help_text='User who uploaded the image',
+    )
     deleted = models.BooleanField(default=False)
     category = models.ForeignKey(ImageCategory, blank=True, null=True)
     objects = ImageManager()
+    tags = TaggableManager(blank=True)
 
     class Meta:
         verbose_name = 'Link Image'
         verbose_name_plural = 'Link Images'
 
     def __str__(self):
-        return '{}'.format(self.title)
+        return '{}. {}'.format(self.pk, self.title)
 
     def save(self, *args, **kwargs):
         """Save the original file name."""
@@ -1062,6 +1073,8 @@ class Image(TimeStampedModel):
     def set_deleted(self):
         self.deleted = True
         self.save()
+
+
 
 reversion.register(Image)
 

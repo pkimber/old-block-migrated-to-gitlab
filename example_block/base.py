@@ -103,6 +103,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
+                'django.template.context_processors.request',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
@@ -128,6 +129,7 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     'easy_thumbnails',
     'reversion',
+    'taggit',
 )
 
 LOCAL_APPS = (
@@ -173,9 +175,24 @@ LOGGING = {
 # view gets no next parameter.
 LOGIN_REDIRECT_URL = reverse_lazy('project.dash')
 
+# http://docs.celeryproject.org/en/2.5/django/unit-testing.html
+CELERY_ALWAYS_EAGER = True
+
 # https://github.com/johnsensible/django-sendfile
 SENDFILE_BACKEND = 'sendfile.backends.development'
 SENDFILE_ROOT = 'media-private'
 
 FTP_STATIC_DIR = None
 FTP_STATIC_URL = None
+
+
+THUMBNAIL_DEFAULT_OPTIONS = {
+                    'size': (100, 100),
+                    'crop': 'center',
+                    }
+
+THUMBNAIL_ALIASES = {
+    '': {
+        '100x100': THUMBNAIL_DEFAULT_OPTIONS,
+    },
+}
