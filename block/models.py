@@ -688,9 +688,9 @@ class ContentManager(models.Manager):
 
     def get_max_order(self, block):
         max_order = self.model.objects.filter(
-            block__page_section=block.page_section
+            block__page_section=block.page_section,
         ).exclude(
-            moderate_state__slug='removed'
+            moderate_state__slug=ModerateState.REMOVED,
         ).aggregate(
             Max('order')
         )['order__max']
@@ -701,16 +701,20 @@ class ContentManager(models.Manager):
         return max_order + 1
 
     def order_vacate(self, obj):
-        """Vacates a `ContentType.order` - for instance if an item is being
-        deleted or moved.
+        """Vacates a `ContentType.order`
+
+        - for instance if an item is being deleted or moved.
+        - Remove this item from the current order
+
         """
-        # Remove this item from the current order
         self.model.objects.filter(
-                            block__page_section=obj.block.page_section,
-                            order__gt=obj.order
-                            ).exclude(
-                                moderate_state__slug=ModerateState.REMOVED
-                                ).update(order=F('order')-1)
+            block__page_section=obj.block.page_section,
+            order__gt=obj.order,
+        ).exclude(
+            moderate_state__slug=ModerateState.REMOVED,
+        ).update(
+            order=F('order')-1
+        )
 
     def order_move(self, obj, target_pos):
         """Insert a `ContentType` in the current order."""
