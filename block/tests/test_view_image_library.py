@@ -113,6 +113,7 @@ def test_image_update(client):
     image = ImageFactory()
     url = reverse('block.image.update', args=[image.pk])
     data = {
+        'tags': 'apple pear',
         'title': 'Football',
     }
     response = client.post(url, data)
@@ -122,3 +123,4 @@ def test_image_update(client):
     assert expect in response['Location']
     image.refresh_from_db()
     assert 'Football' == image.title
+    assert ['apple', 'pear'] == sorted([x for x in image.tags.names()])

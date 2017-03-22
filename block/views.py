@@ -11,10 +11,7 @@ from django.core.paginator import (
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Max
-from django.http import (
-    Http404,
-    HttpResponseRedirect,
-)
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 from django.views.generic.base import RedirectView
@@ -28,6 +25,7 @@ from django.views.generic import (
     TemplateView,
 )
 
+from block.tasks import thumbnail_image
 from braces.views import (
     LoginRequiredMixin,
     StaffuserRequiredMixin,
@@ -357,10 +355,11 @@ class HeaderFooterUpdateView(
         return reverse('block.page.list')
 
 
-# Menu - CRUD views
 class MenuMixin(object):
+    """Menu - CRUD views."""
+
     def _get_menu(self):
-        # default to menu called 'main' for now
+        """Default to menu called 'main' for now."""
         return Menu.objects.get(slug=Menu.NAVIGATION)
 
 
@@ -461,7 +460,6 @@ class PageCreateView(
     model = Page
 
     def form_valid(self, form):
-        # template = form.cleaned_data.get('template')
         with transaction.atomic():
             self.object = form.save(commit=False)
             if not self.request.user.is_superuser:
@@ -840,6 +838,12 @@ class WizardMixin:
         return self.kwargs['type']
 
     def _page_design_url(self, content_obj):
+        """Get the page design URL.
+
+        This method tries to get the design URL from the content object first
+        so the image wizard is able to work with non-block models.
+
+        """
         try:
             result = content_obj.get_design_url()
         except AttributeError:
@@ -900,6 +904,7 @@ class WizardImageMixin(WizardMixin):
             categories=categories,
             field_name=self._field_name(),
             object=content_obj,
+            tags=Image.tags.all(),
             url_page_design=self._page_design_url(content_obj),
             url_choose=reverse('block.wizard.image.choose', kwargs=kwargs),
             url_option=reverse('block.wizard.image.option', kwargs=kwargs),
@@ -997,6 +1002,36 @@ class WizardImageChoose(
 
     template_name = 'block/wizard_image_choose.html'
 
+    def _category_slug(self):
+        return self.kwargs.get('category')
+
+    def _image_queryset(self):
+        category_slug = self._category_slug()
+        tag = self._tag()
+        qs = Image.objects.images()
+        if category_slug:
+            qs = qs.filter(category__slug=category_slug)
+        if tag:
+
+            qs = qs.filter(tags__slug__in=[tag])
+        return qs
+
+    def _paginator(self, qs):
+        page = self.request.GET.get('page')
+        paginator = Paginator(qs, 16)
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            page_obj = paginator.page(paginator.num_pages)
+        return page_obj
+
+    def _tag(self):
+        return self.request.GET.get('tag')
+
     def _update_images_many_to_many(self, images):
         content_obj = self._content_obj()
         field = self._get_field()
@@ -1022,11 +1057,20 @@ class WizardImageChoose(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        category_slug = self.kwargs.get('category')
         category = None
+        category_slug = self._category_slug()
         if category_slug:
             category = ImageCategory.objects.get(slug=category_slug)
-        context.update(dict(category=category))
+            tags = Image.objects.tags_by_category(category)
+        else:
+            tags = Image.tags.most_common()
+        context.update(dict(
+            category=category,
+            is_paginated=self.page_obj.has_other_pages(),
+            page_obj=self.page_obj,
+            tag=self._tag(),
+            tags=tags,
+        ))
         return context
 
     def get_form_class(self):
@@ -1039,9 +1083,23 @@ class WizardImageChoose(
             raise BlockError("Unknown 'link_type': '{}'".format(link_type))
 
     def get_form_kwargs(self):
+        """kwargs that will be passed to the __init__ of your form.
+
+        We only paginate the queryset for the form on a ``GET``.  A ``POST``
+        needs access to all images for validation.
+
+        The paginator slices the queryset.  If this queryset is passed to the
+        form validation, we get a ``Cannot filter a query once a slice has been
+        taken`` error message.  To overcome this we create a new queryset:
+        http://stackoverflow.com/questions/3470111/cannot-filter-a-query-once-a-slice-has-been-taken
+
+        """
         kwargs = super().get_form_kwargs()
-        category_slug = self.kwargs.get('category')
-        kwargs.update(dict(category_slug=category_slug))
+        qs = self._image_queryset()
+        if not self.request.method == 'POST':
+            self.page_obj = self._paginator(qs)
+            qs = Image.objects.filter(pk__in=self.page_obj.object_list)
+        kwargs.update(dict(image_queryset=qs))
         return kwargs
 
     def form_valid(self, form):
@@ -1200,7 +1258,10 @@ class WizardImageUpload(
         content_obj = self._content_obj()
         with transaction.atomic():
             self.object = form.save()
+            self.object.user = self.request.user
+            self.object.save()
             self._update_image(content_obj, self.object)
+        transaction.on_commit(lambda: thumbnail_image.delay(self.object.pk))
         link_type = self._link_type()
         if link_type == Wizard.SINGLE:
             url = self._page_design_url(content_obj)

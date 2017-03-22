@@ -2,7 +2,6 @@
 import pytest
 
 from django.db import IntegrityError
-from django.test import TestCase
 
 from block.models import (
     BlockError,

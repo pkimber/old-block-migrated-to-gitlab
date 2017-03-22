@@ -42,9 +42,9 @@ def test_file():
 @pytest.mark.django_db
 def test_wizard_image_choose_multi(client):
     content = TitleFactory()
-    ImageFactory()
-    image_1 = ImageFactory()
-    image_2 = ImageFactory()
+    ImageFactory(title='0')
+    image_1 = ImageFactory(title='1')
+    image_2 = ImageFactory(title='2')
     user = UserFactory(is_staff=True)
     assert content.picture is None
     assert client.login(username=user.username, password=TEST_PASSWORD) is True
@@ -54,7 +54,7 @@ def test_wizard_image_choose_multi(client):
     }
     response = client.post(url, data)
     # check
-    assert 302 == response.status_code
+    assert 302 == response.status_code, response.context['form'].errors
     expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     content.refresh_from_db()
@@ -138,6 +138,19 @@ def test_wizard_image_choose_category_single(client):
     assert expect in response['Location']
     content.refresh_from_db()
     assert image == content.picture
+
+
+@pytest.mark.django_db
+def test_wizard_image_option(client):
+    user = UserFactory(is_staff=True)
+    category = ImageCategoryFactory()
+    image = ImageFactory(category=category)
+    image.tags.add('apple')
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    content = TitleFactory()
+    url = url_image_single(content, 'block.wizard.image.option')
+    response = client.get(url)
+    assert 200 == response.status_code
 
 
 def _set_up_order_multi(content):
@@ -314,18 +327,21 @@ def test_wizard_image_upload_multi(client):
         'category': category.pk,
         'image': test_file(),
         'title': 'Cricket',
+        'tags': 'bread cheese',
     }
     response = client.post(url, data)
     # check
     content.refresh_from_db()
-    assert 302 == response.status_code
+    assert 302 == response.status_code, response.context['form'].errors
     expect = url_image_multi(content, 'block.wizard.image.option')
     assert expect in response['Location']
     assert 1 == content.slideshow.count()
     image = content.slideshow.first()
     assert 'Cricket' == image.title
-    assert image.category == category
+    assert category == image.category
+    assert user == image.user
     assert image.deleted is False
+    assert ['bread', 'cheese'] == sorted(image.tags.names())
     # check an image has been added to the database
     assert 1 == Image.objects.count()
 
