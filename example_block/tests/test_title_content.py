@@ -41,6 +41,26 @@ def test_get_max_order_ignore_removed():
 
 
 @pytest.mark.django_db
+def test_order_move():
+    page_section = PageSectionFactory()
+    b1 = TitleBlockFactory(page_section=page_section)
+    t1 = TitleFactory(block=b1, order=3)
+    b2 = TitleBlockFactory(page_section=page_section)
+    t2 = TitleFactory(block=b2, order=5)
+    b3 = TitleBlockFactory(page_section=page_section)
+    t3 = TitleFactory(block=b3, order=6)
+    # test
+    Title.objects.order_move(t1, 5)
+    # check
+    t1.refresh_from_db()
+    assert 5 == t1.order
+    t2.refresh_from_db()
+    assert 4 == t2.order
+    t3.refresh_from_db()
+    assert 6 == t3.order
+
+
+@pytest.mark.django_db
 def test_order_vacate():
     page_section = PageSectionFactory()
     b1 = TitleBlockFactory(page_section=page_section)
