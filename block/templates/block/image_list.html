@@ -32,33 +32,41 @@
       </div>
     </div>
   </div>
-
   <div class="pure-g">
-  {% for image in image_list %}
-    {% ifchanged image.category %}
-    <div class="pure-u-1">
-      <div class="l-box">
-        <br>
-        <h3>
-          {% if image.category %}
-            {{ image.category.name }}
-          {% else %}
-            No Category
-          {% endif %}
-        </h3>
-      </div>
-    </div>
-    {% endifchanged %}
-    <div class="pure-u-1-2 pure-u-md-1-4">
-      <div class="l-box">
-        <img src="{% thumbnail image.image 100x100  crop='center' %}">
-        <br>
-        <a href="{% url 'block.image.update' image.pk %}">
-          <i class="fa fa-edit"></i>
-          {{ image.title }}
-        </a>
-        <br>
-        <br>
+    {% for image in image_list %}
+      {% ifchanged image.category %}
+          </div>
+            <div class="pure-g">
+              <div class="pure-u-1">
+                <div class="l-box">
+                  <br>
+                  <h3>
+                    {% if image.category %}
+                      {{ image.category.name }}
+                    {% else %}
+                      No Category
+                    {% endif %}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          <div class="pure-g">
+      {% endifchanged %}
+      <div class="pure-u-1-2 pure-u-md-1-4">
+        <div class="l-box">
+          <a href="{% url 'block.image.update' image.pk %}">
+            <img src="{% thumbnail image.image 100x100  crop='center' %}">
+            <br>
+            <i class="fa fa-edit"></i>
+            {{ image.title }}
+            <small>
+              ({{ image.original_file_name }}:
+              {{ image.tags.names|join:', ' }})
+            </small>
+          </a>
+          <br>
+          <br>
+        </div>
       </div>
     </div>
   {% endfor %}

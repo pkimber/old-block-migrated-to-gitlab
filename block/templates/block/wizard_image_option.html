@@ -11,6 +11,23 @@
 {% endblock sub_heading %}
 
 {% block content %}
+  <style>
+    .pill {
+      -webkit-border-radius: 8px;
+      -moz-border-radius: 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+      background: #428CD1;
+      color: white;
+      font-size: 95%;
+      padding: 3px 8px;
+      margin: 0 8px 12px 0;
+    }
+    .pill:visited {
+      background: #529CD1;
+      color: white;
+    }
+  </style>
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="pure-menu pure-menu-horizontal">
@@ -42,10 +59,18 @@
         <p>
           Choose from the whole library:
         </p>
-        <a href="{{ url_choose }}" class="pure-menu-link">
-          <i class="fa fa-picture-o"></i>
-          Image Library
-        </a>
+      <a href="{{ url_choose }}" class="pure-menu-link">
+        <i class="fa fa-picture-o"></i>
+        Image Library
+      </a>
+      {% if tags %}
+        <p>
+          Choose a tag:
+        </p>
+        {% for tag in tags|dictsort:"name" %}
+          <a href="{{ url_choose }}?tag={{ tag.slug }}" class="pill">{{ tag.name }}</a>
+        {% endfor %}
+      {% endif %}
         <p>
           Or:
         </p>

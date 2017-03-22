@@ -1,10 +1,7 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
-from block.models import (
-    Link,
-    LinkCategory,
-)
+from block.models import LinkCategory
 from block.tests.factories import LinkCategoryFactory
 from block.tests.factories import LinkFactory
 

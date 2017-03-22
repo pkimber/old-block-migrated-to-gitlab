@@ -1,18 +1,24 @@
 
-{% if c.url_order_up %}
+{% if not c.url_order_up == '#' %}
 
 <a
-  class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} disabled{%endif%}"
-  href="{{ c.url_order_up }}{% if request_path %}?next={{ request_path }}{% endif %}"
+  class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} pure-button-disabled{%endif%}"
+  href="{{ c.url_order_up }}{% if return_path %}?next={{ return_path }}{% endif %}"
   title="Move {{ caption }} Up">
   <i class="fa fa-arrow-up"></i>
 </a>
 
-<span class="h6">{{ caption }}#{{ c.order }}</span>
+{% endif %}
+
+<!--
+<span class="h6">{# caption #}#{# c.order #}</span>
+-->
+
+{% if not c.url_order_down == '#' %}
 
 <a
-  class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} disabled{%endif%}"
-  href="{{ c.url_order_down }}{% if request_path %}?next={{ request_path }}{% endif %}"
+  class="pure-button pure-button-xsmall{% if c.url_order_down == '#' %} pure-button-disabled{%endif%}"
+  href="{{ c.url_order_down }}{% if return_path %}?next={{ return_path }}{% endif %}"
   title="Move {{ caption }} Down">
   <i class="fa fa-arrow-down"></i>
 </a>

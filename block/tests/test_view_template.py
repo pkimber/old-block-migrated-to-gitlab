@@ -1,10 +1,8 @@
 # -*- encoding: utf-8 -*-
 import pytest
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 
 from block.models import Page
-from block.tests.factories import TemplateFactory
 from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
