@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import pytest
 
+from block.models import ModerateState
 from block.tests.factories import PageSectionFactory
 from block.tests.helper import check_content
 from login.tests.factories import UserFactory
@@ -13,6 +14,25 @@ from example_block.tests.factories import TitleBlockFactory, TitleFactory
 def test_content_methods():
     c = TitleFactory()
     check_content(c)
+
+
+@pytest.mark.django_db
+def test_get_max_order():
+    block = TitleBlockFactory()
+    TitleFactory(block=block, order=4)
+    assert 4 == Title.objects.get_max_order(block)
+
+
+@pytest.mark.django_db
+def test_get_max_order_ignore_removed():
+    block = TitleBlockFactory()
+    TitleFactory(block=block, order=2)
+    TitleFactory(
+        block=block,
+        order=5,
+        moderate_state=ModerateState.objects._removed(),
+    )
+    assert 2 == Title.objects.get_max_order(block)
 
 
 @pytest.mark.django_db

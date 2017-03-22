@@ -707,9 +707,8 @@ class ContentManager(models.Manager):
                             block__page_section=obj.block.page_section,
                             order__gt=obj.order
                             ).exclude(
-                                moderate_state__slug='removed'
+                                moderate_state__slug=ModerateState.REMOVED
                                 ).update(order=F('order')-1)
-        pass
 
     def order_move(self, obj, target_pos):
         """Insert a `ContentType` in the current order."""
