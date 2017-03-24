@@ -1,8 +1,4 @@
-
-<div class="moderate">
-
 {% if c.url_order_up %}
-
 <a
   class="pure-button pure-button-xsmall{% if c.url_order_up == '#' %} pure-button-disabled{%endif%}"
   href="{{ c.url_order_up }}{% if return_path %}?next={{ return_path }}{% endif %}"
@@ -16,7 +12,6 @@
   title="Move {{ caption }} Down">
   <i class="fa fa-arrow-down"></i>
 </a>
-
 {% endif %}
 
 {% if c.is_pending_added or c.is_pending_edited %}
@@ -52,5 +47,3 @@
     Remove{% if caption %} {{ caption }}{% endif %}
   </a>
 {% endif %}
-
-</div>
