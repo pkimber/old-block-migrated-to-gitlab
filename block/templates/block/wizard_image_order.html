@@ -38,18 +38,26 @@
             <br>
             <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
             <br>
-            {% if forloop.first %}
-              <button class="pure-button pure-button-disabled">
-            {% else %}
-              <button type="submit" name="up" value="{{ item.pk }}" class="pure-button">
-            {% endif %}
+            <button
+              {% if forloop.first %}
+              class="pure-button pure-button-disabled"
+              {% else %}
+              class="pure-button"
+              type="submit"
+              name="up"
+              value="{{ item.pk }}"
+              {% endif %}>
               <i class="fa fa-arrow-up"></i>
             </button>
-            {% if forloop.last %}
-              <button class="pure-button pure-button-disabled">
-            {% else %}
-              <button type="submit" name="down" value="{{ item.pk }}" class="pure-button">
-            {% endif %}
+            <button
+              {% if forloop.last %}
+              class="pure-button pure-button-disabled"
+              {% else %}
+              class="pure-button"
+              type="submit"
+              name="down"
+              value="{{ item.pk }}"
+              {% endif %}>
               <i class="fa fa-arrow-down"></i>
             </button>
             <br>
