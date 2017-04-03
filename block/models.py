@@ -1114,7 +1114,6 @@ class Image(TimeStampedModel):
         self.save()
 
 
-
 reversion.register(Image)
 
 
