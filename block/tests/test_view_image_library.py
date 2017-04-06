@@ -1,6 +1,10 @@
 # -*- encoding: utf-8 -*-
 import pytest
+import io
+import PIL
+import pytest
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from block.models import (
@@ -16,6 +20,18 @@ from login.tests.factories import (
     TEST_PASSWORD,
     UserFactory,
 )
+
+
+def test_file():
+    """create an (image) file ready to upload."""
+    fp = io.BytesIO()
+    PIL.Image.new('1', (1, 1)).save(fp, 'png')
+    fp.seek(0)
+    return SimpleUploadedFile(
+        'file.png',
+        fp.read(),
+        content_type='image/png'
+    )
 
 
 @pytest.mark.django_db
@@ -104,6 +120,26 @@ def test_image_delete(client):
     assert expect in response['Location']
     result = [image.pk for image in Image.objects.images()]
     assert [image_2.pk] == result
+
+
+@pytest.mark.django_db
+def test_image_create(client):
+    user = UserFactory(is_staff=True)
+    assert client.login(username=user.username, password=TEST_PASSWORD) is True
+    url = reverse('block.image.create')
+    data = {
+        'tags': 'apple pear',
+        'title': 'Football',
+        'image': test_file(),
+    }
+    response = client.post(url, data)
+    # check
+    assert 302 == response.status_code
+    expect = reverse('block.image.list')
+    assert expect in response['Location']
+    image = Image.objects.last()
+    assert 'Football' == image.title
+    # assert ['apple', 'pear'] == sorted([x for x in image.tags.names()])
 
 
 @pytest.mark.django_db

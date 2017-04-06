@@ -1559,14 +1559,6 @@ reversion.register(ViewUrl)
 
 
 class MenuManager(models.Manager):
-    def navigation_menu_items(self):
-        # not all systems have a navigation menu
-        try:
-            return self.model.objects.get(
-                slug=self.model.NAVIGATION
-            ).menuitem_set.exclude(deleted=True).exclude(parent__isnull=False)
-        except self.model.DoesNotExist:
-            return None
 
     def create_menu(self, slug, title, navigation=True):
         menu = self.model(
@@ -1594,6 +1586,33 @@ class MenuManager(models.Manager):
                 slug, title, navigation is None or navigation
             )
         return menu
+
+    def menu(self, menu_slug):
+        """Return menu - create navigation if does not exist."""
+        try:
+            menu = Menu.objects.get(slug=menu_slug)
+        except Menu.DoesNotExist:
+            if menu_slug == Menu.NAVIGATION:
+                # Create the default navigation menu
+                menu = Menu.objects.create_menu(
+                    slug=menu_slug, title="Navigation Menu"
+                )
+            else:
+                menu = None
+        return menu
+
+    def navigation_menu(self):
+        """Default to menu called 'main' for now."""
+        return self.model.objects.get(slug=Menu.NAVIGATION)
+
+    def navigation_menu_items(self):
+        # not all systems have a navigation menu
+        try:
+            return self.model.objects.get(
+                slug=self.model.NAVIGATION
+            ).menuitem_set.exclude(deleted=True).exclude(parent__isnull=False)
+        except self.model.DoesNotExist:
+            return self.model.objects.none()
 
 
 class Menu(TimedCreateModifyDeleteModel):
@@ -1650,6 +1669,34 @@ class MenuItemManager(models.Manager):
                 menu, slug, title, order, link, parent
             )
         return menuitem
+
+    def menuitem_list(self, menu_slug):
+        """Return queryset with items with no parent first.
+           Order of items returned is:
+             top level menu items (parent is None)
+             Sub menu items (menus ordered as per their order in top level
+             menu)
+          This method uses queryset.extra to extract the values what have
+          a null parent (i.e the top level menu items) first.  The default
+          ordering is to display null values at the end.
+        """
+        menu_items = MenuItem.objects.select_related().filter(
+            menu__slug=menu_slug
+        ).order_by('parent', 'order', 'title')
+        qs = menu_items.extra(
+            select={'parent_null': 'block_menuitem.parent_id is not null'}
+        )
+        qs = qs.extra(order_by=['parent_null', 'parent', 'order', 'title'])
+
+        return qs
+
+    def parent_list(self, menu, this_pk=None):
+        qs = self.model.objects.filter(
+            menu=menu, parent__isnull=True, link__isnull=True
+        )
+        if this_pk:
+            qs = qs.exclude(pk=this_pk)
+        return qs
 
 
 class MenuItem(TimedCreateModifyDeleteModel):

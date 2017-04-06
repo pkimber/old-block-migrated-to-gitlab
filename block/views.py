@@ -323,8 +323,7 @@ class MenuMixin(object):
     """Menu - CRUD views."""
 
     def _get_menu(self):
-        """Default to menu called 'main' for now."""
-        return Menu.objects.get(slug=Menu.NAVIGATION)
+        return Menu.objects.navigation_menu()
 
 
 class MenuItemCreateView(
@@ -332,6 +331,7 @@ class MenuItemCreateView(
         CreateView):
 
     model = MenuItem
+    form_class = MenuItemForm
 
     def form_valid(self, form):
         with transaction.atomic():
@@ -349,8 +349,11 @@ class MenuItemCreateView(
         ))
         return context
 
-    def get_form_class(self):
-        return MenuItemForm
+    def get_form_kwargs(self):
+        """Returns the argument to any forms on this view."""
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'menu': self._get_menu(), })
+        return kwargs
 
     def get_success_url(self):
         return reverse('block.menuitem.list', args=[self._get_menu().slug])
@@ -380,23 +383,14 @@ class MenuItemListView(
     paginate_by = 15
 
     def get_queryset(self):
-        return MenuItem.objects.filter(
-            menu__slug=self.kwargs.get('slug', None)
-        )
+        slug = self.kwargs.get('slug', None)
+        return MenuItem.objects.menuitem_list(slug)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         menu_slug = self.kwargs.get('slug', None)
-        try:
-            menu = Menu.objects.get(slug=menu_slug)
-        except Menu.DoesNotExist:
-            # Create the default navigation menu
-            menu = Menu.objects.create_menu(
-                slug=menu_slug, title="Navigation Menu"
-            )
-        context.update(dict(
-            menu=menu,
-        ))
+        menu = Menu.objects.menu(menu_slug)
+        context.update({'menu': menu})
         return context
 
 
@@ -405,14 +399,18 @@ class MenuItemUpdateView(
         UpdateView):
 
     model = MenuItem
+    form_class = MenuItemForm
 
     def form_valid(self, form):
         with transaction.atomic():
             self.object = form.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def get_form_class(self):
-        return MenuItemForm
+    def get_form_kwargs(self):
+        """Returns the argument to any forms on this view."""
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'menu': self._get_menu(), 'this_pk': self.object.pk, })
+        return kwargs
 
     def get_success_url(self):
         return reverse('block.menuitem.list', args=[self._get_menu().slug])
@@ -989,7 +987,7 @@ class WizardImageChoose(
             # If page is not an integer, deliver first page.
             page_obj = paginator.page(1)
         except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
+            # If page is out of range (e.g. 9999), deliver last page of results
             page_obj = paginator.page(paginator.num_pages)
         return page_obj
 
@@ -1466,6 +1464,39 @@ class WizardLinkUpload(
         return HttpResponseRedirect(url)
 
 
+class ImageMaintenanceMixin(object):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({'url_option': reverse('block.image.list')})
+        return context
+
+
+class ImageCreateView(
+        LoginRequiredMixin, StaffuserRequiredMixin, ImageMaintenanceMixin,
+        CreateView):
+
+    form_class = ImageForm
+    template_name = 'block/wizard_image_upload.html'
+    model = Image
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+            self.object.user = self.request.user
+            self.object.save()
+        transaction.on_commit(lambda: thumbnail_image.delay(self.object.pk))
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('block.image.list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'in_library': True})
+        return kwargs
+
+
 class ImageListView(LoginRequiredMixin, StaffuserRequiredMixin, ListView):
 
     def get_queryset(self):
@@ -1633,6 +1664,11 @@ class LinkDocumentCreateView(
             Link.objects.create_document_link(self.object, category)
         url = reverse('block.link.list')
         return HttpResponseRedirect(url)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'in_library': True})
+        return kwargs
 
 
 class LinkDocumentUpdateView(

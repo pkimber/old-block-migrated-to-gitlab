@@ -34,12 +34,16 @@
             <th>Title</th>
             <th>Order</th>
             <th>Link</th>
-            <th>Parent</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {% for object in object_list %}
+            {% ifchanged object.parent %}
+            <tr>
+              <td colspan="4" id="{{ object.parent.slug }}">{% if object.parent %}{{ object.parent.title }} Sub Menu{% else %}{{object.menu.title}}{% endif %}</td>
+            </tr>
+            {% endifchanged %}
             <tr valign="top">
               <td>
                 {% if object.is_deleted %}
@@ -59,9 +63,10 @@
               <td>
                 {% if object.is_deleted %}
                 <del>
+                {% elif object.has_children %}
+                  <a href="#{{ object.slug }}">Sub Menu</a>
                 {% else %}
                 <a href="{%url 'block.wizard.link.option' object.get_content_type.pk object.pk 'link' 'single' %}">
-                {% endif %}
                   {% if object.link %}
                     {% if object.link.is_document %}
                       Document:
@@ -75,9 +80,9 @@
                     <i class="fa fa-link"></i>
                     Create Link
                   {% endif %}
+                {% endif %}
                 {% if object.is_deleted %}</del>{% else %}</a>{% endif %}
               </td>
-              <td>{% if object.parent %}{{ object.parent }}{% endif %}</td>
               <td>
                 {% if not object.is_deleted %}
                 <a href="{% url 'block.menuitem.delete' object.pk %}">

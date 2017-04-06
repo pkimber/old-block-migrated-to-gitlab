@@ -16,6 +16,7 @@ from block.models import (
     ImageCategory,
     Link,
     LinkCategory,
+    Menu,
     MenuItem,
     Page,
     Section,
@@ -251,6 +252,7 @@ class ImageForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
+        in_library = kwargs.pop('in_library', None)
         super().__init__(*args, **kwargs)
         for field_name in ['image', 'title']:
             field = self.fields[field_name]
@@ -260,6 +262,8 @@ class ImageForm(forms.ModelForm):
             f.widget.attrs.update({'class': 'pure-input-2-3'})
         category = self.fields['category']
         category.queryset = ImageCategory.objects.categories()
+        if in_library:
+            del self.fields['add_to_library']
 
     class Meta:
         model = Image
@@ -479,10 +483,16 @@ class MenuItemEmptyForm(forms.ModelForm):
 class MenuItemBaseForm(RequiredFieldForm):
 
     def __init__(self, *args, **kwargs):
+        this_pk = kwargs.pop('this_pk', None)
+        menu = kwargs.pop('menu', Menu.objects.navigation_menu())
         super().__init__(*args, **kwargs)
-        for name in ('order', 'title'):
+        for name in ('order', 'title', 'parent'):
             field = self.fields[name]
             field.widget.attrs.update({'class': 'pure-input-1', 'rows': 2})
+
+        self.fields['parent'].queryset = MenuItem.objects.parent_list(
+            menu, this_pk
+        )
 
 
 class MenuItemForm(MenuItemBaseForm):
@@ -492,6 +502,7 @@ class MenuItemForm(MenuItemBaseForm):
         fields = (
             'order',
             'title',
+            'parent',
         )
 
 

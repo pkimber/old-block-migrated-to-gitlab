@@ -120,3 +120,42 @@ def test_init_menuitem_update():
     assert item.title == 'test'
     assert item.order == 1
     assert item.get_link() == 'http://www.bbc.co.uk/'
+
+
+@pytest.mark.django_db
+def test_menuitem_has_children():
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    parent = MenuItemFactory(menu=menu, slug='main-1', title='x')
+    item = MenuItemFactory(menu=menu, slug='main-2', title='x', parent=parent)
+
+    assert parent.has_children()
+    assert not item.has_children()
+
+
+@pytest.mark.django_db
+def test_menuitem_has_link():
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    item = MenuItemFactory(menu=menu, slug='main-1', title='x')
+
+    assert not item.has_link()
+    item.link = Link.objects.create_external_link('http://bbc.co.uk/', 'BBC')
+    item.save()
+    item.refresh_from_db()
+    assert item.has_link()
+
+
+@pytest.mark.django_db
+def test_menuitem_get_content_object():
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    item = MenuItemFactory(menu=menu, slug='main-1', title='x')
+    ct = item.get_content_type()
+    assert ct.app_label == 'block'
+    assert ct.model == 'menuitem'
+
+
+@pytest.mark.django_db
+def test_menuitem_set_pending_edit():
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    item = MenuItemFactory(menu=menu, slug='main-1', title='x')
+    pe = item.set_pending_edit()
+    assert pe is None
