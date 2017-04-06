@@ -1673,9 +1673,12 @@ class MenuItemManager(models.Manager):
     def menuitem_list(self, menu_slug):
         """Return queryset with items with no parent first.
            Order of items returned is:
-             top level menu items
+             top level menu items (parent is None)
              Sub menu items (menus ordered as per their order in top level
              menu)
+          This method uses queryset.extra to extract the values what have
+          a null parent (i.e the top level menu items) first.  The default
+          ordering is to display null values at the end.
         """
         menu_items = MenuItem.objects.select_related().filter(
             menu__slug=menu_slug
