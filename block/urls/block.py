@@ -7,6 +7,7 @@ from block.views import (
     ImageCategoryDeleteView,
     ImageCategoryListView,
     ImageCategoryUpdateView,
+    ImageCreateView,
     ImageListDeleteView,
     ImageListView,
     ImageUpdateView,
@@ -66,6 +67,10 @@ urlpatterns = [
     url(regex=r'^image/$',
         view=ImageListView.as_view(),
         name='block.image.list'
+        ),
+    url(regex=r'^image/create/$',
+        view=ImageCreateView.as_view(),
+        name='block.image.create'
         ),
     url(regex=r'^image/delete/$',
         view=ImageListDeleteView.as_view(),

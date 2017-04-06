@@ -3,11 +3,14 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
+from block.models import Menu
 from block.tests.factories import (
     ImageCategoryFactory,
     ImageFactory,
     LinkCategoryFactory,
     LinkFactory,
+    MenuFactory,
+    MenuItemFactory,
     PageFactory,
 )
 from login.tests.fixture import perm_check
@@ -34,6 +37,12 @@ def test_image(perm_check):
     """Image library."""
     ImageFactory()
     url = reverse('block.image.list')
+    perm_check.staff(url)
+
+
+@pytest.mark.django_db
+def test_image_create(perm_check):
+    url = reverse('block.image.create')
     perm_check.staff(url)
 
 
@@ -133,3 +142,16 @@ def test_link_external_update(perm_check):
 def test_link_internal_update(perm_check):
     obj = LinkFactory()
     perm_check.staff(reverse('block.link.internal.update', args=[obj.pk]))
+
+
+@pytest.mark.django_db
+def test_menu_create(perm_check):
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    perm_check.staff(reverse('block.menuitem.create', args=[menu.pk]))
+
+
+@pytest.mark.django_db
+def test_menu_update(perm_check):
+    menu = MenuFactory(slug=Menu.NAVIGATION)
+    obj = MenuItemFactory(menu=menu)
+    perm_check.staff(reverse('block.menuitem.update', args=[obj.pk]))

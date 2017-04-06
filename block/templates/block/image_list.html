@@ -17,15 +17,21 @@
         <ul class="pure-menu-list">
           {% include 'base/_back_to_settings.html' %}
           <li class="pure-menu-item">
-            <a href="{% url 'block.image.category.list' %}" class="pure-menu-link">
-              <i class="fa fa-picture-o"></i>
-              Image Categories
+            <a href="{% url 'block.image.create' %}" class="pure-menu-link">
+              <i class="fa fa-cloud-upload"></i>
+              Upload Image
             </a>
           </li>
           <li class="pure-menu-item">
             <a href="{% url 'block.image.list.delete' %}" class="pure-menu-link">
               <i class="fa fa-trash-o"></i>
               Delete Images
+            </a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="{% url 'block.image.category.list' %}" class="pure-menu-link">
+              <i class="fa fa-picture-o"></i>
+              Image Categories
             </a>
           </li>
         </ul>
@@ -51,7 +57,7 @@
           <div class="pure-g">
       {% endifchanged %}
       <div class="pure-u-1-2 pure-u-md-1-4">
-        <a href="{% url 'block.image.update' image.pk %}">ss
+        <a href="{% url 'block.image.update' image.pk %}">
           <img src="{% thumbnail image.image 100x100  crop='center' %}">
           <br>
           <i class="fa fa-edit"></i>
