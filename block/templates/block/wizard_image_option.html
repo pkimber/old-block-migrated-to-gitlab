@@ -68,7 +68,7 @@
           <p>
             Choose a tag:
           </p>
-          {% for tag in tags | dictsort : "name" %}
+          {% for tag in tags|dictsort:'name' %}
             <a href="{{ url_choose }}?tag={{ tag.slug }}" class="pill">{{ tag.name }}</a>
           {% endfor %}
         {% endif %}
