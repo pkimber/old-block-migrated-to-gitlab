@@ -67,7 +67,7 @@
       {% for tag in tags|dictsort:'name' %}
         <a
           href="?tag={{ tag.slug }}"
-          class="pill{% if tag.slug == main_tag %} selected{% endif %}">&nbsp;{{ tag.name }}&nbsp;</a>
+          class="pill{% if tag.slug == main_tag %} selected{% endif %}">{{ tag.name }}</a>
       {% endfor %}
       {% endwith %}
     </div>

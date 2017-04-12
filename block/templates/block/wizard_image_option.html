@@ -12,7 +12,6 @@
 
 {% block content %}
   <style>
-  <style>
     .pill {
       -webkit-border-radius: 8px;
       -moz-border-radius: 8px;
@@ -23,17 +22,13 @@
       font-size: 95%;
       padding: 3px 8px;
       margin: 0 8px 12px 0;
-      display: inline-block;
     }
     .pill:visited {
       background: #529CD1;
       color: white;
     }
-    .pill.selected {
-      background: #000;
-    }
-  </style>
 
+  </style>
   <div class="pure-g">
     <div class="pure-u-1">
       <div class="pure-menu pure-menu-horizontal">
@@ -55,12 +50,11 @@
         {% if categories %}
           <p>
             Choose an image from one of these categories:
-          </p>
+
           {% for category in categories %}
-            <a href="{{ category.url }}" class="pill">
-              {{ category.name }}
-            </a>
+            <a href="{{ category.url }}" class="pill">{{ category.name }}</a>
           {% endfor %}
+          </p>
         {% endif %}
         <p>
           Choose from the whole library:
