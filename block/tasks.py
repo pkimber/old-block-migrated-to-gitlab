@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from block.models import Image
 from celery import shared_task
-from django.conf import settings
 from easy_thumbnails.files import generate_all_aliases
 
 
