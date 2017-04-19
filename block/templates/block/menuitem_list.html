@@ -63,10 +63,11 @@
               <td>
                 {% if object.is_deleted %}
                 <del>
-                {% elif object.has_children %}
-                  <a href="#{{ object.slug }}">Sub Menu</a>
                 {% else %}
-                <a href="{%url 'block.wizard.link.option' object.get_content_type.pk object.pk 'link' 'single' %}">
+                  {% if object.has_children %}
+                    <a href="#{{ object.slug }}">Sub Menu</a><br>
+                  {% endif %}
+                  <a href="{%url 'block.wizard.link.option' object.get_content_type.pk object.pk 'link' 'single' %}">
                   {% if object.link %}
                     {% if object.link.is_document %}
                       Document:

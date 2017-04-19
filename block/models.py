@@ -1692,7 +1692,7 @@ class MenuItemManager(models.Manager):
 
     def parent_list(self, menu, this_pk=None):
         qs = self.model.objects.filter(
-            menu=menu, parent__isnull=True, link__isnull=True
+            menu=menu, parent__isnull=True,
         )
         if this_pk:
             qs = qs.exclude(pk=this_pk)
