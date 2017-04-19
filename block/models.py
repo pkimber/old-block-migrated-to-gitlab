@@ -123,6 +123,7 @@ class EditState(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
+
 reversion.register(EditState)
 
 
@@ -164,6 +165,7 @@ class ModerateState(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+
 
 reversion.register(ModerateState)
 
@@ -218,6 +220,7 @@ class Template(TimeStampedModel):
 
     def __str__(self):
         return '{}'.format(self.name)
+
 
 reversion.register(Template)
 
@@ -418,6 +421,7 @@ class Page(TimeStampedModel):
         else:
             return 'project.page'
 
+
 reversion.register(Page)
 
 
@@ -450,6 +454,7 @@ class PaginatedSection(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.items_per_page, self.order_by_field)
+
 
 reversion.register(PaginatedSection)
 
@@ -535,6 +540,7 @@ class Section(TimeStampedModel):
             url = reverse(self.create_url_name, kwargs=kwargs)
         return url
 
+
 reversion.register(Section)
 
 
@@ -568,6 +574,7 @@ class PageSection(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.page.name, self.section.name)
+
 
 reversion.register(PageSection)
 
@@ -912,6 +919,7 @@ class Document(models.Model):
     def url(self):
         return settings.MEDIA_URL + self.document.name
 
+
 reversion.register(Document)
 
 
@@ -961,6 +969,7 @@ class HeaderFooter(SingletonModel):
     def __str__(self):
         return '{}'.format(self.header)
 
+
 reversion.register(HeaderFooter)
 
 
@@ -1005,6 +1014,7 @@ class ImageCategory(models.Model):
     def in_use(self):
         images = Image.objects.filter(category=self, deleted=False)
         return images.count() > 0
+
 
 reversion.register(ImageCategory)
 
@@ -1075,7 +1085,6 @@ class Image(TimeStampedModel):
         self.save()
 
 
-
 reversion.register(Image)
 
 
@@ -1118,6 +1127,7 @@ class LinkCategory(models.Model):
     def in_use(self):
         links = Link.objects.filter(category=self, deleted=False)
         return links.count() > 0
+
 
 reversion.register(LinkCategory)
 
@@ -1247,6 +1257,7 @@ class Url(models.Model):
                 params.append(self.arg3)
             result = reverse(self.name, args=params)
         return result
+
 
 reversion.register(Url)
 
@@ -1466,6 +1477,7 @@ class Link(TimeStampedModel):
             )
         return result
 
+
 reversion.register(Link)
 
 
@@ -1502,6 +1514,7 @@ class TemplateSection(TimeStampedModel):
 
     def __str__(self):
         return '{}, {}'.format(self.template.template_name, self.section.name)
+
 
 reversion.register(TemplateSection)
 
@@ -1554,6 +1567,7 @@ class ViewUrl(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.user.username, self.page.name, self.url)
+
 
 reversion.register(ViewUrl)
 
@@ -1631,6 +1645,7 @@ class Menu(TimedCreateModifyDeleteModel):
 
     def __str__(self):
         return '{}'.format(self.title)
+
 
 reversion.register(Menu)
 
@@ -1739,5 +1754,6 @@ class MenuItem(TimedCreateModifyDeleteModel):
     # required by the link wizard
     def set_pending_edit(self):
         pass
+
 
 reversion.register(MenuItem)
