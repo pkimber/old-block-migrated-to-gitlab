@@ -1469,7 +1469,7 @@ class Link(TimeStampedModel):
         elif self.link_type == self.URL_EXTERNAL:
             return self.url_external
         elif self.link_type == self.URL_INTERNAL:
-            return self.url_internal.url
+            return self.url_internal.url if self.url_internal else None
         else:
             raise BlockError(
                 "'Link' {} does not have a 'link_type' (or is an "
