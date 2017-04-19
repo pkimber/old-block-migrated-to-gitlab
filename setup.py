@@ -27,7 +27,7 @@ setup(
             'templates/block/*.*',
         ],
     },
-    version='0.1.77',
+    version='0.1.80',
     description='block',
     author='Malcolm Dinsmore',
     author_email='code-md@kbsoftware.co.uk',
