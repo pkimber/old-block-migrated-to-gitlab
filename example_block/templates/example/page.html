@@ -53,13 +53,13 @@
                   {% if c.picture %}
                     <br>
                     <h3>Picture</h3>
-                    <img src="{% thumbnail c.picture.image 100x100 crop='center' %}">
+                    <img src="{% thumbnail c.picture.image 100x0 crop='center' %}">
                   {% endif %}
                   {% if c.ordered_slideshow.count %}
                     <h3>Slideshow</h3>
                     {% for item in c.ordered_slideshow %}
                       <br>
-                      <img src="{% thumbnail item.image.image 100x100 crop='center' %}">
+                      <img src="{% thumbnail item.image.image 100x0 crop='center' %}">
                       <br>
                       {{ item.order }}.
                       {{ item.image.title }}

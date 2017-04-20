@@ -58,7 +58,7 @@
       {% endifchanged %}
       <div class="pure-u-1-2 pure-u-md-1-4">
         <a href="{% url 'block.image.update' image.pk %}">
-          <img src="{% thumbnail image.image 100x100  crop='center' %}">
+          <img src="{% thumbnail image.image 100x0  crop='center' %}">
           <br>
           <i class="fa fa-edit"></i>
           {{ image.title }}

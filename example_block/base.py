@@ -187,12 +187,12 @@ FTP_STATIC_URL = None
 
 
 THUMBNAIL_DEFAULT_OPTIONS = {
-                    'size': (100, 100),
+                    'size': (100, 0),
                     'crop': 'center',
                     }
 
 THUMBNAIL_ALIASES = {
     '': {
-        '100x100': THUMBNAIL_DEFAULT_OPTIONS,
+        '100x0': THUMBNAIL_DEFAULT_OPTIONS,
     },
 }
