@@ -35,7 +35,7 @@
           {{ item.order }}.
           {{ item.image.title }}
           <br>
-          <img src="{% thumbnail item.image.image 100x100  crop='center' %}">
+          <img src="{% thumbnail item.image.image 100x0  crop='center' %}">
           <br>
           {% if forloop.first %}
             <button class="pure-button pure-button-disabled">

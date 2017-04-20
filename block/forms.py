@@ -30,7 +30,7 @@ def _label_from_instance(obj):
     thumbnailer = get_thumbnailer(obj.image)
     thumbnail_options = {
         'crop': True,
-        'size': (100, 100),
+        'size': (100, 0),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
     html = """
@@ -55,7 +55,7 @@ def _label_from_many_to_many_instance(obj):
     thumbnailer = get_thumbnailer(obj.image.image)
     thumbnail_options = {
         'crop': True,
-        'size': (100, 100),
+        'size': (100, 0),
     }
     thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
     return format_html('{}. {}<br><img src="{}" />'.format(
